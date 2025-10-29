@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<VBox spacing="10" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LoginController">
+    <Label text="InterviewAI - Login" />
+    <TextField promptText="Username" />
+    <PasswordField promptText="Password" />
+    <Button text="Login" />
+</VBox>

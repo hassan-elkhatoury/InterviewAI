@@ -1,0 +1,5 @@
+/* theme overrides placeholder */
+.button {
+    -fx-background-color: #2b6fbf;
+    -fx-text-fill: white;
+}

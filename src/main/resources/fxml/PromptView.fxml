@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.PromptController">
+    <center>
+        <VBox spacing="8">
+            <Label text="Prompt" />
+            <TextArea prefRowCount="10" />
+            <Button text="Send" />
+        </VBox>
+    </center>
+</BorderPane>
