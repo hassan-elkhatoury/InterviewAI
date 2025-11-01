@@ -1,14 +1,15 @@
 -- MySQL schema for InterviewAI
 -- Create users, courses, progress, feedback tables
 
-CREATE DATABASE interviewai;
-USE interviewai;
+-- CREATE DATABASE interviewai;
+-- USE interviewai;
 
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(100) NOT NULL UNIQUE,
   email VARCHAR(255),
   password_hash VARCHAR(255),
+  role VARCHAR(20) DEFAULT 'CANDIDATE',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

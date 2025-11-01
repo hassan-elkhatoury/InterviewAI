@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.*?>
+<!-- TODO: Show XP, streaks, notifications, and quick actions. -->
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.DashboardController">
+    <top>
+        <ToolBar>
+            <Button text="Profile" onAction="#onOpenProfile" />
+            <Button text="Courses" onAction="#onOpenCourses" />
+        </ToolBar>
+    </top>
+    <center>
+        <Label text="Dashboard" />
+    </center>
+ </BorderPane>

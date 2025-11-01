@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<!-- Placeholder for post-lesson/simulation feedback. -->
+<VBox spacing="8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.FeedbackController">
+    <Label text="Feedback" />
+    <TextArea promptText="Feedback details" prefRowCount="8" />
+    <Button text="Close" />
+</VBox>
