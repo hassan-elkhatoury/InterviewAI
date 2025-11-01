@@ -1,4 +1,278 @@
-/* main stylesheet placeholder */
+/* Main Professional Stylesheet for InterviewAI */
+
+/* Root styles */
 .root {
-    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
+
+/* Auth container styles (login/signup) */
+.auth-container {
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 4);
+    -fx-padding: 48px 40px;
+    -fx-max-width: 450px;
+    -fx-pref-width: 450px;
+}
+
+/* Title styles */
+.auth-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a202c;
+    -fx-padding: 0 0 8 0;
+}
+
+.auth-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: #718096;
+    -fx-padding: 0 0 32 0;
+}
+
+/* Form label styles */
+.form-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #2d3748;
+    -fx-padding: 0 0 6 0;
+}
+
+/* Input field styles */
+.text-field, .password-field {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-padding: 12px 16px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #2d3748;
+    -fx-pref-height: 44px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 2, 0, 0, 1);
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #667eea;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(102,126,234,0.15), 4, 0, 0, 2);
+}
+
+.text-field:hover, .password-field:hover {
+    -fx-border-color: #cbd5e0;
+}
+
+/* Button styles */
+.button {
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 24px;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-pref-height: 44px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);
+}
+
+/* Primary button (Login, Create Account) */
+.button-primary {
+    -fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -fx-text-fill: white;
+    -fx-min-width: 140px;
+}
+
+.button-primary:hover {
+    -fx-background-color: linear-gradient(135deg, #5568d3 0%, #6a4190 100%);
+    -fx-effect: dropshadow(gaussian, rgba(102,126,234,0.3), 8, 0, 0, 4);
+    -fx-scale-y: 1.02;
+    -fx-scale-x: 1.02;
+}
+
+.button-primary:pressed {
+    -fx-background-color: linear-gradient(135deg, #4c5bc4 0%, #5e3a82 100%);
+    -fx-effect: dropshadow(gaussian, rgba(102,126,234,0.2), 4, 0, 0, 2);
+    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.98;
+}
+
+/* Secondary button (Back, Cancel) */
+.button-secondary {
+    -fx-background-color: white;
+    -fx-text-fill: #667eea;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+}
+
+.button-secondary:hover {
+    -fx-background-color: #f7fafc;
+    -fx-border-color: #667eea;
+    -fx-effect: dropshadow(gaussian, rgba(102,126,234,0.15), 6, 0, 0, 2);
+}
+
+.button-secondary:pressed {
+    -fx-background-color: #edf2f7;
+}
+
+/* Link button */
+.button-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #667eea;
+    -fx-underline: false;
+    -fx-padding: 8px;
+    -fx-effect: none;
+}
+
+.button-link:hover {
+    -fx-text-fill: #5568d3;
+    -fx-underline: true;
+    -fx-effect: none;
+}
+
+/* Divider */
+.separator {
+    -fx-background-color: #e2e8f0;
+}
+
+/* Form row spacing */
+.form-row {
+    -fx-spacing: 8px;
+}
+
+/* Button container */
+.button-container {
+    -fx-spacing: 12px;
+    -fx-alignment: center-right;
+    -fx-padding: 24 0 0 0;
+}
+
+/* Default button indicator */
+.button:default {
+    -fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -fx-text-fill: white;
+}
+
+.button:default:hover {
+    -fx-background-color: linear-gradient(135deg, #5568d3 0%, #6a4190 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .auth-container {
+        -fx-padding: 32px 24px;
+        -fx-max-width: 100%;
+    }
+    
+    .auth-title {
+        -fx-font-size: 28px;
+    }
+}
+
+/* ======== Dark variant inspired by Duolingo login ======== */
+/* Dark page background */
+.dark-root {
+    -fx-font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #0f172a; /* slate-900 */
+}
+
+/* Container without card, centered column */
+.auth-dark {
+    -fx-padding: 16px 0 0 0;
+    -fx-max-width: 520px;
+}
+
+.title-dark {
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #e2e8f0; /* slate-200 */
+    -fx-padding: 0 0 12 0;
+}
+
+.subtitle-dark {
+    -fx-font-size: 13px;
+    -fx-text-fill: #94a3b8; /* slate-400 */
+}
+
+/* Dark inputs */
+.input-dark {
+    -fx-background-color: #0b1220; /* inner background */
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #233041; /* slate-700 */
+    -fx-border-width: 1.6px;
+    -fx-padding: 12px 16px;
+    -fx-text-fill: #e5eef7;
+    -fx-prompt-text-fill: #64748b; /* slate-500 */
+    -fx-pref-height: 48px;
+}
+
+.input-dark:hover {
+    -fx-border-color: #2d3e53;
+}
+
+.input-dark:focused {
+    -fx-border-color: #34a6ff; /* blue focus */
+    -fx-effect: dropshadow(gaussian, rgba(52,166,255,0.35), 8, 0, 0, 2);
+}
+
+/* Primary blue button */
+.btn-primary-blue {
+    -fx-background-color: linear-gradient(to bottom, #53b9ff, #249dff);
+    -fx-text-fill: #04121a;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 20px;
+}
+
+.btn-primary-blue:hover {
+    -fx-background-color: linear-gradient(to bottom, #6ac3ff, #36a7ff);
+}
+
+.btn-primary-blue:pressed {
+    -fx-background-color: linear-gradient(to bottom, #3aaeff, #1f8fe0);
+}
+
+/* Outline light pill button (top-right) */
+.btn-outline-light {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cbd5e1;
+    -fx-border-color: #2a3a4e;
+    -fx-border-radius: 999px;
+    -fx-background-radius: 999px;
+    -fx-padding: 8px 16px;
+}
+
+.btn-outline-light:hover {
+    -fx-border-color: #3a506a;
+    -fx-text-fill: white;
+}
+
+/* Divider with label */
+.divider-label {
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 600;
+    -fx-padding: 0 12 0 12;
+}
+
+/* Social buttons */
+.btn-social {
+    -fx-background-color: transparent;
+    -fx-border-color: #223246;
+    -fx-text-fill: #cbd5e1;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 10px 16px;
+}
+
+.btn-social:hover {
+    -fx-border-color: #34506b;
+}
+
+.footer-text {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+    -fx-wrap-text: true;
+    -fx-alignment: center;
+}
+

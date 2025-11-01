@@ -3,4 +3,8 @@ target/
 .idea/
 *.log
 src/main/resources/config/config.properties
+<<<<<<< HEAD
 .vscode
+=======
+.vscode/*
+>>>>>>> FAHD

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<!-- TODO: Multi-step wizard for role selection, goals, and experience level. -->
+<VBox spacing="10" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.OnboardingController">
+    <Label text="Onboarding" />
+    <Button text="Continue" onAction="#onContinue" />
+</VBox>
