@@ -1,9 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-<VBox spacing="10" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LoginController">
-    <Label text="InterviewAI - Login" />
-    <TextField promptText="Username" />
-    <PasswordField promptText="Password" />
-    <Button text="Login" />
-</VBox>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LoginController">
+    <center>
+        <VBox spacing="16" alignment="CENTER">
+            <Label text="InterviewAI" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+            <Label text="Sign in to continue" styleClass="muted" />
+            <GridPane hgap="8" vgap="8">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120" halignment="RIGHT" />
+                    <ColumnConstraints minWidth="240" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30" />
+                    <RowConstraints minHeight="30" />
+                </rowConstraints>
+                <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <TextField fx:id="usernameField" promptText="Username" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <PasswordField fx:id="passwordField" promptText="Password" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+            </GridPane>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button fx:id="loginButton" text="Login" onAction="#onLogin" defaultButton="true" />
+                <Button text="Create account" onAction="#onOpenCreateAccount" />
+            </HBox>
+        </VBox>
+    </center>
+    <padding>
+        <Insets top="24" right="24" bottom="24" left="24" />
+    </padding>
+</BorderPane>

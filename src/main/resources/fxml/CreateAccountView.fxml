@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.CreateAccountController">
+    <center>
+        <VBox spacing="16" alignment="CENTER">
+            <Label text="Create your account" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+            <GridPane hgap="8" vgap="8">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120" halignment="RIGHT" />
+                    <ColumnConstraints minWidth="280" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30" />
+                    <RowConstraints minHeight="30" />
+                    <RowConstraints minHeight="30" />
+                </rowConstraints>
+                <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <TextField fx:id="usernameField" promptText="Choose a username" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <TextField fx:id="emailField" promptText="name@example.com" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+                <Label text="Password:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                <PasswordField fx:id="passwordField" promptText="Create a password" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+            </GridPane>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="Back to Login" onAction="#onBack" />
+                <Button text="Create Account" onAction="#onCreate" defaultButton="true" />
+            </HBox>
+        </VBox>
+    </center>
+    <padding>
+        <Insets top="24" right="24" bottom="24" left="24" />
+    </padding>
+</BorderPane>
