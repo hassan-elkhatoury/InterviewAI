@@ -1,5 +1,6 @@
-# target/
-# *.iml
-# .idea/
-# *.log
-# src/main/resources/config/config.properties
+.vscode/
+target/
+*.iml
+.idea/
+*.log
+src/main/resources/config/config.properties
