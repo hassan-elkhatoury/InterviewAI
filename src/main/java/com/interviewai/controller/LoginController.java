@@ -71,4 +71,13 @@ public class LoginController {
             err.showAndWait();
         }
     }
+
+    @FXML
+    private void onForgotPassword(ActionEvent event) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle("Password Help");
+        a.setHeaderText("Forgot password");
+        a.setContentText("Password reset isn't set up yet. Please contact support or try a demo user: admin/password.");
+        a.showAndWait();
+    }
 }

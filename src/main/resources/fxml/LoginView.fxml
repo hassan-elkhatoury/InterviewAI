@@ -2,32 +2,58 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LoginController">
-    <center>
-        <VBox spacing="16" alignment="CENTER">
-            <Label text="InterviewAI" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
-            <Label text="Sign in to continue" styleClass="muted" />
-            <GridPane hgap="8" vgap="8">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="120" halignment="RIGHT" />
-                    <ColumnConstraints minWidth="240" />
-                </columnConstraints>
-                <rowConstraints>
-                    <RowConstraints minHeight="30" />
-                    <RowConstraints minHeight="30" />
-                </rowConstraints>
-                <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-                <TextField fx:id="usernameField" promptText="Username" GridPane.rowIndex="0" GridPane.columnIndex="1" />
-                <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-                <PasswordField fx:id="passwordField" promptText="Password" GridPane.rowIndex="1" GridPane.columnIndex="1" />
-            </GridPane>
-            <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button fx:id="loginButton" text="Login" onAction="#onLogin" defaultButton="true" />
-                <Button text="Create account" onAction="#onOpenCreateAccount" />
+<?import javafx.scene.image.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LoginController"
+           stylesheets="@../css/main.css" styleClass="dark-root">
+    <BorderPane>
+        <top>
+            <HBox alignment="CENTER_RIGHT">
+                <padding>
+                    <Insets top="16" right="24" bottom="0" left="24" />
+                </padding>
+                <Pane HBox.hgrow="ALWAYS" />
+                <Button text="S'inscrire" onAction="#onOpenCreateAccount" styleClass="btn-outline-light" />
             </HBox>
-        </VBox>
-    </center>
-    <padding>
-        <Insets top="24" right="24" bottom="24" left="24" />
-    </padding>
-</BorderPane>
+        </top>
+        <center>
+            <VBox alignment="CENTER" spacing="18">
+                <VBox alignment="CENTER" spacing="18" styleClass="auth-dark" maxWidth="520">
+                    <Label text="Connexion" styleClass="title-dark" />
+
+                    <!-- Email/Username Field -->
+                    <VBox spacing="8">
+                        <TextField fx:id="usernameField" promptText="E-mail ou nom d'utilisateur" styleClass="input-dark" />
+                    </VBox>
+
+                    <!-- Password with Forgot link -->
+                    <VBox spacing="8">
+                        <HBox alignment="CENTER_RIGHT" spacing="8">
+                            <Pane HBox.hgrow="ALWAYS" />
+                            <Button text="Oublié ?" onAction="#onForgotPassword" styleClass="button-link" />
+                        </HBox>
+                        <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="input-dark" />
+                    </VBox>
+
+                    <!-- Primary button -->
+                    <Button fx:id="loginButton" text="SE CONNECTER" onAction="#onLogin" defaultButton="true" styleClass="btn-primary-blue" maxWidth="Infinity" />
+
+                    <!-- Divider -->
+                    <HBox alignment="CENTER" spacing="10">
+                        <Region HBox.hgrow="ALWAYS" prefHeight="1" style="-fx-background-color:#233041;" />
+                        <Label text="OU" styleClass="divider-label" />
+                        <Region HBox.hgrow="ALWAYS" prefHeight="1" style="-fx-background-color:#233041;" />
+                    </HBox>
+
+                    <!-- Social buttons -->
+                    <HBox spacing="16" alignment="CENTER">
+                        <Button text="GOOGLE" styleClass="btn-social" />
+                        <Button text="FACEBOOK" styleClass="btn-social" />
+                    </HBox>
+
+                    <!-- Footer text -->
+                    <Label text="En te connectant à InterviewAI, tu acceptes nos Conditions d'utilisation et notre Politique de confidentialité." wrapText="true" styleClass="footer-text" />
+                </VBox>
+            </VBox>
+        </center>
+    </BorderPane>
+</StackPane>
