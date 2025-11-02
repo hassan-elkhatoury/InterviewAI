@@ -19,7 +19,7 @@ public class OnboardingController {
         // TODO: Validate onboarding selections and persist via OnboardingService
         try {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            SceneNavigator.switchTo(stage, Routes.DASHBOARD, 900, 600);
+            SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
         } catch (Exception e) {
             // TODO: centralize error dialogs
         }

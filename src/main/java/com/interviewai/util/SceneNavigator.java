@@ -13,9 +13,15 @@ import javafx.stage.Stage;
  * TODO: Centralize route names and role-based guards.
  */
 public class SceneNavigator {
-    public static void switchTo(Stage stage, String fxmlPath, double width, double height) throws IOException {
+    public static void switchTo(Stage stage, String fxmlPath, double width, double height ) throws IOException {
         Parent root = FXMLLoader.load(SceneNavigator.class.getResource(fxmlPath));
         stage.setScene(new Scene(root, width, height));
+        stage.show();
+    }
+
+    public static void switchTo(Stage stage, String fxmlPath ) throws IOException {
+        Parent root = FXMLLoader.load(SceneNavigator.class.getResource(fxmlPath));
+        stage.setScene(new Scene(root));
         stage.show();
     }
 }
