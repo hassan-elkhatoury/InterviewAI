@@ -276,3 +276,140 @@
     -fx-alignment: center;
 }
 
+/* ======== Onboarding Styles ======== */
+/* Progress indicator */
+.progress-dot {
+    -fx-background-color: #233041;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 10px;
+    -fx-pref-height: 10px;
+}
+
+.progress-dot-active {
+    -fx-background-color: #34a6ff;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 10px;
+    -fx-pref-height: 10px;
+}
+
+/* Onboarding question text */
+.onboarding-question {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #e2e8f0;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.onboarding-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #94a3b8;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+/* Option cards (clickable tiles) */
+.option-card {
+    -fx-background-color: #0b1220;
+    -fx-border-color: #233041;
+    -fx-border-width: 2px;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-padding: 20px 16px;
+    -fx-cursor: hand;
+    -fx-min-height: 80px;
+    -fx-alignment: center-left;
+}
+
+.option-card:hover {
+    -fx-border-color: #2d3e53;
+    -fx-background-color: #0f1829;
+}
+
+.option-card-selected {
+    -fx-background-color: #0f1829;
+    -fx-border-color: #34a6ff;
+    -fx-border-width: 2.5px;
+    -fx-effect: dropshadow(gaussian, rgba(52,166,255,0.4), 12, 0, 0, 2);
+}
+
+.option-card-selected:hover {
+    -fx-border-color: #4bb5ff;
+}
+
+/* Option emoji/icon */
+.option-emoji {
+    -fx-font-size: 28px;
+    -fx-padding: 0 12 0 0;
+    -fx-text-fill: #cbd5e1;
+
+}
+
+/* Option label */
+.option-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #cbd5e1;
+}
+
+/* Navigation buttons */
+.btn-next {
+    -fx-background-color: linear-gradient(to bottom, #53b9ff, #249dff);
+    -fx-text-fill: #04121a;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12px;
+    -fx-padding: 14px 32px;
+    -fx-font-size: 15px;
+}
+
+.btn-next:hover {
+    -fx-background-color: linear-gradient(to bottom, #6ac3ff, #36a7ff);
+}
+
+.btn-next:disabled {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #475569;
+    -fx-opacity: 0.6;
+}
+
+.btn-back {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: 600;
+    -fx-padding: 10px 20px;
+}
+
+.btn-back:hover {
+    -fx-text-fill: #cbd5e1;
+}
+
+/* Upload area */
+.upload-area {
+    -fx-background-color: #0b1220;
+    -fx-border-color: #233041;
+    -fx-border-width: 2px;
+    -fx-border-style: dashed;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 32px 24px;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+}
+
+.upload-area:hover {
+    -fx-border-color: #34a6ff;
+    -fx-background-color: #0f1829;
+}
+
+.upload-icon {
+    -fx-font-size: 40px;
+    -fx-text-fill: #64748b;
+}
+
+.upload-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #94a3b8;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
