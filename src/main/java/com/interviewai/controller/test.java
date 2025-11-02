@@ -1,3 +1,4 @@
+
 package com.interviewai.controller;
 
 import java.io.File;
@@ -26,7 +27,7 @@ import javafx.stage.Stage;
  * Handles the multi-step onboarding flow with Duolingo-inspired UI.
  * Collects user preferences: interview type, language, timeline, and context.
  */
-public class OnboardingController {
+public class test {
 
     // Progress indicator
     @FXML private HBox progressContainer;
@@ -82,57 +83,39 @@ public class OnboardingController {
         updateProgressDots();
         updateNavigationButtons();
     }
-   
+    
+    // ========== Step Navigation ==========
+    
     @FXML
-    public void updateProgressDots(){
-        
-        progressContainer.getChildren().clear();
-        for (int i=1; i<=TOTAL_STEPS; i++){
-            Region dot= new Region();
-
-            if(i<=currentStep){
-                dot.getStyleClass().add("progress-dot-active");
-            } else{
-                dot.getStyleClass().add("progress-dot");
-            }
-
-            progressContainer.getChildren().add(dot);
-        } 
-    }
-
-    public void onNext(ActionEvent event){
-            if (currentStep < TOTAL_STEPS) {
+    private void onNext(ActionEvent event) {
+        if (currentStep < TOTAL_STEPS) {
             currentStep++;
-            updateStepView();
-            updateNavigationButtons();
+            showCurrentStep();
             updateProgressDots();
-
-
+            updateNavigationButtons();
+            
+            // Update Step 4 question based on interview type
             if (currentStep == 4) {
                 updateStep4Content();
             }
-
         } else {
             // Final step - complete onboarding
             completeOnboarding(event);
         }
-        
-        
     }
-    public void onBack(ActionEvent event){
-
-        if(currentStep > 1){
-
-            currentStep --;
-            updateStepView();
-            updateNavigationButtons();
+    
+    @FXML
+    private void onBack(ActionEvent event) {
+        if (currentStep > 1) {
+            currentStep--;
+            showCurrentStep();
             updateProgressDots();
-
+            updateNavigationButtons();
         }
-
     }
-
-    public void updateStepView(){
+    
+    private void showCurrentStep() {
+        // Hide all steps
         step1Container.setVisible(false);
         step1Container.setManaged(false);
         step2Container.setVisible(false);
@@ -141,124 +124,42 @@ public class OnboardingController {
         step3Container.setManaged(false);
         step4Container.setVisible(false);
         step4Container.setManaged(false);
-
-        switch (currentStep){
-            case 1 :
+        
+        // Show current step
+        switch (currentStep) {
+            case 1:
                 step1Container.setVisible(true);
                 step1Container.setManaged(true);
                 break;
-
-            case 2 :
+            case 2:
                 step2Container.setVisible(true);
                 step2Container.setManaged(true);
                 break;
-
-            case 3 :
+            case 3:
                 step3Container.setVisible(true);
                 step3Container.setManaged(true);
                 break;
-
-            case 4 :
+            case 4:
                 step4Container.setVisible(true);
                 step4Container.setManaged(true);
                 break;
-            
-        }
-    }
-
-
-    public void onSelectInterviewType(MouseEvent event){
-
-        HBox source = (HBox) event.getSource();
-       
-        selectCard(source);
-
-        if (source == optionJobInterview) {
-            selectedInterviewType = "JOB";
-        } else if (source == optionVisaInterview) {
-            selectedInterviewType = "VISA";
-        } else if (source == optionInternshipInterview) {
-            selectedInterviewType = "INTERNSHIP";
-        } else if (source == optionUniversityInterview) {
-            selectedInterviewType = "UNIVERSITY";
-        }
-
-        updateNavigationButtons();
-
-    }
-
-
-    
-    
-    public  void onSelectLanguage(MouseEvent event) {
-
-        HBox source = (HBox) event.getSource();
-        selectCard(source);
-        
-        if (source == optionEnglish) {
-            selectedLanguage = "ENGLISH";
-        } else if (source == optionFrench) {
-            selectedLanguage = "FRENCH";
-        } else if (source == optionArabic) {
-            selectedLanguage = "ARABIC";
-        } else if (source == optionSpanish) {
-            selectedLanguage = "SPANISH";
-        }
-        
-        updateNavigationButtons();
-    }
-    
-    
-    public void onSelectTimeline(MouseEvent event) {
-        HBox source = (HBox) event.getSource();
-        selectCard(source);
-        
-        if (source == optionTomorrow) {
-            selectedTimeline = "TOMORROW";
-        } else if (source == optionThisWeek) {
-            selectedTimeline = "THIS_WEEK";
-        } else if (source == optionLater) {
-            selectedTimeline = "LATER";
-        }
-        
-        updateNavigationButtons();
-    }
-    
-    
-     public void onUploadCV(MouseEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Upload CV/Resume");
-        fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("PDF Files", "*.pdf"),
-            new FileChooser.ExtensionFilter("Word Documents", "*.doc", "*.docx"),
-            new FileChooser.ExtensionFilter("All Files", "*.*")
-        );
-        
-        Stage stage = (Stage) uploadArea.getScene().getWindow();
-        File file = fileChooser.showOpenDialog(stage);
-        
-        if (file != null) {
-            uploadedCV = file;
-            uploadedFileName.setText(file.getName());
-            uploadedFileName.setVisible(true);
         }
     }
     
-    
-    
-
-    public void selectCard(HBox card){
-
-            if (selectedCard != null) {
-                selectedCard.getStyleClass().remove("option-card-selected");
-            }
-            selectedCard = card;
-            card.getStyleClass().add("option-card-selected");
+    private void updateProgressDots() {
+        progressContainer.getChildren().clear();
+        for (int i = 1; i <= TOTAL_STEPS; i++) {
+            Region dot = new Region();
+            dot.getStyleClass().add(i <= currentStep ? "progress-dot-active" : "progress-dot");
+            progressContainer.getChildren().add(dot);
+        }
     }
-
-       private void updateNavigationButtons() {
+    
+    private void updateNavigationButtons() {
+        // Show back button after first step
         backButton.setVisible(currentStep > 1);
         
+        // Enable next button only if current step has a selection
         boolean canProceed = false;
         switch (currentStep) {
             case 1:
@@ -279,9 +180,66 @@ public class OnboardingController {
         // Change button text on last step
         nextButton.setText(currentStep == TOTAL_STEPS ? "Start Practicing" : "Next");
     }
-
-
-
+    
+    // ========== Step 1: Interview Type Selection ==========
+    
+    @FXML
+    private void onSelectInterviewType(MouseEvent event) {
+        HBox source = (HBox) event.getSource();
+        selectCard(source);
+        
+        if (source == optionJobInterview) {
+            selectedInterviewType = "JOB";
+        } else if (source == optionVisaInterview) {
+            selectedInterviewType = "VISA";
+        } else if (source == optionInternshipInterview) {
+            selectedInterviewType = "INTERNSHIP";
+        } else if (source == optionUniversityInterview) {
+            selectedInterviewType = "UNIVERSITY";
+        }
+        
+        updateNavigationButtons();
+    }
+    
+    // ========== Step 2: Language Selection ==========
+    
+    @FXML
+    private void onSelectLanguage(MouseEvent event) {
+        HBox source = (HBox) event.getSource();
+        selectCard(source);
+        
+        if (source == optionEnglish) {
+            selectedLanguage = "ENGLISH";
+        } else if (source == optionFrench) {
+            selectedLanguage = "FRENCH";
+        } else if (source == optionArabic) {
+            selectedLanguage = "ARABIC";
+        } else if (source == optionSpanish) {
+            selectedLanguage = "SPANISH";
+        }
+        
+        updateNavigationButtons();
+    }
+    
+    // ========== Step 3: Timeline Selection ==========
+    
+    @FXML
+    private void onSelectTimeline(MouseEvent event) {
+        HBox source = (HBox) event.getSource();
+        selectCard(source);
+        
+        if (source == optionTomorrow) {
+            selectedTimeline = "TOMORROW";
+        } else if (source == optionThisWeek) {
+            selectedTimeline = "THIS_WEEK";
+        } else if (source == optionLater) {
+            selectedTimeline = "LATER";
+        }
+        
+        updateNavigationButtons();
+    }
+    
+    // ========== Step 4: Context & CV Upload ==========
     
     private void updateStep4Content() {
         if ("JOB".equals(selectedInterviewType) || "INTERNSHIP".equals(selectedInterviewType)) {
@@ -298,8 +256,42 @@ public class OnboardingController {
         // Add listener to enable next button when text is entered
         contextField.textProperty().addListener((obs, old, newVal) -> updateNavigationButtons());
     }
-
-
+    
+    @FXML
+    private void onUploadCV(MouseEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Upload CV/Resume");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("PDF Files", "*.pdf"),
+            new FileChooser.ExtensionFilter("Word Documents", "*.doc", "*.docx"),
+            new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+        
+        Stage stage = (Stage) uploadArea.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        
+        if (file != null) {
+            uploadedCV = file;
+            uploadedFileName.setText(file.getName());
+            uploadedFileName.setVisible(true);
+        }
+    }
+    
+    // ========== UI Helpers ==========
+    
+    private void selectCard(HBox card) {
+        // Remove selection from previously selected card
+        if (selectedCard != null) {
+            selectedCard.getStyleClass().remove("option-card-selected");
+        }
+        
+        // Add selection to new card
+        card.getStyleClass().add("option-card-selected");
+        selectedCard = card;
+    }
+    
+    // ========== Complete Onboarding ==========
+    
     private void completeOnboarding(ActionEvent event) {
         contextInfo = contextField.getText();
         
