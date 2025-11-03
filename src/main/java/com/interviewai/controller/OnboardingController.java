@@ -58,6 +58,7 @@ public class OnboardingController {
     @FXML private Label step4Question;
     @FXML private Label step4Subtitle;
     @FXML private TextField contextField;
+    @FXML private TextField descriptionField;
     @FXML private VBox uploadArea;
     @FXML private Label uploadedFileName;
     
@@ -73,6 +74,8 @@ public class OnboardingController {
     private String selectedLanguage;
     private String selectedTimeline;
     private String contextInfo;
+    private String description;
+
     private File uploadedCV;
     
     private HBox selectedCard; // Track currently selected option card
@@ -107,10 +110,11 @@ public class OnboardingController {
             updateNavigationButtons();
             updateProgressDots();
 
-
             if (currentStep == 4) {
                 updateStep4Content();
             }
+
+            
 
         } else {
             // Final step - complete onboarding
@@ -302,6 +306,8 @@ public class OnboardingController {
 
     private void completeOnboarding(ActionEvent event) {
         contextInfo = contextField.getText();
+        description = descriptionField.getText();
+
         
         // Persist onboarding data via OnboardingService
         User currentUser = SessionContext.getCurrentUser();
@@ -312,9 +318,11 @@ public class OnboardingController {
             data.setLanguage(selectedLanguage);
             data.setTimeline(selectedTimeline);
             data.setContext(contextInfo);
+            data.setDescription(description);
             data.setCvPath(uploadedCV != null ? uploadedCV.getAbsolutePath() : null);
             
             OnboardingService service = new OnboardingService();
+            
             service.saveOnboardingData(data);
             
             System.out.println("=== Onboarding Complete ===");

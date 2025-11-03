@@ -9,18 +9,20 @@ public class OnboardingData {
     private String language; // ENGLISH, FRENCH, ARABIC, SPANISH
     private String timeline; // TOMORROW, THIS_WEEK, LATER
     private String context; // Industry/Program/Position
+    private String description; //optionel customization
     private String cvPath; // Path to uploaded CV
     
     public OnboardingData() {}
     
-    public OnboardingData(int userId, String interviewType, String language, String timeline, String context, String cvPath) {
+    public OnboardingData(int userId, String interviewType, String language, String timeline, String context, String description, String cvPath) {
         this.userId = userId;
         this.interviewType = interviewType;
         this.language = language;
         this.timeline = timeline;
         this.context = context;
+        this.description = description;
         this.cvPath = cvPath;
-    }
+        }
     
     // Getters and Setters
     public int getUserId() { return userId; }
@@ -37,6 +39,11 @@ public class OnboardingData {
     
     public String getContext() { return context; }
     public void setContext(String context) { this.context = context; }
+
+     
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
     
     public String getCvPath() { return cvPath; }
     public void setCvPath(String cvPath) { this.cvPath = cvPath; }

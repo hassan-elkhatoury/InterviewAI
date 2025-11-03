@@ -126,6 +126,11 @@
                             <VBox spacing="8">
                                 <TextField fx:id="contextField" promptText="e.g., Software Developer, Marketing Manager" styleClass="input-dark" />
                             </VBox>
+
+                             <!-- additionel customizations field -->
+                            <VBox spacing="8">
+                                <TextField fx:id="descriptionField" promptText="Add more description for better customization" styleClass="input-dark" />
+                            </VBox>
                             
                             <!-- Optional: CV/Resume upload -->
                             <VBox spacing="8">

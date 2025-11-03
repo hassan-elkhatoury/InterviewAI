@@ -39,7 +39,9 @@ public class LoginController {
             // TODO: Replace demo routing with real onboarding state check.
             try {
                 Stage stage = (Stage) usernameField.getScene().getWindow();
+
                 SessionContext.setCurrentUser(u);
+                
                 if (u != null && "ADMIN".equalsIgnoreCase(u.getRole())) {
                     // Admin route
                     SceneNavigator.switchTo(stage, Routes.ADMIN, stage.getWidth()-15, stage.getHeight()-38);
