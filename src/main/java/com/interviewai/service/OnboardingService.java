@@ -1,5 +1,7 @@
 package com.interviewai.service;
 
+import com.interviewai.dao.CourseDAO;
+import com.interviewai.model.GeneratedCourse;
 import com.interviewai.model.OnboardingData;
 import com.interviewai.model.User;
 
@@ -21,7 +23,35 @@ public class OnboardingService {
     }
 
     /**
-     * Saves user onboarding preferences and triggers AI course generation.
+     * Saves user onboarding preferences and triggers AI course generation asynchronously.
+     * Calls the callback when complete.
+     */
+    public void saveOnboardingDataAsync(OnboardingData data, Runnable onComplete) {
+        System.out.println("Saving onboarding data: " + data);
+        
+        // Run AI generation in background thread
+        new Thread(() -> {
+            try {
+                if (aiService != null) {
+                    generateAICourse(data);
+                    System.out.println("✓ Course generation complete!");
+                } else {
+                    System.out.println("ℹ️  AI service not available. Skipping course generation.");
+                }
+            } catch (Exception e) {
+                System.err.println("Error during AI generation: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                // Always call the completion callback
+                if (onComplete != null) {
+                    onComplete.run();
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * Saves user onboarding preferences and triggers AI course generation (synchronous).
      */
     public void saveOnboardingData(OnboardingData data) {
         System.out.println("Saving onboarding data: " + data);
@@ -29,9 +59,7 @@ public class OnboardingService {
         if (aiService != null) {
             generateAICourse(data);
         } else {
-
             System.out.println("ℹ️  AI service not available. Skipping course generation.");
-            
         }
     }
     
@@ -66,13 +94,15 @@ public class OnboardingService {
             System.out.println("=" + "=".repeat(80) + "\n");
 
             // Parse and save course to database
-            com.interviewai.model.GeneratedCourse course = com.interviewai.model.GeneratedCourse.fromJson(response, data.getUserId());
-            new com.interviewai.dao.CourseDAO().saveGeneratedCourse(course);
-            System.out.println("Course saved to database for user: " + data.getUserId());
+            GeneratedCourse course = GeneratedCourse.fromJson(response, data.getUserId());
+            CourseDAO courseDAO = new CourseDAO();
+            courseDAO.saveGeneratedCourse(course);
+            System.out.println("✓ Course saved to database for user: " + data.getUserId());
 
         } catch (Exception e) {
             System.err.println("\n❌ AI Course Generation Failed:");
             System.err.println("   Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     

@@ -321,22 +321,35 @@ public class OnboardingController {
             data.setDescription(description);
             data.setCvPath(uploadedCV != null ? uploadedCV.getAbsolutePath() : null);
             
-            OnboardingService service = new OnboardingService();
-            
-            service.saveOnboardingData(data);
-            
-            System.out.println("=== Onboarding Complete ===");
-            System.out.println(data.toString());
+            try {
+                Stage stage = (Stage) nextButton.getScene().getWindow();
+                // Navigate to waiting page
+                SceneNavigator.switchTo(stage, Routes.ONBOARDINGWAITING, stage.getWidth()-15, stage.getHeight()-38);
+                
+                // Start AI generation in background thread
+                OnboardingService service = new OnboardingService();
+                service.saveOnboardingDataAsync(data, () -> {
+                    // This callback runs on background thread, so use Platform.runLater for UI updates
+                    javafx.application.Platform.runLater(() -> {
+                        try {
+                            // Navigate to dashboard after AI completes
+                            SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
+                        } catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Navigation Error");
+                            alert.setContentText("Failed to navigate to dashboard: " + e.getMessage());
+                            alert.showAndWait();
+                        }
+                    });
+                });
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Navigation Error");
+                alert.setContentText("Failed to navigate to waiting page: " + e.getMessage());
+                alert.showAndWait();
+            }
         }
         
-        try {
-            Stage stage = (Stage) nextButton.getScene().getWindow();
-            SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
-        } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Navigation Error");
-            alert.setContentText("Failed to navigate to dashboard: " + e.getMessage());
-            alert.showAndWait();
-        }
     }
 }

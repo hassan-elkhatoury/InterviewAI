@@ -17,4 +17,5 @@ public final class Routes {
     public static final String ADMIN = "/fxml/AdminView.fxml";
     public static final String PROMPT = "/fxml/PromptView.fxml";
     public static final String CREATE_ACCOUNT = "/fxml/CreateAccountView.fxml";
+    public static final String ONBOARDINGWAITING = "/fxml/OnboardingWaitingView.fxml";
 }

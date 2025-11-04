@@ -413,3 +413,20 @@
     -fx-text-alignment: center;
 }
 
+/* Loading spinner animation */
+.loading-spinner {
+    -fx-rotate: 0;
+}
+
+@keyframes spin {
+    0% {
+        -fx-rotate: 0;
+    }
+    100% {
+        -fx-rotate: 360;
+    }
+}
+
+.loading-spinner:focused {
+    -fx-rotate: 0;
+}
