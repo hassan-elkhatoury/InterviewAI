@@ -47,6 +47,82 @@ public class GeneratedCourse {
         return id;
     }
     
+        /**
+         * Parse AI response JSON into a GeneratedCourse object.
+         * Handles Gemini API response format with candidates/content/parts structure.
+         */
+        public static GeneratedCourse fromJson(String json, int userId) {
+            try {
+                org.json.JSONObject response = new org.json.JSONObject(json);
+                
+                // Extract the actual JSON course from Gemini's response
+                String courseJson = json;
+                if (response.has("candidates")) {
+                    // Gemini API format: candidates[0].content.parts[0].text
+                    org.json.JSONArray candidates = response.getJSONArray("candidates");
+                    if (candidates.length() > 0) {
+                        org.json.JSONObject candidate = candidates.getJSONObject(0);
+                        org.json.JSONObject content = candidate.getJSONObject("content");
+                        org.json.JSONArray parts = content.getJSONArray("parts");
+                        if (parts.length() > 0) {
+                            courseJson = parts.getJSONObject(0).getString("text");
+                            // Remove markdown code blocks if present
+                            courseJson = courseJson.replaceAll("```json\\s*", "").replaceAll("```\\s*$", "").trim();
+                        }
+                    }
+                }
+                
+                System.out.println("Parsing course JSON: " + courseJson.substring(0, Math.min(200, courseJson.length())) + "...");
+                
+                org.json.JSONObject obj = new org.json.JSONObject(courseJson);
+                String courseTitle = obj.optString("course_title", "Untitled Course");
+                java.util.List<Chapter> chapters = new java.util.ArrayList<>();
+                org.json.JSONArray chaptersArr = obj.optJSONArray("chapters");
+                
+                System.out.println("Found " + (chaptersArr != null ? chaptersArr.length() : 0) + " chapters");
+                
+                if (chaptersArr != null) {
+                    for (int i = 0; i < chaptersArr.length(); i++) {
+                        org.json.JSONObject chObj = chaptersArr.getJSONObject(i);
+                        int chapterNumber = chObj.optInt("chapter_number", i+1);
+                        String name = chObj.optString("name", "");
+                        String description = chObj.optString("description", "");
+                        java.util.List<Question> questions = new java.util.ArrayList<>();
+                        org.json.JSONArray questionsArr = chObj.optJSONArray("questions");
+                        
+                        System.out.println("Chapter " + chapterNumber + ": " + name + " - " + (questionsArr != null ? questionsArr.length() : 0) + " questions");
+                        
+                        if (questionsArr != null) {
+                            for (int j = 0; j < questionsArr.length(); j++) {
+                                org.json.JSONObject qObj = questionsArr.getJSONObject(j);
+                                int qId = qObj.optInt("id", j+1);
+                                String questionText = qObj.optString("question", "");
+                                java.util.List<String> choices = new java.util.ArrayList<>();
+                                org.json.JSONArray choicesArr = qObj.optJSONArray("choices");
+                                if (choicesArr != null) {
+                                    for (int k = 0; k < choicesArr.length(); k++) {
+                                        choices.add(choicesArr.getString(k));
+                                    }
+                                }
+                                String correctAnswer = qObj.optString("correct_answer", "");
+                                String explanation = qObj.optString("explanation", "");
+                                Question q = new Question(qId, questionText, choices, correctAnswer, explanation);
+                                questions.add(q);
+                            }
+                        }
+                        Chapter chapter = new Chapter(chapterNumber, name, description, questions);
+                        chapters.add(chapter);
+                    }
+                }
+                GeneratedCourse course = new GeneratedCourse(userId, courseTitle, null, null, chapters);
+                System.out.println("Parsed course: " + courseTitle + " with " + chapters.size() + " chapters");
+                return course;
+            } catch (Exception e) {
+                System.err.println("JSON parsing error: " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Failed to parse AI course JSON: " + e.getMessage(), e);
+            }
+        }
     public void setId(int id) {
         this.id = id;
     }

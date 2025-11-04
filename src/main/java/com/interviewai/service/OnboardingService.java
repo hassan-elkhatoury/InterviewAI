@@ -29,7 +29,9 @@ public class OnboardingService {
         if (aiService != null) {
             generateAICourse(data);
         } else {
+
             System.out.println("ℹ️  AI service not available. Skipping course generation.");
+            
         }
     }
     
@@ -62,7 +64,12 @@ public class OnboardingService {
             System.out.println("=" + "=".repeat(80));
             System.out.println(response);
             System.out.println("=" + "=".repeat(80) + "\n");
-            
+
+            // Parse and save course to database
+            com.interviewai.model.GeneratedCourse course = com.interviewai.model.GeneratedCourse.fromJson(response, data.getUserId());
+            new com.interviewai.dao.CourseDAO().saveGeneratedCourse(course);
+            System.out.println("Course saved to database for user: " + data.getUserId());
+
         } catch (Exception e) {
             System.err.println("\n❌ AI Course Generation Failed:");
             System.err.println("   Error: " + e.getMessage());
