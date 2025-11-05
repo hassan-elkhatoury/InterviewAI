@@ -99,4 +99,35 @@ public class CourseDAO {
         }
         return  isSaved;
     }
+
+
+    public Boolean checkUserCourse(int id){
+
+        boolean haveCourse = false;
+        Connection conn = null;
+
+        try {
+
+            conn = DBConnection.getConnection();
+            String sqlCourse = "SELECT * from generated_courses WHERE   user_id = ? ";
+            PreparedStatement stmt = conn.prepareStatement(sqlCourse);
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if(rs.next()){
+                haveCourse = true;
+            }
+
+            
+
+        } catch(SQLException e){
+
+            System.err.println("Error at checking user Course: " + e.getMessage());
+
+
+        }
+
+        return haveCourse;
+    }
 }

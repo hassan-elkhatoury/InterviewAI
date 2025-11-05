@@ -1,5 +1,7 @@
 package com.interviewai.controller;
 
+import com.interviewai.dao.CourseDAO;
+import com.interviewai.dao.OnboardingDAO;
 import com.interviewai.model.User;
 import com.interviewai.service.AuthService;
 import com.interviewai.util.Routes;
@@ -43,11 +45,24 @@ public class LoginController {
                 SessionContext.setCurrentUser(u);
                 
                 if (u != null && "ADMIN".equalsIgnoreCase(u.getRole())) {
+
                     // Admin route
                     SceneNavigator.switchTo(stage, Routes.ADMIN, stage.getWidth()-15, stage.getHeight()-38);
+                    
                 } else {
-                    // Candidate route -> Onboarding first, later can go to Dashboard
-                    SceneNavigator.switchTo(stage, Routes.ONBOARDING, stage.getWidth()-15, stage.getHeight()-38);
+
+                    CourseDAO courseDAO = new CourseDAO();
+                    if(courseDAO.checkUserCourse(u.getId())){
+
+                        SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
+
+                    } else{
+
+                        SceneNavigator.switchTo(stage, Routes.ONBOARDING, stage.getWidth()-15, stage.getHeight()-38);
+
+                    }
+
+                    
                 }
             } catch (Exception ex) {
                 // TODO: centralize error dialogs
