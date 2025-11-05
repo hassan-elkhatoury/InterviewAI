@@ -32,7 +32,7 @@ public class AuthService {
     /**
      * Returns DB user if exists, otherwise a demo user object.
      */
-    public User getDemoUser(String username) {
+    public User getUser(String username) {
         try {
             User fromDb = userDAO.getByUsername(username);
             if (fromDb != null) return fromDb;

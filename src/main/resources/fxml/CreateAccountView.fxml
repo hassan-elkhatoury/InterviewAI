@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.CreateAccountController"
-           stylesheets="@../css/main.css" styleClass="dark-root">
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane prefHeight="600.0" prefWidth="900.0" styleClass="dark-root" stylesheets="@../css/main.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="com.interviewai.controller.CreateAccountController">
     <BorderPane>
         <top>
             <HBox alignment="CENTER_RIGHT">
                 <padding>
-                    <Insets top="16" right="24" bottom="0" left="24" />
+                    <Insets bottom="0" left="24" right="24" top="16" />
                 </padding>
                 <Pane HBox.hgrow="ALWAYS" />
-                <Button text="Se connecter" onAction="#onBack" styleClass="btn-outline-light" />
+                <Button onAction="#onBack" styleClass="btn-outline-light" text="Se connecter" />
             </HBox>
         </top>
         <center>
             <VBox alignment="CENTER" spacing="18">
-                <VBox alignment="CENTER" spacing="18" styleClass="auth-dark" maxWidth="520">
-                    <Label text="Créer un compte" styleClass="title-dark" />
+                <VBox alignment="CENTER" maxWidth="520" spacing="18" styleClass="auth-dark">
+                    <Label styleClass="title-dark" text="Créer un compte" />
 
                     <!-- Username -->
                     <VBox spacing="8">
@@ -36,23 +44,23 @@
                     </VBox>
 
                     <!-- Primary button -->
-                    <Button fx:id="createAccountButton" text="S'INSCRIRE" onAction="#onCreate" defaultButton="true" styleClass="btn-primary-blue" maxWidth="Infinity" />
+                    <Button fx:id="createAccountButton" defaultButton="true" maxWidth="Infinity" onAction="#onCreate" styleClass="btn-primary-blue" text="S'INSCRIRE" />
 
                     <!-- Divider -->
                     <HBox alignment="CENTER" spacing="10">
-                        <Region HBox.hgrow="ALWAYS" prefHeight="1" style="-fx-background-color:#233041;" />
-                        <Label text="OU" styleClass="divider-label" />
-                        <Region HBox.hgrow="ALWAYS" prefHeight="1" style="-fx-background-color:#233041;" />
+                        <Region prefHeight="1" style="-fx-background-color:#233041;" HBox.hgrow="ALWAYS" />
+                        <Label styleClass="divider-label" text="OU" />
+                        <Region prefHeight="1" style="-fx-background-color:#233041;" HBox.hgrow="ALWAYS" />
                     </HBox>
 
                     <!-- Social buttons -->
-                    <HBox spacing="16" alignment="CENTER">
-                        <Button text="GOOGLE" styleClass="btn-social" />
-                        <Button text="FACEBOOK" styleClass="btn-social" />
+                    <HBox alignment="CENTER" spacing="16">
+                        <Button styleClass="btn-social" text="GOOGLE" />
+                        <Button styleClass="btn-social" text="FACEBOOK" />
                     </HBox>
 
                     <!-- Footer text -->
-                    <Label text="En t'inscrivant à InterviewAI, tu acceptes nos Conditions d'utilisation et notre Politique de confidentialité." wrapText="true" styleClass="footer-text" />
+                    <Label styleClass="footer-text" text="En t'inscrivant à InterviewAI, tu acceptes nos Conditions d'utilisation et notre Politique de confidentialité." wrapText="true" />
                 </VBox>
             </VBox>
         </center>

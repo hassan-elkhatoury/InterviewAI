@@ -1,5 +1,6 @@
 package com.interviewai.util;
 
+import com.interviewai.model.OnboardingData;
 import com.interviewai.model.User;
 
 /**
@@ -8,6 +9,7 @@ import com.interviewai.model.User;
  */
 public final class SessionContext {
     private static User currentUser;
+    private static OnboardingData onboardingData;
 
     private SessionContext() {}
 
@@ -17,5 +19,13 @@ public final class SessionContext {
 
     public static User getCurrentUser() {
         return currentUser;
+    }
+    
+    public static void setOnboardingData(OnboardingData data) {
+        onboardingData = data;
+    }
+    
+    public static OnboardingData getOnboardingData() {
+        return onboardingData;
     }
 }

@@ -1,8 +1,158 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.*?>
-<!-- TODO: Multi-step wizard for role selection, goals, and experience level. -->
-<VBox spacing="10" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.OnboardingController">
-    <Label text="Onboarding" />
-    <Button text="Continue" onAction="#onContinue" />
-</VBox>
+
+<StackPane prefHeight="600.0" prefWidth="900.0" styleClass="dark-root" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.OnboardingController">
+    <BorderPane>
+        <top>
+            <!-- Progress dots -->
+            <VBox alignment="CENTER">
+                <padding>
+                    <Insets bottom="16" top="24" />
+                </padding>
+                <HBox fx:id="progressContainer" alignment="CENTER" spacing="10">
+                    <!-- Progress dots will be updated dynamically -->
+                </HBox>
+            </VBox>
+        </top>
+        
+        <center>
+            <VBox alignment="CENTER" spacing="24">
+                <VBox alignment="CENTER" maxWidth="620" spacing="32" styleClass="auth-dark">
+                    
+                    <!-- Step 1: Interview Type Selection -->
+                    <VBox fx:id="step1Container" alignment="CENTER" managed="true" spacing="24" visible="true">
+                        <VBox alignment="CENTER" spacing="12">
+                            <Label styleClass="onboarding-question" text="What kind of interview are you preparing for?" wrapText="true" />
+                            <Label styleClass="onboarding-subtitle" text="Choose the type that best matches your goal" />
+                        </VBox>
+                        
+                        <VBox maxWidth="500" spacing="14">
+                            <!-- Option cards -->
+                            <HBox fx:id="optionJobInterview" alignment="CENTER_LEFT" onMouseClicked="#onSelectInterviewType" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="💼" textFill="WHITE" />
+                                <Label styleClass="option-label" text="Job Interview" />
+                            </HBox>
+                            
+                            <HBox fx:id="optionVisaInterview" alignment="CENTER_LEFT" onMouseClicked="#onSelectInterviewType" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="✈️" textFill="WHITE" />
+                                <Label styleClass="option-label" text="Visa Interview" />
+                            </HBox>
+                            
+                            <HBox fx:id="optionInternshipInterview" alignment="CENTER_LEFT" onMouseClicked="#onSelectInterviewType" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="🎓" textFill="WHITE" />
+                                <Label styleClass="option-label" text="Internship Interview" />
+                            </HBox>
+                            
+                            <HBox fx:id="optionUniversityInterview" alignment="CENTER_LEFT" onMouseClicked="#onSelectInterviewType" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="🏫" textFill="WHITE" />
+                                <Label styleClass="option-label" text="University Admission Interview" />
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                    
+                    <!-- Step 2: Language Selection -->
+                    <VBox fx:id="step2Container" alignment="CENTER" managed="false" spacing="24" visible="false">
+                        <VBox alignment="CENTER" spacing="12">
+                            <Label styleClass="onboarding-question" text="What language do you prefer to practice in?" wrapText="true" />
+                            <Label styleClass="onboarding-subtitle" text="Select your preferred interview language" />
+                        </VBox>
+                        
+                        <VBox maxWidth="500" spacing="14">
+                            <HBox fx:id="optionEnglish" alignment="CENTER_LEFT" onMouseClicked="#onSelectLanguage" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="🇬🇧" />
+                                <Label styleClass="option-label" text="English" />
+                            </HBox>
+                            
+                            <HBox fx:id="optionFrench" alignment="CENTER_LEFT" onMouseClicked="#onSelectLanguage" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="🇫🇷" />
+                                <Label styleClass="option-label" text="French" />
+                            </HBox>
+                            
+                            <HBox fx:id="optionArabic" alignment="CENTER_LEFT" onMouseClicked="#onSelectLanguage" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="🇸🇦" />
+                                <Label styleClass="option-label" text="Arabic" />
+                            </HBox>
+                            
+                            <HBox fx:id="optionSpanish" alignment="CENTER_LEFT" onMouseClicked="#onSelectLanguage" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="🇪🇸" />
+                                <Label styleClass="option-label" text="Spanish" />
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                    
+                    <!-- Step 3: Timeline -->
+                    <VBox fx:id="step3Container" alignment="CENTER" managed="false" spacing="24" visible="false">
+                        <VBox alignment="CENTER" spacing="12">
+                            <Label styleClass="onboarding-question" text="How soon is your interview?" wrapText="true" />
+                            <Label styleClass="onboarding-subtitle" text="This helps us set the right difficulty level" />
+                        </VBox>
+                        
+                        <VBox maxWidth="500" spacing="14">
+                            <HBox fx:id="optionTomorrow" alignment="CENTER_LEFT" onMouseClicked="#onSelectTimeline" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="🔥" />
+                                <Label styleClass="option-label" text="Tomorrow" />
+                            </HBox>
+                            
+                            <HBox fx:id="optionThisWeek" alignment="CENTER_LEFT" onMouseClicked="#onSelectTimeline" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="📅" />
+                                <Label styleClass="option-label" text="This Week" />
+                            </HBox>
+                            
+                            <HBox fx:id="optionLater" alignment="CENTER_LEFT" onMouseClicked="#onSelectTimeline" spacing="12" styleClass="option-card">
+                                <Label styleClass="option-emoji" text="⏰" />
+                                <Label styleClass="option-label" text="Later (more than a week)" />
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                    
+                    <!-- Step 4: Context (Job/University specific) -->
+                    <VBox fx:id="step4Container" alignment="CENTER" managed="false" spacing="24" visible="false">
+                        <VBox alignment="CENTER" spacing="12">
+                            <Label fx:id="step4Question" styleClass="onboarding-question" text="Tell us more about your interview" wrapText="true" />
+                            <Label fx:id="step4Subtitle" styleClass="onboarding-subtitle" text="This helps personalize your practice" />
+                        </VBox>
+                        
+                        <VBox maxWidth="500" spacing="16">
+                            <!-- Industry/Program field -->
+                            <VBox spacing="8">
+                                <TextField fx:id="contextField" promptText="e.g., Software Developer, Marketing Manager" styleClass="input-dark" />
+                            </VBox>
+
+                             <!-- additionel customizations field -->
+                            <VBox spacing="8">
+                                <TextField fx:id="descriptionField" promptText="Add more description for better customization" styleClass="input-dark" />
+                            </VBox>
+                            
+                            <!-- Optional: CV/Resume upload -->
+                            <VBox spacing="8">
+                                <Label style="-fx-text-fill: #94a3b8; -fx-font-size: 13px;" text="Upload your CV/Resume (optional)" />
+                                <VBox fx:id="uploadArea" alignment="CENTER" onMouseClicked="#onUploadCV" spacing="8" styleClass="upload-area">
+                                    <Label styleClass="upload-icon" text="📄" />
+                                    <Label styleClass="upload-text" text="Click to upload or drag and drop" />
+                                    <Label fx:id="uploadedFileName" style="-fx-text-fill: #34a6ff; -fx-font-size: 12px;" text="" visible="false" />
+                                </VBox>
+                            </VBox>
+                        </VBox>
+                    </VBox>
+                    
+                    <!-- Navigation buttons -->
+                    <HBox alignment="CENTER" spacing="16">
+                        <Button fx:id="backButton" onAction="#onBack" styleClass="btn-back" text="Back" visible="false" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <Button fx:id="nextButton" defaultButton="true" disable="true" onAction="#onNext" styleClass="btn-next" text="Next" />
+                    </HBox>
+                    
+                </VBox>
+            </VBox>
+        </center>
+    </BorderPane>
+</StackPane>

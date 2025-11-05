@@ -1,5 +1,7 @@
 package com.interviewai.controller;
 
+import com.interviewai.dao.CourseDAO;
+import com.interviewai.dao.OnboardingDAO;
 import com.interviewai.model.User;
 import com.interviewai.service.AuthService;
 import com.interviewai.util.Routes;
@@ -26,26 +28,41 @@ public class LoginController {
 
     @FXML
     private void onLogin(ActionEvent event) {
-        String user = usernameField.getText();
+        String userName = usernameField.getText();
         String pass = passwordField.getText();
-        boolean ok = authService.authenticate(user, pass);
+        boolean ok = authService.authenticate(userName, pass);
         if (ok) {
-            User u = authService.getDemoUser(user);
+            User u = authService.getUser(userName);
             Alert a = new Alert(Alert.AlertType.INFORMATION);
             a.setTitle("Login Successful");
             a.setHeaderText(null);
-            a.setContentText("Welcome, " + (u != null ? u.getUsername() : user) + "!");
+            a.setContentText("Welcome, " + (u != null ? u.getUsername() : userName) + "!");
             a.showAndWait();
             // TODO: Replace demo routing with real onboarding state check.
             try {
                 Stage stage = (Stage) usernameField.getScene().getWindow();
+
                 SessionContext.setCurrentUser(u);
+                
                 if (u != null && "ADMIN".equalsIgnoreCase(u.getRole())) {
+
                     // Admin route
-                    SceneNavigator.switchTo(stage, Routes.ADMIN, 900, 600);
+                    SceneNavigator.switchTo(stage, Routes.ADMIN, stage.getWidth()-15, stage.getHeight()-38);
+                    
                 } else {
-                    // Candidate route -> Onboarding first, later can go to Dashboard
-                    SceneNavigator.switchTo(stage, Routes.ONBOARDING, 900, 600);
+
+                    CourseDAO courseDAO = new CourseDAO();
+                    if(courseDAO.checkUserCourse(u.getId())){
+
+                        SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
+
+                    } else{
+
+                        SceneNavigator.switchTo(stage, Routes.ONBOARDING, stage.getWidth()-15, stage.getHeight()-38);
+
+                    }
+
+                    
                 }
             } catch (Exception ex) {
                 // TODO: centralize error dialogs
@@ -65,7 +82,7 @@ public class LoginController {
     private void onOpenCreateAccount(ActionEvent event) {
         try {
             Stage stage = (Stage) usernameField.getScene().getWindow();
-            SceneNavigator.switchTo(stage, Routes.CREATE_ACCOUNT, 900, 600);
+            SceneNavigator.switchTo(stage, Routes.CREATE_ACCOUNT, stage.getWidth()-15, stage.getHeight()-38);
         } catch (Exception ex) {
             Alert err = new Alert(Alert.AlertType.ERROR, "Failed to open Create Account: " + ex.getMessage());
             err.showAndWait();

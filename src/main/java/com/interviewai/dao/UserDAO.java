@@ -12,6 +12,8 @@ import com.interviewai.model.User;
 /**
  * Basic JDBC-backed DAO for users.
  */
+
+
 public class UserDAO {
 
     /**
@@ -27,6 +29,8 @@ public class UserDAO {
                 if (rs.next()) return false; // username taken
             }
         }
+
+        
         String hash = BCrypt.hashpw(rawPassword, BCrypt.gensalt(10));
         
         // Try with role column first; fallback to without role if column doesn't exist
@@ -39,17 +43,12 @@ public class UserDAO {
                 ps.setString(4, role);
                 return ps.executeUpdate() == 1;
             } catch (SQLException e) {
-                // If role column doesn't exist, try without it
-                if (e.getMessage() != null && e.getMessage().toLowerCase().contains("unknown column")) {
-                    String sqlInsertNoRole = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)";
-                    try (PreparedStatement ps2 = c.prepareStatement(sqlInsertNoRole)) {
-                        ps2.setString(1, username);
-                        ps2.setString(2, email);
-                        ps2.setString(3, hash);
-                        return ps2.executeUpdate() == 1;
-                    }
-                }
-                throw e;
+
+                System.err.println("Error at creating a new user: " + e.getMessage());
+                
+                return false;
+              
+               
             }
         }
     }
@@ -100,25 +99,7 @@ public class UserDAO {
                     }
                 }
             } catch (SQLException e) {
-                // If role column doesn't exist, try without it
-                if (e.getMessage() != null && e.getMessage().toLowerCase().contains("unknown column")) {
-                    String sqlNoRole = "SELECT id, username, email FROM users WHERE username = ?";
-                    try (PreparedStatement ps2 = c.prepareStatement(sqlNoRole)) {
-                        ps2.setString(1, username);
-                        try (ResultSet rs = ps2.executeQuery()) {
-                            if (rs.next()) {
-                                User u = new User();
-                                u.setId(rs.getInt("id"));
-                                u.setUsername(rs.getString("username"));
-                                u.setEmail(rs.getString("email"));
-                                u.setRole("CANDIDATE"); // default role
-                                return u;
-                            }
-                        }
-                    }
-                } else {
-                    throw e;
-                }
+                System.err.println("Error at get user by username: " + e.getMessage());
             }
         }
         return null;

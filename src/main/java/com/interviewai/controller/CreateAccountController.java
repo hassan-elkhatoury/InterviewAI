@@ -35,12 +35,13 @@ public class CreateAccountController {
             new Alert(Alert.AlertType.WARNING, "Username and password are required.").showAndWait();
             return;
         }
+
         try {
             boolean ok = userDAO.createUser(username, email, password, "CANDIDATE");
             if (ok) {
                 new Alert(Alert.AlertType.INFORMATION, "Account created. You can now sign in.").showAndWait();
                 Stage stage = (Stage) usernameField.getScene().getWindow();
-                SceneNavigator.switchTo(stage, Routes.LOGIN, 900, 600);
+                SceneNavigator.switchTo(stage, Routes.LOGIN, stage.getWidth()-15, stage.getHeight()-38);
             } else {
                 new Alert(Alert.AlertType.ERROR, "Username already exists or could not create account.").showAndWait();
             }
@@ -53,7 +54,7 @@ public class CreateAccountController {
     private void onBack(ActionEvent event) {
         try {
             Stage stage = (Stage) usernameField.getScene().getWindow();
-            SceneNavigator.switchTo(stage, Routes.LOGIN, 900, 600);
+            SceneNavigator.switchTo(stage, Routes.LOGIN, stage.getWidth()-15, stage.getHeight()-38);
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Failed to go back: " + e.getMessage()).showAndWait();
         }

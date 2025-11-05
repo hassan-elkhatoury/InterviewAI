@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.OnboardingWaitingController">
+   <children>
+      <BorderPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #0f172a;">
+         <center>
+            <VBox alignment="CENTER" spacing="30.0" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <ImageView fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="/images/Untitled (1080 x 1080 px)(1).gif" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </HBox>
+                 
+                  <Label text="Building your interview preparation course..." style="-fx-text-fill: #e2e8f0; -fx-font-size: 18; -fx-font-weight: bold;" />
+                  <Label text="Please wait while we create a personalized course tailored to your needs..." style="-fx-text-fill: #cbd5e1; -fx-font-size: 14;" wrapText="true" />
+                   <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0">
+                     <children>
+                        <StackPane fx:id="loadingSpinner" prefHeight="50.0" prefWidth="50.0">
+                           <children>
+                              <Circle radius="20.0" fill="transparent" stroke="#3b82f6" strokeWidth="3.0" strokeDashArray="5, 10" />
+                           </children>
+                        </StackPane>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </center>
+      </BorderPane>
+   </children>
+</StackPane>
