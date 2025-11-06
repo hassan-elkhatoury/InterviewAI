@@ -1,7 +1,5 @@
 package com.interviewai.service;
 
-import com.interviewai.dao.CourseDAO;
-import com.interviewai.model.GeneratedCourse;
 import com.interviewai.model.OnboardingData;
 import com.interviewai.model.User;
 
@@ -11,98 +9,33 @@ import com.interviewai.model.User;
  */
 public class OnboardingService {
     
-    private AIService aiService;
+    private MultiStageAIService multiStageAIService;
 
     public OnboardingService() {
         try {
-            this.aiService = new AIService();
-            System.out.println("✓ AI Service initialized");
+            this.multiStageAIService = new MultiStageAIService();
+            System.out.println("✓ Multi-Stage AI Service initialized");
         } catch (Exception e) {
-            System.err.println("⚠️  Warning: Failed to initialize AI Service: " + e.getMessage());
+            System.err.println("⚠️  Warning: Failed to initialize Multi-Stage AI Service: " + e.getMessage());
         }
     }
 
     /**
-     * Saves user onboarding preferences and triggers AI course generation asynchronously.
-     * Calls the callback when complete.
+     * Saves user onboarding preferences and triggers multi-stage AI course generation asynchronously.
+     * Calls the callback when complete with progress updates.
      */
-    public void saveOnboardingDataAsync(OnboardingData data, Runnable onComplete) {
+    public void saveOnboardingDataAsync(OnboardingData data, 
+                                       MultiStageAIService.ProgressCallback progressCallback,
+                                       Runnable onComplete) {
         System.out.println("Saving onboarding data: " + data);
         
-        // Run AI generation in background thread
-        new Thread(() -> {
-            try {
-                if (aiService != null) {
-                    generateAICourse(data);
-                    System.out.println("✓ Course generation complete!");
-                } else {
-                    System.out.println("ℹ️  AI service not available. Skipping course generation.");
-                }
-            } catch (Exception e) {
-                System.err.println("Error during AI generation: " + e.getMessage());
-                e.printStackTrace();
-            } finally {
-                // Always call the completion callback
-                if (onComplete != null) {
-                    onComplete.run();
-                }
-            }
-        }).start();
-    }
-
-    /**
-     * Saves user onboarding preferences and triggers AI course generation (synchronous).
-     */
-    public void saveOnboardingData(OnboardingData data) {
-        System.out.println("Saving onboarding data: " + data);
-        
-        if (aiService != null) {
-            generateAICourse(data);
+        if (multiStageAIService != null) {
+            multiStageAIService.generateCourseAsync(data, progressCallback, onComplete);
         } else {
-            System.out.println("ℹ️  AI service not available. Skipping course generation.");
-        }
-    }
-    
-    /**
-     * Generates an AI-powered interview prep course based on onboarding preferences.
-     */
-    private void generateAICourse(OnboardingData data) {
-        System.out.println("\n🤖 Starting AI course generation...");
-        System.out.println("  Interview Type: " + data.getInterviewType());
-        System.out.println("  Language: " + data.getLanguage());
-        System.out.println("  Timeline: " + data.getTimeline());
-        System.out.println("  Context: " + data.getContext());
-        
-        try {
-            // Build the prompt
-            String prompt = aiService.buildCoursePrompt(
-                data.getInterviewType(),
-                data.getLanguage(),
-                data.getTimeline(),
-                data.getContext()
-            );
-            
-            // Send request and get response
-            String response = aiService.sendRequest(prompt);
-            
-            // Display response in terminal
-            System.out.println("\n✅ AI Course Generated Successfully!\n");
-            System.out.println("=" + "=".repeat(80));
-            System.out.println("AI RESPONSE:");
-            System.out.println("=" + "=".repeat(80));
-            System.out.println(response);
-            System.out.println("=" + "=".repeat(80) + "\n");
-
-            // Parse and save course to database
-            GeneratedCourse course = GeneratedCourse.fromJson(response, data.getUserId());
-            CourseDAO courseDAO = new CourseDAO();
-            courseDAO.saveGeneratedCourse(course);
-            System.out.println("✓ Course saved to database for user: " + data.getUserId());
-
-        } catch (Exception e) {
-            System.err.println("\n❌ AI Course Generation Failed:");
-            System.err.println("   Error: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("ℹ️  Multi-Stage AI service not available. Skipping course generation.");
+            if (onComplete != null) {
+                onComplete.run();
+            }
         }
     }
     

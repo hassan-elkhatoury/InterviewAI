@@ -97,16 +97,29 @@ public class GeneratedCourse {
                                 org.json.JSONObject qObj = questionsArr.getJSONObject(j);
                                 int qId = qObj.optInt("id", j+1);
                                 String questionText = qObj.optString("question", "");
+                                
+                                // Determine question type
+                                String typeStr = qObj.optString("question_type", "MULTIPLE_CHOICE");
+                                Question.QuestionType questionType = 
+                                    typeStr.equals("SHORT_ANSWER") ? 
+                                    Question.QuestionType.SHORT_ANSWER : 
+                                    Question.QuestionType.MULTIPLE_CHOICE;
+                                
                                 java.util.List<String> choices = new java.util.ArrayList<>();
-                                org.json.JSONArray choicesArr = qObj.optJSONArray("choices");
-                                if (choicesArr != null) {
-                                    for (int k = 0; k < choicesArr.length(); k++) {
-                                        choices.add(choicesArr.getString(k));
+                                
+                                // Only parse choices for multiple choice questions
+                                if (questionType == Question.QuestionType.MULTIPLE_CHOICE) {
+                                    org.json.JSONArray choicesArr = qObj.optJSONArray("choices");
+                                    if (choicesArr != null) {
+                                        for (int k = 0; k < choicesArr.length(); k++) {
+                                            choices.add(choicesArr.getString(k));
+                                        }
                                     }
                                 }
+                                
                                 String correctAnswer = qObj.optString("correct_answer", "");
                                 String explanation = qObj.optString("explanation", "");
-                                Question q = new Question(qId, questionText, choices, correctAnswer, explanation);
+                                Question q = new Question(qId, questionText, questionType, choices, correctAnswer, explanation);
                                 questions.add(q);
                             }
                         }

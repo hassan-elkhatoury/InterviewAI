@@ -3,17 +3,26 @@ package com.interviewai.model;
 import java.util.List;
 
 public class Question {
+    public enum QuestionType {
+        MULTIPLE_CHOICE,
+        SHORT_ANSWER
+    }
+    
     private int id;
     private String question;
+    private QuestionType questionType;
     private List<String> choices;
     private String correctAnswer;
     private String explanation;
 
-    public Question() {}
+    public Question() {
+        this.questionType = QuestionType.MULTIPLE_CHOICE; // default
+    }
 
-    public Question(int id, String question, List<String> choices, String correctAnswer, String explanation) {
+    public Question(int id, String question, QuestionType questionType, List<String> choices, String correctAnswer, String explanation) {
         this.id = id;
         this.question = question;
+        this.questionType = questionType;
         this.choices = choices;
         this.correctAnswer = correctAnswer;
         this.explanation = explanation;
@@ -24,6 +33,9 @@ public class Question {
 
     public String getQuestion() { return question; }
     public void setQuestion(String question) { this.question = question; }
+
+    public QuestionType getQuestionType() { return questionType; }
+    public void setQuestionType(QuestionType questionType) { this.questionType = questionType; }
 
     public List<String> getChoices() { return choices; }
     public void setChoices(List<String> choices) { this.choices = choices; }
@@ -39,6 +51,7 @@ public class Question {
         return "Question{" +
                 "id=" + id +
                 ", question='" + question + '\'' +
+                ", questionType=" + questionType +
                 ", choices=" + choices +
                 ", correctAnswer='" + correctAnswer + '\'' +
                 ", explanation='" + explanation + '\'' +

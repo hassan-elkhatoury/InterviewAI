@@ -430,3 +430,58 @@
 .loading-spinner:focused {
     -fx-rotate: 0;
 }
+
+/* Modern Progress Bar Styles */
+.progress-bar-container {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 15px;
+    -fx-pref-height: 30px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);
+}
+
+.progress-bar-fill {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #06b6d4);
+    -fx-background-radius: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(59,130,246,0.4), 8, 0, 0, 2);
+}
+
+.progress-percent-label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 1);
+}
+
+.progress-status-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 14px;
+    -fx-text-alignment: center;
+}
+
+.progress-message-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+}
+
+/* Motivational Quote Box */
+.quote-container {
+    -fx-background-color: rgba(30, 41, 59, 0.5);
+    -fx-background-radius: 10px;
+    -fx-padding: 20px 30px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 2);
+}
+
+.quote-text {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 15px;
+    -fx-font-style: italic;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
+
+.quote-author {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+    -fx-text-alignment: center;
+}

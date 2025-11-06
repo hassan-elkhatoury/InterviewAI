@@ -326,11 +326,30 @@ public class OnboardingController {
                 // Navigate to waiting page
                 SceneNavigator.switchTo(stage, Routes.ONBOARDINGWAITING, stage.getWidth()-15, stage.getHeight()-38);
                 
-                // Start AI generation in background thread
+                // Start multi-stage AI generation in background
                 OnboardingService service = new OnboardingService();
-                service.saveOnboardingDataAsync(data, () -> {
-                   
-                });
+                service.saveOnboardingDataAsync(
+                    data,
+                    // Progress callback - update the waiting page UI
+                    (message, percent) -> {
+                        System.out.println(String.format("Progress: %d%% - %s", percent, message));
+                        // Update the waiting page controller
+                        OnboardingWaitingController waitingController = OnboardingWaitingController.getInstance();
+                        if (waitingController != null) {
+                            waitingController.updateProgress(message, percent);
+                        }
+                    },
+                    // Completion callback - navigate to dashboard
+                    () -> {
+                        javafx.application.Platform.runLater(() -> {
+                            try {
+                                SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
+                            } catch (Exception e) {
+                                System.err.println("Failed to navigate to dashboard: " + e.getMessage());
+                            }
+                        });
+                    }
+                );
                 
             } catch (Exception e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
