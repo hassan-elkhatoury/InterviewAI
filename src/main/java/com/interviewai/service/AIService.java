@@ -5,10 +5,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.interviewai.model.ChapterOutline;
 import com.interviewai.util.ConfigLoader;
 
 /**
@@ -149,5 +152,156 @@ public class AIService {
             case "LATER": return "Relaxed - Interview later";
             default: return timeline;
         }
+    }
+    
+    /**
+     * STAGE 1: Build a prompt to generate 12 chapter outlines (without questions).
+     */
+    public String buildChapterOutlinesPrompt(String interviewType, String language, 
+                                             String timeline, String context) {
+        return String.format(
+            "Generate a comprehensive interview preparation course outline for %s position/program applying for a %s. " +
+            "User preparation timeline: %s\n" +
+            "Desired language: %s\n\n" +
+            "Create exactly 12 chapters (each chapter represents a topic area).\n" +
+            "Each chapter must have:\n" +
+            "- A clear, descriptive name\n" +
+            "- A detailed description of what will be covered\n\n" +
+            "Return the response in valid JSON format with this exact structure:\n" +
+            "{\n" +
+            "  \"course_title\": \"[Generated title]\",\n" +
+            "  \"chapters\": [\n" +
+            "    {\n" +
+            "      \"chapter_number\": 1,\n" +
+            "      \"name\": \"[Chapter name]\",\n" +
+            "      \"description\": \"[Detailed description of chapter content]\"\n" +
+            "    },\n" +
+            "    ... (repeat for all 12 chapters)\n" +
+            "  ]\n" +
+            "}",
+            context, 
+            mapInterviewType(interviewType), 
+            mapTimeline(timeline), 
+            mapLanguage(language)
+        );
+    }
+    
+    /**
+     * STAGE 2: Build a prompt to generate 2 specific chapters with questions.
+     * Each chapter will have 20 multiple choice + 20 short answer questions = 40 total.
+     */
+    public String buildChapterQuestionsPrompt(String courseTitle, List<ChapterOutline> outlines, 
+                                             int startChapterNum, int endChapterNum,
+                                             String language) {
+        StringBuilder chapterInfo = new StringBuilder();
+        for (ChapterOutline outline : outlines) {
+            if (outline.getChapterNumber() >= startChapterNum && 
+                outline.getChapterNumber() <= endChapterNum) {
+                chapterInfo.append(String.format(
+                    "Chapter %d: %s - %s\n",
+                    outline.getChapterNumber(),
+                    outline.getName(),
+                    outline.getDescription()
+                ));
+            }
+        }
+        
+        return String.format(
+            "Generate detailed questions for the following chapters of the course '%s':\n\n" +
+            "%s\n" +
+            "Language: %s\n\n" +
+            "For EACH chapter, generate:\n" +
+            "1. 20 multiple-choice questions with:\n" +
+            "   - 4 short, concise answer choices (A, B, C, D)\n" +
+            "   - Each choice should be a SHORT PHRASE (maximum 10-15 words)\n" +
+            "   - Clear correct answer\n" +
+            "   - Brief explanation\n\n" +
+            "2. 20 short-answer questions with:\n" +
+            "   - Questions that require SHORT ANSWERS (1-3 words or a brief phrase)\n" +
+            "   - Clear correct answer (must be short and concise)\n" +
+            "   - Brief explanation\n\n" +
+            "Return the response in valid JSON format with this exact structure:\n" +
+            "{\n" +
+            "  \"chapters\": [\n" +
+            "    {\n" +
+            "      \"chapter_number\": %d,\n" +
+            "      \"name\": \"[Chapter name]\",\n" +
+            "      \"description\": \"[Brief description]\",\n" +
+            "      \"questions\": [\n" +
+            "        {\n" +
+            "          \"id\": 1,\n" +
+            "          \"question\": \"[Question text]\",\n" +
+            "          \"question_type\": \"MULTIPLE_CHOICE\",\n" +
+            "          \"choices\": [\"Short Choice A\", \"Short Choice B\", \"Short Choice C\", \"Short Choice D\"],\n" +
+            "          \"correct_answer\": \"Short Choice A\",\n" +
+            "          \"explanation\": \"[Why this is correct]\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"id\": 21,\n" +
+            "          \"question\": \"[Short answer question]\",\n" +
+            "          \"question_type\": \"SHORT_ANSWER\",\n" +
+            "          \"choices\": null,\n" +
+            "          \"correct_answer\": \"[Brief answer]\",\n" +
+            "          \"explanation\": \"[Why this is correct]\"\n" +
+            "        },\n" +
+            "        ... (20 MC + 20 SA per chapter = 40 total)\n" +
+            "      ]\n" +
+            "    },\n" +
+            "    ... (repeat for next chapter if applicable)\n" +
+            "  ]\n" +
+            "}\n\n" +
+            "IMPORTANT: Make sure chapters complement each other and build upon previous knowledge.",
+            courseTitle,
+            chapterInfo.toString(),
+            mapLanguage(language),
+            startChapterNum
+        );
+    }
+    
+    /**
+     * Parse chapter outlines from AI response.
+     */
+    public List<ChapterOutline> parseChapterOutlines(String jsonResponse) {
+        List<ChapterOutline> outlines = new ArrayList<>();
+        try {
+            JSONObject root = new JSONObject(jsonResponse);
+            
+            // Try to extract the text from Gemini's response structure
+            if (root.has("candidates")) {
+                JSONArray candidates = root.getJSONArray("candidates");
+                if (candidates.length() > 0) {
+                    JSONObject firstCandidate = candidates.getJSONObject(0);
+                    if (firstCandidate.has("content")) {
+                        JSONObject content = firstCandidate.getJSONObject("content");
+                        if (content.has("parts")) {
+                            JSONArray parts = content.getJSONArray("parts");
+                            if (parts.length() > 0) {
+                                String text = parts.getJSONObject(0).getString("text");
+                                
+                                // Clean up markdown code blocks if present
+                                text = text.replaceAll("```json\\s*", "").replaceAll("```\\s*$", "").trim();
+                                
+                                // Parse the actual JSON content
+                                JSONObject courseData = new JSONObject(text);
+                                JSONArray chapters = courseData.getJSONArray("chapters");
+                                
+                                for (int i = 0; i < chapters.length(); i++) {
+                                    JSONObject chapterJson = chapters.getJSONObject(i);
+                                    ChapterOutline outline = new ChapterOutline();
+                                    outline.setChapterNumber(chapterJson.getInt("chapter_number"));
+                                    outline.setName(chapterJson.getString("name"));
+                                    outline.setDescription(chapterJson.getString("description"));
+                                    outlines.add(outline);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing chapter outlines: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return outlines;
     }
 }
