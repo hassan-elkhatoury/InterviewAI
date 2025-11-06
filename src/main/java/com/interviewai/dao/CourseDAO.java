@@ -48,13 +48,14 @@ public class CourseDAO {
                                 }
 
                                 // Insert questions
-                                String sqlQuestion = "INSERT INTO questions (chapter_id, question, correct_answer, explanation) VALUES (?, ?, ?, ?)";
+                                String sqlQuestion = "INSERT INTO questions (chapter_id, question, question_type, correct_answer, explanation) VALUES (?, ?, ?, ?, ?)";
                                 try (PreparedStatement psQuestion = conn.prepareStatement(sqlQuestion, Statement.RETURN_GENERATED_KEYS)) {
                                     for (Question q : chapter.getQuestions()) {
                                         psQuestion.setInt(1, chapterId);
                                         psQuestion.setString(2, q.getQuestion());
-                                        psQuestion.setString(3, q.getCorrectAnswer());
-                                        psQuestion.setString(4, q.getExplanation());
+                                        psQuestion.setString(3, q.getQuestionType().name());
+                                        psQuestion.setString(4, q.getCorrectAnswer());
+                                        psQuestion.setString(5, q.getExplanation());
                                         psQuestion.executeUpdate();
                                         try (ResultSet rsQuestion = psQuestion.getGeneratedKeys()) {
                                             int questionId = -1;
@@ -62,16 +63,18 @@ public class CourseDAO {
                                                 questionId = rsQuestion.getInt(1);
                                             }
 
-                                            // Insert choices
-                                            String sqlChoice = "INSERT INTO choices (question_id, choice_text) VALUES (?, ?)";
-                                            try (PreparedStatement psChoice = conn.prepareStatement(sqlChoice)) {
-                                                for (String choice : q.getChoices()) {
-                                                    psChoice.setInt(1, questionId);
-                                                    psChoice.setString(2, choice);
-                                                    psChoice.executeUpdate();
+                                            // Insert choices (only for multiple choice questions)
+                                            if (q.getQuestionType() == Question.QuestionType.MULTIPLE_CHOICE && q.getChoices() != null) {
+                                                String sqlChoice = "INSERT INTO choices (question_id, choice_text) VALUES (?, ?)";
+                                                try (PreparedStatement psChoice = conn.prepareStatement(sqlChoice)) {
+                                                    for (String choice : q.getChoices()) {
+                                                        psChoice.setInt(1, questionId);
+                                                        psChoice.setString(2, choice);
+                                                        psChoice.executeUpdate();
+                                                    }
+                                                } catch (SQLException ce) {
+                                                    System.err.println("Choice insert error: " + ce.getMessage());
                                                 }
-                                            } catch (SQLException ce) {
-                                                System.err.println("Choice insert error: " + ce.getMessage());
                                             }
                                         }
                                     }

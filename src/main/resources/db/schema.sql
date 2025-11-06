@@ -589,6 +589,7 @@ CREATE TABLE IF NOT EXISTS `questions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `chapter_id` int NOT NULL,
   `question` text,
+  `question_type` varchar(50) DEFAULT 'MULTIPLE_CHOICE',
   `correct_answer` varchar(255) DEFAULT NULL,
   `explanation` text,
   PRIMARY KEY (`id`),

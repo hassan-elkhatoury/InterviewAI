@@ -307,10 +307,19 @@ public class test {
             data.setCvPath(uploadedCV != null ? uploadedCV.getAbsolutePath() : null);
             
             OnboardingService service = new OnboardingService();
-            service.saveOnboardingData(data);
+            // Use async method with progress and completion callbacks
+            service.saveOnboardingDataAsync(
+                data,
+                (message, percent) -> {
+                    System.out.println(String.format("Progress: %d%% - %s", percent, message));
+                },
+                () -> {
+                    System.out.println("=== Onboarding Complete ===");
+                    System.out.println(data.toString());
+                }
+            );
             
-            System.out.println("=== Onboarding Complete ===");
-            System.out.println(data.toString());
+            System.out.println("=== Onboarding Started (Async) ===");
         }
         
         try {
