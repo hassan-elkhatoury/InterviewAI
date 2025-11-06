@@ -82,49 +82,6 @@ public class AIService {
         }
     }
     
-    /**
-     * Build a course generation prompt based on user's onboarding data.
-     */
-    public String buildCoursePrompt(String interviewType, String language, 
-                                   String timeline, String context) {
-        return String.format(
-            "Generate a comprehensive interview preparation course for %s position/program applying for a %s. " +
-            "User preparation timeline: %s\n" +
-            "Desired language: %s\n\n" +
-            "Create a detailed course with the following structure:\n" +
-            "- Create 3-5 chapters (each chapter represents a topic area)\n" +
-            "- Each chapter must have a clear name and description\n" +
-            "- Each chapter contains 4-6 multiple-choice questions\n" +
-            "- Each question must have exactly 4 choices (A, B, C, D)\n" +
-            "- Clearly mark the correct answer choice\n" +
-            "- Include brief explanations for why answers are correct\n\n" +
-            "Return the complete response in valid JSON format with this exact structure:\n" +
-            "{\n" +
-            "  \"course_title\": \"[Generated title]\",\n" +
-            "  \"chapters\": [\n" +
-            "    {\n" +
-            "      \"chapter_number\": 1,\n" +
-            "      \"name\": \"[Chapter name]\",\n" +
-            "      \"description\": \"[Brief description]\",\n" +
-            "      \"questions\": [\n" +
-            "        {\n" +
-            "          \"id\": 1,\n" +
-            "          \"question\": \"[Question text]\",\n" +
-            "          \"choices\": [\"Choice A\", \"Choice B\", \"Choice C\", \"Choice D\"],\n" +
-            "          \"correct_answer\": \"Choice A\",\n" +
-            "          \"explanation\": \"[Why this is correct]\"\n" +
-            "        }\n" +
-            "      ]\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}",
-            context, 
-            mapInterviewType(interviewType), 
-            mapTimeline(timeline), 
-            mapLanguage(language)
-        );
-    }
-    
     private String mapInterviewType(String type) {
         switch (type) {
             case "JOB": return "Job";
