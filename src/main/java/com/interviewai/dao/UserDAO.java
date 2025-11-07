@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -115,5 +116,34 @@ public class UserDAO {
         } catch (Exception e) {
             throw new RuntimeException("Hashing failed", e);
         }
+    }
+
+    /**
+     * Get top learners by total XP (for leaderboard display)
+     */
+    public List<Map<String, Object>> getTopLearners(int limit) throws SQLException {
+        List<Map<String, Object>> learners = new ArrayList<>();
+        String query = "SELECT u.id, u.username, COALESCE(SUM(p.xp), 0) as total_xp " +
+                       "FROM users u " +
+                       "LEFT JOIN progress p ON u.id = p.user_id " +
+                       "GROUP BY u.id, u.username " +
+                       "ORDER BY total_xp DESC " +
+                       "LIMIT ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                int rank = 1;
+                while (rs.next()) {
+                    Map<String, Object> learner = new HashMap<>();
+                    learner.put("rank", rank++);
+                    learner.put("username", rs.getString("username"));
+                    learner.put("total_xp", rs.getInt("total_xp"));
+                    learner.put("user_id", rs.getInt("id"));
+                    learners.add(learner);
+                }
+            }
+        }
+        return learners;
     }
 }

@@ -38,7 +38,6 @@ public class LoginController {
             a.setHeaderText(null);
             a.setContentText("Welcome, " + (u != null ? u.getUsername() : userName) + "!");
             a.showAndWait();
-            // TODO: Replace demo routing with real onboarding state check.
             try {
                 Stage stage = (Stage) usernameField.getScene().getWindow();
 
@@ -65,7 +64,10 @@ public class LoginController {
                     
                 }
             } catch (Exception ex) {
-                // TODO: centralize error dialogs
+                System.err.println("=== ERROR IN LOGIN FLOW ===");
+                System.err.println("Exception type: " + ex.getClass().getName());
+                System.err.println("Message: " + ex.getMessage());
+                ex.printStackTrace();
                 Alert err = new Alert(Alert.AlertType.ERROR, "Failed to open next screen: " + ex.getMessage());
                 err.showAndWait();
             }

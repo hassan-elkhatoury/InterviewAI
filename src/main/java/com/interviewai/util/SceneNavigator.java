@@ -13,15 +13,35 @@ import javafx.stage.Stage;
  * TODO: Centralize route names and role-based guards.
  */
 public class SceneNavigator {
-    public static void switchTo(Stage stage, String fxmlPath, double width, double height ) throws IOException {
-        Parent root = FXMLLoader.load(SceneNavigator.class.getResource(fxmlPath));
-        stage.setScene(new Scene(root, width, height));
-        stage.show();
+    public static void switchTo(Stage stage, String fxmlPath, double width, double height) throws IOException {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(SceneNavigator.class.getResource(fxmlPath));
+            Parent root = loader.load();
+            Scene scene = new Scene(root, width, height);
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            System.err.println("Error loading FXML: " + fxmlPath);
+            System.err.println("Error message: " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Failed to load FXML: " + fxmlPath, e);
+        }
     }
 
-    public static void switchTo(Stage stage, String fxmlPath ) throws IOException {
-        Parent root = FXMLLoader.load(SceneNavigator.class.getResource(fxmlPath));
-        stage.setScene(new Scene(root));
-        stage.show();
+    public static void switchTo(Stage stage, String fxmlPath) throws IOException {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(SceneNavigator.class.getResource(fxmlPath));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            System.err.println("Error loading FXML: " + fxmlPath);
+            System.err.println("Error message: " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Failed to load FXML: " + fxmlPath, e);
+        }
     }
 }

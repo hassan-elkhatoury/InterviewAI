@@ -33,13 +33,14 @@ public class CourseDAO {
                     }
 
                     // Insert chapters
-                    String sqlChapter = "INSERT INTO chapters (course_id, chapter_number, name, description) VALUES (?, ?, ?, ?)";
+                    String sqlChapter = "INSERT INTO chapters (course_id, chapter_number, name, description, status) VALUES (?, ?, ?, ?, ?)";
                     try (PreparedStatement psChapter = conn.prepareStatement(sqlChapter, Statement.RETURN_GENERATED_KEYS)) {
                         for (Chapter chapter : course.getChapters()) {
                             psChapter.setInt(1, courseId);
                             psChapter.setInt(2, chapter.getChapterNumber());
                             psChapter.setString(3, chapter.getName());
                             psChapter.setString(4, chapter.getDescription());
+                            psChapter.setString(5, chapter.getStatusValue());
                             psChapter.executeUpdate();
                             try (ResultSet rsChapter = psChapter.getGeneratedKeys()) {
                                 int chapterId = -1;
@@ -48,7 +49,7 @@ public class CourseDAO {
                                 }
 
                                 // Insert questions
-                                String sqlQuestion = "INSERT INTO questions (chapter_id, question, question_type, correct_answer, explanation) VALUES (?, ?, ?, ?, ?)";
+                                String sqlQuestion = "INSERT INTO questions (chapter_id, question, question_type, correct_answer, explanation, status) VALUES (?, ?, ?, ?, ?, ?)";
                                 try (PreparedStatement psQuestion = conn.prepareStatement(sqlQuestion, Statement.RETURN_GENERATED_KEYS)) {
                                     for (Question q : chapter.getQuestions()) {
                                         psQuestion.setInt(1, chapterId);
@@ -56,6 +57,7 @@ public class CourseDAO {
                                         psQuestion.setString(3, q.getQuestionType().name());
                                         psQuestion.setString(4, q.getCorrectAnswer());
                                         psQuestion.setString(5, q.getExplanation());
+                                        psQuestion.setString(6, q.getStatusValue());
                                         psQuestion.executeUpdate();
                                         try (ResultSet rsQuestion = psQuestion.getGeneratedKeys()) {
                                             int questionId = -1;

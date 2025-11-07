@@ -1,5 +1,164 @@
 package com.interviewai.dao;
 
+import java.sql.*;
+import java.util.*;
+
+/**
+ * ProgressDAO - Handles all progress-related database operations.
+ * Tracks user XP, streaks, course progress, quests, and achievements.
+ */
 public class ProgressDAO {
-    // Track user progress
+    
+    /**
+     * Get total XP for a user from all their progress records
+     */
+    public int getTotalXPForUser(int userId) throws SQLException {
+        String query = "SELECT COALESCE(SUM(xp), 0) as total_xp FROM progress WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("total_xp");
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Calculate user's current streak (days of consecutive activity)
+     * Simplified: counts days with at least one progress entry
+     */
+    public int calculateUserStreak(int userId) throws SQLException {
+        String query = "SELECT COUNT(DISTINCT DATE(last_updated)) as streak_days FROM progress " +
+                       "WHERE user_id = ? AND last_updated >= DATE_SUB(NOW(), INTERVAL 365 DAY) " +
+                       "ORDER BY DATE(last_updated) DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("streak_days");
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Get all courses a user is enrolled in with progress info
+     */
+    public List<Map<String, Object>> getUserCourses(int userId) throws SQLException {
+        List<Map<String, Object>> courses = new ArrayList<>();
+        String query = "SELECT gc.id as course_id, gc.course_title, gc.created_at, " +
+                       "COALESCE(p.xp, 0) as user_xp, " +
+                       "ROUND((COALESCE(p.xp, 0) / 1000 * 100), 0) as progress_percentage " +
+                       "FROM generated_courses gc " +
+                       "LEFT JOIN progress p ON p.course_id = gc.id AND p.user_id = ? " +
+                       "WHERE gc.user_id = ? AND gc.status = 'ACTIVE' " +
+                       "ORDER BY gc.created_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> course = new HashMap<>();
+                course.put("course_id", rs.getInt("course_id"));
+                course.put("course_title", rs.getString("course_title"));
+                course.put("user_xp", rs.getInt("user_xp"));
+                course.put("progress_percentage", rs.getInt("progress_percentage"));
+                courses.add(course);
+            }
+        }
+        return courses;
+    }
+    
+    /**
+     * Get daily quests for user (mock implementation - in real app, fetch from quests table)
+     */
+    public List<Map<String, Object>> getDailyQuests(int userId) throws SQLException {
+        List<Map<String, Object>> quests = new ArrayList<>();
+        
+        // Mock daily quests - replace with real database query if quests table exists
+        Map<String, Object> quest1 = new HashMap<>();
+        quest1.put("quest_name", "Answer 5 Interview Questions");
+        quest1.put("required_count", 5);
+        quest1.put("current_count", Math.min(5, Math.random() > 0.5 ? 3 : 2));
+        quest1.put("xp_reward", 50);
+        quests.add(quest1);
+        
+        Map<String, Object> quest2 = new HashMap<>();
+        quest2.put("quest_name", "Complete 1 Full Course Chapter");
+        quest2.put("required_count", 1);
+        quest2.put("current_count", 0);
+        quest2.put("xp_reward", 100);
+        quests.add(quest2);
+        
+        Map<String, Object> quest3 = new HashMap<>();
+        quest3.put("quest_name", "Achieve 90% Accuracy");
+        quest3.put("required_count", 1);
+        quest3.put("current_count", 0);
+        quest3.put("xp_reward", 75);
+        quests.add(quest3);
+        
+        return quests;
+    }
+    
+    /**
+     * Get number of lessons completed by user
+     */
+    public int getLessonsCompletedByUser(int userId) throws SQLException {
+        String query = "SELECT COUNT(*) as lessons_completed FROM progress WHERE user_id = ? AND xp > 0";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("lessons_completed");
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Save or update user progress for a course
+     */
+    public void saveProgress(int userId, int courseId, int xp) throws SQLException {
+        String query = "INSERT INTO progress (user_id, course_id, xp, last_updated) " +
+                       "VALUES (?, ?, ?, NOW()) " +
+                       "ON DUPLICATE KEY UPDATE xp = xp + ?, last_updated = NOW()";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, courseId);
+            stmt.setInt(3, xp);
+            stmt.setInt(4, xp);
+            stmt.executeUpdate();
+        }
+    }
+    
+    /**
+     * Get top learners by XP (for leaderboard)
+     */
+    public List<Map<String, Object>> getTopLearners(int limit) throws SQLException {
+        List<Map<String, Object>> topLearners = new ArrayList<>();
+        String query = "SELECT u.username, COALESCE(SUM(p.xp), 0) as total_xp " +
+                       "FROM users u " +
+                       "LEFT JOIN progress p ON p.user_id = u.id " +
+                       "GROUP BY u.id, u.username " +
+                       "ORDER BY total_xp DESC " +
+                       "LIMIT ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, limit);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> learner = new HashMap<>();
+                learner.put("username", rs.getString("username"));
+                learner.put("total_xp", rs.getInt("total_xp"));
+                topLearners.add(learner);
+            }
+        }
+        return topLearners;
+    }
 }
