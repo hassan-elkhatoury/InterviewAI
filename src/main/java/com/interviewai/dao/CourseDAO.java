@@ -11,10 +11,10 @@ import com.interviewai.model.GeneratedCourse;
 import com.interviewai.model.Question;
 
 public class CourseDAO {
-    // Save a generated course for a user
-    public Boolean saveGeneratedCourse(GeneratedCourse course) {
-        boolean isSaved = false;
+    // Save a generated course for a user and return the generated course ID
+    public int saveGeneratedCourse(GeneratedCourse course) {
         Connection conn = null;
+        int generatedCourseId = -1;
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
@@ -30,6 +30,7 @@ public class CourseDAO {
                     int courseId = -1;
                     if (rsCourse.next()) {
                         courseId = rsCourse.getInt(1);
+                        generatedCourseId = courseId; // Store the generated ID to return
                     }
 
                     // Insert chapters
@@ -91,7 +92,7 @@ public class CourseDAO {
                 }
             }
             conn.commit();
-            isSaved = true;
+            System.out.println("✓ Course saved successfully with ID: " + generatedCourseId);
         } catch (SQLException e) {
             if (conn != null) {
                 try { conn.rollback(); } catch (SQLException re) { System.err.println("Rollback error: " + re.getMessage()); }
@@ -102,7 +103,7 @@ public class CourseDAO {
                 try { conn.setAutoCommit(true); } catch (SQLException ignore) {}
             }
         }
-        return  isSaved;
+        return generatedCourseId;
     }
 
 
