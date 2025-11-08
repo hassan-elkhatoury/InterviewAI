@@ -2,6 +2,7 @@
 -- Run these statements against your MySQL database after selecting the interviewai schema
 
 -- Add status column to chapters table if it does not already exist
+use interviewai;
 ALTER TABLE chapters
     ADD status VARCHAR(30) NOT NULL DEFAULT 'NOT_STARTED';
 
