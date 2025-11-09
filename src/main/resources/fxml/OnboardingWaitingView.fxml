@@ -66,6 +66,26 @@
                         <Insets bottom="10.0" left="30.0" right="30.0" top="10.0" />
                      </padding>
                   </VBox>
+                  
+                  <!-- Error Container (Hidden by default) -->
+                  <VBox fx:id="errorContainer" alignment="CENTER" spacing="15.0" maxWidth="650" 
+                        style="-fx-background-color: rgba(220, 38, 38, 0.15); -fx-border-color: #dc2626; -fx-border-width: 1; -fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 25;"
+                        visible="false" managed="false">
+                     <children>
+                        <Label text="⚠️ Course Generation Failed" 
+                               style="-fx-text-fill: #fca5a5; -fx-font-size: 18; -fx-font-weight: bold;" />
+                        <Label fx:id="errorMessageLabel" 
+                               text="An error occurred during course generation." 
+                               style="-fx-text-fill: #fecaca; -fx-font-size: 14; -fx-text-alignment: center;" 
+                               wrapText="true" textAlignment="CENTER" />
+                        <javafx.scene.control.Button fx:id="retryButton" 
+                               text="← Back to Onboarding" 
+                               style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 14; -fx-padding: 12 30; -fx-background-radius: 8; -fx-cursor: hand;" />
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="30.0" right="30.0" top="10.0" />
+                     </padding>
+                  </VBox>
                </children>
                <padding>
                   <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />

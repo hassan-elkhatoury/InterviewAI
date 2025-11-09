@@ -7,13 +7,20 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import com.interviewai.util.Routes;
+import com.interviewai.util.SceneNavigator;
 
 /**
  * Controller for the waiting/loading screen shown while AI generates the course.
  * Displays progress bar, percentage, and rotating motivational quotes.
+ * Shows error message and retry button on failure.
  */
 public class OnboardingWaitingController {
     
@@ -28,6 +35,15 @@ public class OnboardingWaitingController {
     
     @FXML
     private Label quoteAuthorLabel;
+    
+    @FXML
+    private VBox errorContainer;
+    
+    @FXML
+    private Label errorMessageLabel;
+    
+    @FXML
+    private Button retryButton;
     
     private static OnboardingWaitingController instance;
     
@@ -57,8 +73,53 @@ public class OnboardingWaitingController {
             progressFill.setMaxWidth(0);
         }
         
+        // Hide error container initially
+        if (errorContainer != null) {
+            errorContainer.setVisible(false);
+            errorContainer.setManaged(false);
+        }
+        
+        // Set up retry button action
+        if (retryButton != null) {
+            retryButton.setOnAction(event -> handleRetry());
+        }
+        
         // Start quote rotation (every 5 seconds)
         startQuoteRotation();
+    }
+    
+    /**
+     * Handle retry button click - navigate back to onboarding page.
+     */
+    @FXML
+    private void handleRetry() {
+        try {
+            Stage stage = (Stage) retryButton.getScene().getWindow();
+            SceneNavigator.switchTo(stage, Routes.ONBOARDING, stage.getWidth()-15, stage.getHeight()-38);
+        } catch (Exception e) {
+            System.err.println("Failed to navigate back to onboarding: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Show error message and retry button.
+     */
+    public void showError(String errorMessage) {
+        Platform.runLater(() -> {
+            if (errorMessageLabel != null) {
+                errorMessageLabel.setText(errorMessage);
+            }
+            if (errorContainer != null) {
+                errorContainer.setVisible(true);
+                errorContainer.setManaged(true);
+            }
+            
+            // Stop quote rotation
+            if (quoteTimeline != null) {
+                quoteTimeline.stop();
+            }
+        });
     }
     
     /**

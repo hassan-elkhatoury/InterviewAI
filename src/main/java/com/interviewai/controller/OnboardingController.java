@@ -339,13 +339,22 @@ public class OnboardingController {
                             waitingController.updateProgress(message, percent);
                         }
                     },
-                    // Completion callback - navigate to dashboard
-                    () -> {
+                    // Completion callback - navigate to dashboard on success, show error on failure
+                    (success, errorMessage) -> {
                         javafx.application.Platform.runLater(() -> {
-                            try {
-                                SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
-                            } catch (Exception e) {
-                                System.err.println("Failed to navigate to dashboard: " + e.getMessage());
+                            if (success) {
+                                // Success: navigate to dashboard
+                                try {
+                                    SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
+                                } catch (Exception e) {
+                                    System.err.println("Failed to navigate to dashboard: " + e.getMessage());
+                                }
+                            } else {
+                                // Failure: show error message with retry button
+                                OnboardingWaitingController waitingController = OnboardingWaitingController.getInstance();
+                                if (waitingController != null) {
+                                    waitingController.showError("A problem occurred during course generation:\n\n" + errorMessage + "\n\nPlease try again.");
+                                }
                             }
                         });
                     }

@@ -1,8 +1,17 @@
 package com.interviewai.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -39,7 +48,7 @@ public class MultiStageAIService {
      * Generate both technical and soft-skills courses asynchronously.
      * Progress: 0-45% technical course, 50-95% soft-skills course, 95-100% saving to DB.
      */
-    public void generateCourseAsync(OnboardingData data, ProgressCallback progressCallback, Runnable onComplete) {
+    public void generateCourseAsync(OnboardingData data, ProgressCallback progressCallback, CompletionCallback completionCallback) {
         new Thread(() -> {
             try {
                 // Generate technical course (0-45%)
@@ -72,14 +81,26 @@ public class MultiStageAIService {
                 updateProgress(progressCallback, "Interview preparation courses ready!", 100);
                 System.out.println("✅ Both courses generated successfully!");
                 
+                // Success callback
+                if (completionCallback != null) {
+                    Platform.runLater(() -> completionCallback.onComplete(true, null));
+                }
+                
             } catch (Exception e) {
                 System.err.println("❌ Course generation failed: " + e.getMessage());
                 e.printStackTrace();
-                updateProgress(progressCallback, "Error: " + e.getMessage(), -1);
-            } finally {
-                // Always call completion callback
-                if (onComplete != null) {
-                    Platform.runLater(onComplete);
+                
+                String errorMessage = e.getMessage();
+                if (errorMessage.contains("All ") && errorMessage.contains("API key(s) exhausted")) {
+                    errorMessage = "All API keys have reached their rate limit. Please try again later or add more API keys in config.properties.";
+                }
+                
+                updateProgress(progressCallback, "Error: " + errorMessage, -1);
+                
+                // Failure callback
+                if (completionCallback != null) {
+                    String finalErrorMessage = errorMessage;
+                    Platform.runLater(() -> completionCallback.onComplete(false, finalErrorMessage));
                 }
             }
         }).start();
@@ -103,9 +124,16 @@ public class MultiStageAIService {
             String context = data.getContext();
             String courseType = isTechnical ? "TECHNICAL" : "SOFT_SKILLS";
             
-            if (!isTechnical) {
-                // For soft-skills, modify the context to focus on non-technical aspects
-                context = "Soft-skills and behavioral interview preparation for " + data.getContext();
+            String courseContent ="";
+            String courseGoal = "";
+
+            // Determine course focus
+            if (isTechnical) {
+                courseContent = "Hands-on technical interview preparation covering core concepts, problem-solving, and real-world coding challenges.";
+                courseGoal = "Help the learner strengthen their technical expertise and confidently tackle technical interviews.";
+            } else {
+                courseContent = "Soft-skills and behavioral interview preparation, focusing on communication, confidence, and emotional intelligence.";
+                courseGoal = "Equip the learner with the mindset and interpersonal skills needed to stand out in non-technical or HR interviews for.";
             }
             
             // Stage 1: Generate 12 chapter outlines
@@ -117,11 +145,22 @@ public class MultiStageAIService {
             
             System.out.println(String.format("\n🤖 Stage 1 (%s): Generating chapter outlines...", courseType));
             
+            String cvTxtContent = extractText(data.getCvPath());
+
+            System.out.println("----------Cv content : " +  cvTxtContent);
+
+            if (cvTxtContent.length() > 4000) {
+                cvTxtContent = cvTxtContent.substring(0, 4000) + "... [truncated]";
+}
+
             String outlinesPrompt = aiService.buildChapterOutlinesPrompt(
                 data.getInterviewType(),
                 data.getLanguage(),
                 data.getTimeline(),
-                context
+                context,
+                cvTxtContent,
+                courseContent,
+                courseGoal
             );
             
             String outlinesResponse = aiService.sendRequest(outlinesPrompt);
@@ -351,4 +390,39 @@ public class MultiStageAIService {
     public interface ProgressCallback {
         void onProgress(String message, int percent);
     }
+    
+    /**
+     * Callback interface for completion with success/failure status.
+     */
+    public interface CompletionCallback {
+        void onComplete(boolean success, String errorMessage);
+    }
+
+ 
+
+    public String extractText(String filePath) throws IOException {
+        File file = new File(filePath);
+        String name = file.getName().toLowerCase();
+        
+        if (name.endsWith(".pdf")) {
+            try (PDDocument doc = Loader.loadPDF(file)) {
+                return new PDFTextStripper().getText(doc);
+            }
+        } else if (name.endsWith(".docx")) {
+            try (XWPFDocument doc = new XWPFDocument(new FileInputStream(file))) {
+                return doc.getParagraphs().stream()
+                    .map(XWPFParagraph::getText)
+                    .reduce("", (a, b) -> a + "\n" + b);
+            }
+        } else if (name.endsWith(".doc")) {
+            try (HWPFDocument doc = new HWPFDocument(new FileInputStream(file))) {
+                return doc.getDocumentText();
+            }
+        }
+        
+        return "";
+    }
 }
+
+
+

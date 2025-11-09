@@ -26,15 +26,15 @@ public class OnboardingService {
      */
     public void saveOnboardingDataAsync(OnboardingData data, 
                                        MultiStageAIService.ProgressCallback progressCallback,
-                                       Runnable onComplete) {
+                                       MultiStageAIService.CompletionCallback completionCallback) {
         System.out.println("Saving onboarding data: " + data);
         
         if (multiStageAIService != null) {
-            multiStageAIService.generateCourseAsync(data, progressCallback, onComplete);
+            multiStageAIService.generateCourseAsync(data, progressCallback, completionCallback);
         } else {
             System.out.println("ℹ️  Multi-Stage AI service not available. Skipping course generation.");
-            if (onComplete != null) {
-                onComplete.run();
+            if (completionCallback != null) {
+                completionCallback.onComplete(false, "AI Service not initialized");
             }
         }
     }

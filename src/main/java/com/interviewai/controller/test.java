@@ -313,9 +313,14 @@ public class test {
                 (message, percent) -> {
                     System.out.println(String.format("Progress: %d%% - %s", percent, message));
                 },
-                () -> {
-                    System.out.println("=== Onboarding Complete ===");
-                    System.out.println(data.toString());
+                (success, errorMessage) -> {
+                    if (success) {
+                        System.out.println("=== Onboarding Complete Successfully ===");
+                        System.out.println(data.toString());
+                    } else {
+                        System.err.println("=== Onboarding Failed ===");
+                        System.err.println("Error: " + errorMessage);
+                    }
                 }
             );
             

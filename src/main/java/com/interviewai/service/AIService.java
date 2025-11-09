@@ -16,6 +16,7 @@ import com.interviewai.util.ConfigLoader;
 
 /**
  * Simple AI service to send requests to Gemini API and get responses.
+ * Supports multiple API keys with automatic rotation on rate limits.
  */
 public class AIService {
     
@@ -24,25 +25,83 @@ public class AIService {
             .build();
     
     private final String apiUrl;
-    private final String apiKey;
+    private final List<String> apiKeys;
+    private int currentKeyIndex = 0;
     
     public AIService() {
         // Load from config
         this.apiUrl = ConfigLoader.get("ai.api.url");
-        this.apiKey = ConfigLoader.get("ai.api.key");
+        String keysConfig = ConfigLoader.get("ai.api.keys");
         
-        if (apiUrl == null || apiKey == null) {
+        if (apiUrl == null || keysConfig == null) {
             throw new RuntimeException("AI API not configured in config.properties");
         }
+        
+        // Parse multiple API keys (comma-separated)
+        this.apiKeys = new ArrayList<>();
+        for (String key : keysConfig.split(",")) {
+            String trimmedKey = key.trim();
+            if (!trimmedKey.isEmpty()) {
+                apiKeys.add(trimmedKey);
+            }
+        }
+        
+        if (apiKeys.isEmpty()) {
+            throw new RuntimeException("No valid API keys found in config.properties");
+        }
+        
+        System.out.println("✓ Loaded " + apiKeys.size() + " API key(s) for rotation");
     }
     
     /**
      * Send a prompt to Gemini and get JSON response.
+     * Automatically rotates API keys on rate limit errors (429).
      * 
      * @param prompt The prompt text to send
      * @return JSON response as String
+     * @throws RuntimeException if all API keys fail
      */
     public String sendRequest(String prompt) {
+        int attempts = 0;
+        int maxAttempts = apiKeys.size();
+        RuntimeException lastException = null;
+        
+        while (attempts < maxAttempts) {
+            try {
+                String apiKey = getCurrentApiKey();
+                String response = sendRequestWithKey(prompt, apiKey);
+                return response;
+                
+            } catch (RuntimeException e) {
+                lastException = e;
+                
+                // Check if it's a rate limit error (429)
+                if (e.getMessage().contains("429") || e.getMessage().contains("RESOURCE_EXHAUSTED")) {
+                    System.err.println("⚠️  API key " + (currentKeyIndex + 1) + " rate limited. Rotating to next key...");
+                    rotateToNextKey();
+                    attempts++;
+                    
+                    // Add a small delay before retry
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    // Non-rate-limit error, throw immediately
+                    throw e;
+                }
+            }
+        }
+        
+        // All keys exhausted
+        throw new RuntimeException("All " + maxAttempts + " API key(s) exhausted. " + lastException.getMessage(), lastException);
+    }
+    
+    /**
+     * Send request using a specific API key.
+     */
+    private String sendRequestWithKey(String prompt, String apiKey) {
         try {
             // Build Gemini request format
             JSONObject requestBody = new JSONObject();
@@ -82,6 +141,21 @@ public class AIService {
         }
     }
     
+    /**
+     * Get current API key.
+     */
+    private synchronized String getCurrentApiKey() {
+        return apiKeys.get(currentKeyIndex);
+    }
+    
+    /**
+     * Rotate to next API key.
+     */
+    private synchronized void rotateToNextKey() {
+        currentKeyIndex = (currentKeyIndex + 1) % apiKeys.size();
+        System.out.println("🔄 Switched to API key " + (currentKeyIndex + 1) + "/" + apiKeys.size());
+    }
+    
     private String mapInterviewType(String type) {
         switch (type) {
             case "JOB": return "Job";
@@ -114,35 +188,50 @@ public class AIService {
     /**
      * STAGE 1: Build a prompt to generate 12 chapter outlines (without questions).
      */
-    public String buildChapterOutlinesPrompt(String interviewType, String language, 
-                                             String timeline, String context) {
+    public String buildChapterOutlinesPrompt(
+        String interviewType, 
+        String language, 
+        String timeline, 
+        String context, 
+        String cvContent, 
+        String courseContent, 
+        String courseGoal
+    ) {
         return String.format(
-            "Generate a comprehensive interview preparation course outline for %s position/program applying for a %s. " +
+            "You are an expert AI course designer.\n\n" +
+            "Your task: Generate a comprehensive interview preparation course outline for a **%s** position or program.\n" +
+            "Focus area: %s\n" +
             "User preparation timeline: %s\n" +
-            "Desired language: %s\n\n" +
-            "Create exactly 12 chapters (each chapter represents a topic area).\n" +
-            "Each chapter must have:\n" +
-            "- A clear, descriptive name\n" +
-            "- A detailed description of what will be covered\n\n" +
-            "Return the response in valid JSON format with this exact structure:\n" +
+            "Preferred language: %s\n\n" +
+            "User context: %s\n" +
+            "Course goal: %s\n\n" +
+            "Below is the candidate’s CV text (use it to tailor topics and skill focus):\n" +
+            "\"\"\"%s\"\"\"\n\n" +
+            "Instructions:\n" +
+            "- Create exactly 12 chapters (each representing a topic area).\n" +
+            "- Each chapter must have:\n" +
+            "  * A clear and descriptive name\n" +
+            "  * A detailed description of what will be covered\n\n" +
+            "Return your response **as pure JSON**, with no explanations or extra text, in this exact format:\n" +
             "{\n" +
             "  \"course_title\": \"[Generated title]\",\n" +
             "  \"chapters\": [\n" +
             "    {\n" +
             "      \"chapter_number\": 1,\n" +
             "      \"name\": \"[Chapter name]\",\n" +
-            "      \"description\": \"[Detailed description of chapter content]\"\n" +
-            "    },\n" +
-            "    ... (repeat for all 12 chapters)\n" +
+            "      \"description\": \"[Detailed description]\"\n" +
+            "    }\n" +
             "  ]\n" +
             "}",
-            context, 
-            mapInterviewType(interviewType), 
-            mapTimeline(timeline), 
-            mapLanguage(language)
+            mapInterviewType(interviewType),
+            courseContent,
+            mapTimeline(timeline),
+            mapLanguage(language),
+            context,
+            courseGoal,
+            cvContent
         );
     }
-    
     /**
      * STAGE 2: Build a prompt to generate 2 specific chapters with questions.
      * Each chapter will have 20 multiple choice + 20 short answer questions = 40 total.
