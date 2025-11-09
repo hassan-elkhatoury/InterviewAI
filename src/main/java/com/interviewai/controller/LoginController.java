@@ -33,11 +33,6 @@ public class LoginController {
         boolean ok = authService.authenticate(userName, pass);
         if (ok) {
             User u = authService.getUser(userName);
-            Alert a = new Alert(Alert.AlertType.INFORMATION);
-            a.setTitle("Login Successful");
-            a.setHeaderText(null);
-            a.setContentText("Welcome, " + (u != null ? u.getUsername() : userName) + "!");
-            a.showAndWait();
             try {
                 Stage stage = (Stage) usernameField.getScene().getWindow();
 

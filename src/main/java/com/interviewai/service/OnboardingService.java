@@ -1,14 +1,19 @@
 package com.interviewai.service;
 
+import com.interviewai.dao.OnboardingDAO;
 import com.interviewai.model.OnboardingData;
 import com.interviewai.model.User;
+import com.interviewai.util.SessionContext;
+
+import java.sql.SQLException;
 
 /**
  * Handles multi-step onboarding: interview type, language, timeline, and context.
- * Triggers AI course generation after onboarding completion.
+ * Persists onboarding data and triggers AI course generation after completion.
  */
 public class OnboardingService {
     
+    private final OnboardingDAO onboardingDAO = new OnboardingDAO();
     private MultiStageAIService multiStageAIService;
 
     public OnboardingService() {
@@ -21,13 +26,24 @@ public class OnboardingService {
     }
 
     /**
-     * Saves user onboarding preferences and triggers multi-stage AI course generation asynchronously.
+     * Saves user onboarding preferences to DB and triggers multi-stage AI course generation asynchronously.
      * Calls the callback when complete with progress updates.
      */
     public void saveOnboardingDataAsync(OnboardingData data, 
                                        MultiStageAIService.ProgressCallback progressCallback,
                                        MultiStageAIService.CompletionCallback completionCallback) {
         System.out.println("Saving onboarding data: " + data);
+
+        // Persist to DB (or update if exists)
+        try {
+            boolean saved = onboardingDAO.saveOnboardingData(data);
+            System.out.println(saved ? "✓ Onboarding data saved" : "⚠️ Onboarding data not saved");
+        } catch (SQLException e) {
+            System.err.println("✗ Failed to save onboarding data: " + e.getMessage());
+        }
+
+        // Cache in session for quick access during this run
+        SessionContext.setOnboardingData(data);
         
         if (multiStageAIService != null) {
             multiStageAIService.generateCourseAsync(data, progressCallback, completionCallback);
@@ -41,32 +57,33 @@ public class OnboardingService {
     
     /**
      * Retrieves saved onboarding data for a user.
-     * TODO: Load from database.
      */
     public OnboardingData getOnboardingData(int userId) {
-        // TODO: Load from database
-        return null;
+        try {
+            return onboardingDAO.getByUserId(userId);
+        } catch (SQLException e) {
+            System.err.println("Failed to load onboarding data: " + e.getMessage());
+            return null;
+        }
     }
-
-    
 
     /**
      * Checks if user has completed onboarding.
      */
-
-
     public boolean hasCompletedOnboarding(int userId) {
-        // TODO: Check database
-        return false;
+        try {
+            return onboardingDAO.hasCompletedOnboarding(userId);
+        } catch (SQLException e) {
+            System.err.println("Failed to check onboarding completion: " + e.getMessage());
+            return false;
+        }
     }
-
-
 
     /**
      * Initializes onboarding state for a new user.
      */
     public void startOnboarding(User user) {
-        // TODO: initialize onboarding state for user
+        // Placeholder for any future initialization steps
         System.out.println("Starting onboarding for user: " + user.getUsername());
     }
 }

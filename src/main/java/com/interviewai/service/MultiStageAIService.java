@@ -163,7 +163,12 @@ public class MultiStageAIService {
                 courseGoal
             );
             
-            String outlinesResponse = aiService.sendRequest(outlinesPrompt);
+            String outlinesResponse = aiService.sendRequestWithProgress(
+                outlinesPrompt,
+                progressCallback,
+                String.format("Stage 1 (%s outlines)", courseType),
+                outlineProgress
+            );
             List<ChapterOutline> outlines = aiService.parseChapterOutlines(outlinesResponse);
             
             if (outlines.isEmpty()) {
@@ -206,7 +211,12 @@ public class MultiStageAIService {
                     data.getLanguage()
                 );
                 
-                String chaptersResponse = aiService.sendRequest(chaptersPrompt);
+                String chaptersResponse = aiService.sendRequestWithProgress(
+                    chaptersPrompt,
+                    progressCallback,
+                    String.format("Stage 2.%d (%s chapters %d-%d)", (i+1), courseType, startChapter, endChapter),
+                    chapterProgress
+                );
                 List<Chapter> chapters = parseChaptersWithQuestions(chaptersResponse);
                 
                 if (chapters.isEmpty()) {
@@ -318,7 +328,21 @@ public class MultiStageAIService {
                 }
             }
             
-            JSONObject chaptersData = new JSONObject(chaptersJson);
+            // First attempt direct parse
+            JSONObject chaptersData;
+            try {
+                chaptersData = new JSONObject(chaptersJson);
+            } catch (Exception primaryParseEx) {
+                System.err.println("Primary JSON parse failed (" + primaryParseEx.getMessage() + "). Applying sanitization...");
+                chaptersJson = sanitizeChaptersJson(chaptersJson);
+                try {
+                    chaptersData = new JSONObject(chaptersJson);
+                } catch (Exception secondaryParseEx) {
+                    System.err.println("Sanitized JSON parse still failed: " + secondaryParseEx.getMessage());
+                    // Give up gracefully
+                    return chapters;
+                }
+            }
             JSONArray chaptersArray = chaptersData.getJSONArray("chapters");
             
             for (int i = 0; i < chaptersArray.length(); i++) {
@@ -373,6 +397,80 @@ public class MultiStageAIService {
             e.printStackTrace();
         }
         return chapters;
+    }
+
+    /**
+     * Attempt to clean AI produced JSON so org.json can parse it.
+     * Handles:
+     *  - Duplicate keys like "explanation" inside the same object
+     *  - Missing commas between sibling objects ("}{" -> "},{")
+     *  - Raw array without root object (wraps into {"chapters": [...]})
+     *  - Stray markdown fences / code block markers
+     */
+    private String sanitizeChaptersJson(String raw) {
+        if (raw == null) return "{\"chapters\":[]}";
+        String cleaned = raw.trim();
+        // Remove markdown fences
+        cleaned = cleaned.replaceAll("```json", "").replaceAll("```", "").trim();
+        // Wrap if it's just an array
+        if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+            cleaned = "{\"chapters\":" + cleaned + "}";
+        }
+        // Fix missing commas between objects in arrays: }{ -> },{
+        cleaned = cleaned.replaceAll("}\\s*{", "},{");
+        // Remove duplicate "explanation" keys within the same object keeping first occurrence.
+        // Strategy: For each object block, track explanation occurrences.
+        StringBuilder sb = new StringBuilder();
+        int braceDepth = 0;
+        boolean inString = false;
+        boolean escape = false;
+        int objStart = -1;
+        List<Integer> explanationPositions = new ArrayList<>();
+        for (int i = 0; i < cleaned.length(); i++) {
+            char c = cleaned.charAt(i);
+            sb.append(c);
+            if (escape) { escape = false; continue; }
+            if (c == '\\') { escape = true; continue; }
+            if (c == '"') { inString = !inString; }
+            if (!inString) {
+                if (c == '{') {
+                    if (braceDepth == 0) {
+                        objStart = sb.length() - 1;
+                        explanationPositions.clear();
+                    }
+                    braceDepth++;
+                } else if (c == '}') {
+                    braceDepth--;
+                    if (braceDepth == 0 && explanationPositions.size() > 1) {
+                        // Post-process this object substring to remove duplicate explanation keys beyond first
+                        int objEnd = sb.length();
+                        String obj = sb.substring(objStart, objEnd);
+                        // Remove subsequent explanation keys with a simplistic regex
+                        // Matches ,"explanation":"..." following the first
+                        String firstPattern = "\\\\\"explanation\\\\\":"; // marker
+                        int firstIdx = obj.indexOf("\"explanation\":");
+                        if (firstIdx >= 0) {
+                            // keep first, remove later occurrences
+                            String before = obj.substring(0, firstIdx + "\"explanation\":".length());
+                            String after = obj.substring(firstIdx + "\"explanation\":".length());
+                            // Find subsequent occurrences and remove preceding comma segment
+                            // Regex replace: ,"explanation":"..."
+                            after = after.replaceAll(",\\s*\\\"explanation\\\":\\s*\\\"[^\\\"]*\\\"", "");
+                            obj = before + after;
+                            // Rebuild sb
+                            sb.setLength(objStart);
+                            sb.append(obj);
+                        }
+                    }
+                }
+            }
+        }
+        cleaned = sb.toString();
+        // Basic sanity: ensure it starts with '{'
+        if (!cleaned.trim().startsWith("{")) {
+            cleaned = "{\"chapters\":[]}"; // fallback
+        }
+        return cleaned;
     }
     
     /**

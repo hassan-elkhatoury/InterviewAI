@@ -1,9 +1,12 @@
 package com.interviewai.dao;
 
+import com.interviewai.model.GeneratedCourse;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DAO for managing interview_prep table.
@@ -120,5 +123,59 @@ public class InterviewPrepDAO {
         }
         
         return false;
+    }
+    
+    /**
+     * Get all interview prep records with course details for a user.
+     * Returns a list with both technical and soft-skills courses.
+     * 
+     * @param userId User ID
+     * @return List of interview prep pairs (technical + soft-skills)
+     */
+    public List<InterviewPrepRecord> getAllInterviewPreps(int userId) {
+        List<InterviewPrepRecord> records = new ArrayList<>();
+        String sql = "SELECT ip.id, ip.technical_course_id, ip.softskills_course_id, " +
+                     "tc.course_title as technical_title, sc.course_title as softskills_title, " +
+                     "ip.created_at " +
+                     "FROM interview_prep ip " +
+                     "LEFT JOIN generated_courses tc ON ip.technical_course_id = tc.id " +
+                     "LEFT JOIN generated_courses sc ON ip.softskills_course_id = sc.id " +
+                     "WHERE ip.user_id = ? " +
+                     "ORDER BY ip.created_at DESC";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    InterviewPrepRecord record = new InterviewPrepRecord();
+                    record.id = rs.getInt("id");
+                    record.technicalCourseId = rs.getInt("technical_course_id");
+                    record.softskillsCourseId = rs.getInt("softskills_course_id");
+                    record.technicalTitle = rs.getString("technical_title");
+                    record.softskillsTitle = rs.getString("softskills_title");
+                    record.createdAt = rs.getTimestamp("created_at");
+                    records.add(record);
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to get interview prep records: " + e.getMessage());
+        }
+        
+        return records;
+    }
+    
+    /**
+     * Inner class to hold interview prep record data.
+     */
+    public static class InterviewPrepRecord {
+        public int id;
+        public int technicalCourseId;
+        public int softskillsCourseId;
+        public String technicalTitle;
+        public String softskillsTitle;
+        public java.sql.Timestamp createdAt;
     }
 }
