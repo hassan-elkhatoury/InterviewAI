@@ -243,4 +243,45 @@ public class CourseProgressDAO {
             return fetchQuestionCounts(conn, chapterId);
         }
     }
+    
+    /**
+     * Get a course by its ID with all chapters
+     * @param courseId The course ID
+     * @return The GeneratedCourse object or null if not found
+     */
+    public GeneratedCourse getCourseById(int courseId) {
+        String sql = "SELECT g.id, g.user_id, g.course_title, g.status, g.created_at, " +
+                     "o.interview_type, o.language " +
+                     "FROM generated_courses g " +
+                     "LEFT JOIN onboarding_data o ON o.user_id = g.user_id " +
+                     "WHERE g.id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, courseId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    GeneratedCourse course = new GeneratedCourse();
+                    course.setId(rs.getInt("id"));
+                    course.setUserId(rs.getInt("user_id"));
+                    course.setCourseTitle(rs.getString("course_title"));
+                    course.setInterviewType(rs.getString("interview_type"));
+                    course.setLanguage(rs.getString("language"));
+                    course.setStatus(rs.getString("status"));
+                    
+                    // Load chapters
+                    List<Chapter> chapters = fetchChaptersWithCounts(conn, courseId);
+                    course.setChapters(chapters);
+                    
+                    return course;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching course by ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
 }

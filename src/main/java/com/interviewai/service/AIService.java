@@ -7,6 +7,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,48 +38,97 @@ public class AIService {
     }
     
     /**
-     * Send a prompt to Gemini and get JSON response.
-     * 
-     * @param prompt The prompt text to send
-     * @return JSON response as String
+     * Send a prompt to Gemini and get JSON response (no progress callback).
      */
     public String sendRequest(String prompt) {
-        try {
-            // Build Gemini request format
-            JSONObject requestBody = new JSONObject();
-            JSONArray contents = new JSONArray();
-            JSONObject content = new JSONObject();
-            JSONArray parts = new JSONArray();
-            JSONObject part = new JSONObject();
-            
-            part.put("text", prompt);
-            parts.put(part);
-            content.put("parts", parts);
-            contents.put(content);
-            requestBody.put("contents", contents);
-            
-            // Add API key to URL
-            String fullUrl = apiUrl + "?key=" + apiKey;
-            
-            // Send HTTP request
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(fullUrl))
-                    .timeout(Duration.ofSeconds(60))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
-                    .build();
-            
-            HttpResponse<String> response = httpClient.send(request, 
-                    HttpResponse.BodyHandlers.ofString());
-            
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                return response.body();
-            } else {
-                throw new RuntimeException("API Error " + response.statusCode() + 
-                        ": " + response.body());
+        return sendRequestInternal(prompt, null, null, -1);
+    }
+
+    /**
+     * Send a prompt with retry + optional progress reporting (used by multi-stage generation).
+     * Retries 429 RESOURCE_EXHAUSTED errors with exponential backoff.
+     * @param prompt Prompt text
+     * @param progressCallback Optional progress callback (can be null)
+     * @param phaseLabel Short label to show when retrying
+     * @param percentBase Percent value to reuse when emitting retry messages
+     */
+    public String sendRequestWithProgress(String prompt,
+                                          MultiStageAIService.ProgressCallback progressCallback,
+                                          String phaseLabel,
+                                          int percentBase) {
+        return sendRequestInternal(prompt, progressCallback, phaseLabel, percentBase);
+    }
+
+    private String sendRequestInternal(String prompt,
+                                       MultiStageAIService.ProgressCallback progressCallback,
+                                       String phaseLabel,
+                                       int percentBase) {
+        final int maxRetries = 3;
+        int attempt = 0;
+        while (true) {
+            attempt++;
+            try {
+                // Build Gemini request format
+                JSONObject requestBody = new JSONObject();
+                JSONArray contents = new JSONArray();
+                JSONObject content = new JSONObject();
+                JSONArray parts = new JSONArray();
+                JSONObject part = new JSONObject();
+
+                part.put("text", prompt);
+                parts.put(part);
+                content.put("parts", parts);
+                contents.put(content);
+                requestBody.put("contents", contents);
+
+                String fullUrl = apiUrl + "?key=" + apiKey;
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(fullUrl))
+                        .timeout(Duration.ofSeconds(60))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                int status = response.statusCode();
+                if (status >= 200 && status < 300) {
+                    return response.body();
+                }
+
+                // Rate limit / resource exhausted handling (429)
+                if (status == 429 || response.body().contains("RESOURCE_EXHAUSTED")) {
+                    if (attempt <= maxRetries) {
+                        long backoffMs = (long) (1000L * Math.pow(2, attempt - 1)); // 1s,2s,4s
+                        String msg = String.format("Rate limit hit (%s). Retrying in %d ms (attempt %d/%d)...",
+                                status == 429 ? "429" : "RESOURCE_EXHAUSTED", backoffMs, attempt, maxRetries);
+                        System.out.println(msg);
+                        if (progressCallback != null && phaseLabel != null) {
+                            int percent = percentBase >= 0 ? percentBase : 0;
+                            progressCallback.onProgress(phaseLabel + " - " + msg, percent);
+                        }
+                        TimeUnit.MILLISECONDS.sleep(backoffMs);
+                        continue; // retry
+                    } else {
+                        throw new RuntimeException("API Error 429 after retries: " + response.body());
+                    }
+                }
+
+                throw new RuntimeException("API Error " + status + ": " + response.body());
+            } catch (Exception e) {
+                // Non-rate-limit or exhausted after retries
+                if (e.getMessage() != null && e.getMessage().contains("429")) {
+                    throw new RuntimeException("Failed to call AI API: " + e.getMessage(), e);
+                }
+                if (attempt >= maxRetries) {
+                    throw new RuntimeException("Failed to call AI API: " + e.getMessage(), e);
+                }
+                // Transient network error, brief backoff then retry
+                long backoffMs = (long) (800L * Math.pow(2, attempt - 1));
+                System.out.println("Transient error: " + e.getMessage() + ". Retrying in " + backoffMs + " ms (attempt " + attempt + "/" + maxRetries + ")...");
+                try { TimeUnit.MILLISECONDS.sleep(backoffMs); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to call AI API: " + e.getMessage(), e);
         }
     }
     
