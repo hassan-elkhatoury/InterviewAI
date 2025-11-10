@@ -98,7 +98,7 @@ public class AIService {
                 contents.put(content);
                 requestBody.put("contents", contents);
 
-                String fullUrl = apiUrl + "?key=" + apiKey;
+                String fullUrl = apiUrl + "?key=" + this.apiKeys.get(currentKeyIndex);
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(fullUrl))
