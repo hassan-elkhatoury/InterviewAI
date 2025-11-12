@@ -2,6 +2,7 @@ package com.interviewai.controller;
 
 import com.interviewai.dao.CourseDAO;
 import com.interviewai.dao.OnboardingDAO;
+import com.interviewai.dao.UserDAO;
 import com.interviewai.model.User;
 import com.interviewai.service.AuthService;
 import com.interviewai.util.Routes;
@@ -37,6 +38,18 @@ public class LoginController {
                 Stage stage = (Stage) usernameField.getScene().getWindow();
 
                 SessionContext.setCurrentUser(u);
+
+                // Load last-used course/chapter into session so Dashboard opens the right one
+                try {
+                    UserDAO userDAO = new UserDAO();
+                    Integer[] lastUsed = userDAO.getLastUsedIds(u.getId());
+                    if (lastUsed != null) {
+                        SessionContext.setActiveCourseId(lastUsed[0]);
+                        SessionContext.setActiveChapterId(lastUsed[1]);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Could not load last-used course: " + e.getMessage());
+                }
                 
                 if (u != null && "ADMIN".equalsIgnoreCase(u.getRole())) {
 

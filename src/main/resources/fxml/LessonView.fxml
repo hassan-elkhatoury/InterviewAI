@@ -1,8 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.*?>
-<!-- TODO: Lesson content area with questions and navigation. -->
-<VBox spacing="8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LessonController">
-    <Label text="Lesson" />
-    <Button text="Next" />
-</VBox>
+
+<!-- Modern Futuristic Question View (Sticky Navigation) -->
+
+<BorderPane styleClass="lesson-root" stylesheets="@../css/lesson.css,@../css/dashboard.css" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LessonController">
+    <!-- TOP: Header -->
+    <top>
+        <VBox styleClass="lesson-header">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label fx:id="chapterTitleLabel" styleClass="lesson-chapter-title" text="Chapter 1: Java Fundamentals" wrapText="true" />
+                    <Label fx:id="questionProgressLabel" styleClass="lesson-subtitle" text="Question 1 of 25" />
+                </VBox>
+                <VBox spacing="8" styleClass="progress-stats">
+                    <ProgressBar fx:id="progressBar" prefWidth="220" progress="0.0" styleClass="lesson-progress-bar" />
+                    <Label fx:id="progressPercentLabel" styleClass="progress-percent" text="0% Complete" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- CENTER: Scrollable Content -->
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="lesson-scroll" vbarPolicy="AS_NEEDED">
+            <VBox spacing="32" styleClass="lesson-wrapper">
+                <padding>
+                    <Insets bottom="32" left="32" right="32" top="32" />
+                </padding>
+                <!-- Main Question Card -->
+                <VBox styleClass="question-card">
+                    <!-- Question Number Badge -->
+                    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="question-header">
+                        <Label fx:id="questionNumberBadge" styleClass="question-badge" text="Q1" />
+                        <Label fx:id="questionTypeLabel" styleClass="question-type-label" text="Multiple Choice" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="questionStatusLabel" styleClass="status-indicator" text="●" />
+                    </HBox>
+
+                    <!-- Question Text -->
+                    <Label fx:id="questionTextLabel" styleClass="question-text" text="Question placeholder" wrapText="true" />
+
+                    <!-- Short Answer Field (hidden by default) -->
+                    <VBox fx:id="shortAnswerBox" managed="false" spacing="12" styleClass="short-answer-box" visible="false">
+                        <Label styleClass="short-answer-label" text="Your Answer" />
+                        <TextArea fx:id="shortAnswerField" prefRowCount="4" promptText="Type your answer here..." styleClass="short-answer-area" wrapText="true" />
+                    </VBox>
+
+                    <!-- Choices Container -->
+                    <VBox fx:id="choicesContainer" spacing="14" styleClass="choices-container" />
+
+                    <!-- Answer Feedback Banner (Hidden by default) -->
+                    <HBox fx:id="feedbackBanner" alignment="CENTER_LEFT" managed="false" spacing="12" styleClass="feedback-banner" visible="false">
+                        <Label fx:id="feedbackIcon" styleClass="feedback-icon" text="✓" />
+                        <VBox spacing="2">
+                            <Label fx:id="feedbackTitle" styleClass="feedback-title" text="Correct!" />
+                            <Label fx:id="feedbackMessage" styleClass="feedback-message" text="Great job! You got it right." />
+                        </VBox>
+                    </HBox>
+
+                    <!-- Explanation Panel (Hidden by default) -->
+                    <VBox fx:id="explanationPanel" managed="false" styleClass="explanation-panel" visible="false">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label styleClass="explanation-icon" text="💡" />
+                            <Label styleClass="explanation-title" text="Explanation" />
+                        </HBox>
+                        <Label fx:id="explanationTextLabel" styleClass="explanation-text" text="" wrapText="true" />
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="correct-answer-box">
+                            <Label styleClass="correct-label" text="Correct Answer:" />
+                            <Label fx:id="correctAnswerLabel" styleClass="correct-answer" text="" />
+                        </HBox>
+                    </VBox>
+                 <HBox alignment="CENTER" spacing="24" styleClass="lesson-navigation-sticky">
+                     <Button fx:id="previousButton" onAction="#onPrevious" styleClass="btn-nav btn-secondary" text="← Previous" />
+                     <Button fx:id="submitButton" onAction="#onSubmitAnswer" styleClass="btn-nav btn-primary" text="Submit Answer" />
+                     <Button fx:id="nextButton" onAction="#onNext" styleClass="btn-nav btn-primary" text="Next →" visible="false" managed="false" />
+                     <Region HBox.hgrow="ALWAYS" />
+                     <Button fx:id="finishButton" managed="false" onAction="#onFinish" styleClass="btn-nav btn-success" text="✓ Finish Chapter" visible="false" />
+                 </HBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

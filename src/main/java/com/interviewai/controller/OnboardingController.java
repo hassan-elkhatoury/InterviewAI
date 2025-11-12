@@ -124,16 +124,27 @@ public class OnboardingController {
         
     }
     public void onBack(ActionEvent event){
-
         if(currentStep > 1){
-
             currentStep --;
             updateStepView();
             updateNavigationButtons();
             updateProgressDots();
-
+            return;
         }
-
+        // If launched from Dashboard and at step 1, go back to Dashboard
+        if (SessionContext.isOnboardingFromDashboard()) {
+            try {
+                Stage stage = (Stage) backButton.getScene().getWindow();
+                SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Navigation Error");
+                alert.setContentText("Failed to navigate back to dashboard: " + e.getMessage());
+                alert.showAndWait();
+            } finally {
+                SessionContext.setOnboardingFromDashboard(false);
+            }
+        }
     }
 
     public void updateStepView(){
@@ -260,11 +271,13 @@ public class OnboardingController {
             card.getStyleClass().add("option-card-selected");
     }
 
-       private void updateNavigationButtons() {
-        backButton.setVisible(currentStep > 1);
-        
-        boolean canProceed = false;
-        switch (currentStep) {
+    private void updateNavigationButtons() {
+     // Show Back on step > 1; also show on step 1 if launched from Dashboard
+     boolean showBack = currentStep > 1 || SessionContext.isOnboardingFromDashboard();
+     backButton.setVisible(showBack);
+
+     boolean canProceed = false;
+     switch (currentStep) {
             case 1:
                 canProceed = selectedInterviewType != null;
                 break;
@@ -344,6 +357,7 @@ public class OnboardingController {
                         javafx.application.Platform.runLater(() -> {
                             try {
                                 SceneNavigator.switchTo(stage, Routes.DASHBOARD, stage.getWidth()-15, stage.getHeight()-38);
+                                SessionContext.setOnboardingFromDashboard(false);
                             } catch (Exception e) {
                                 System.err.println("Failed to navigate to dashboard: " + e.getMessage());
                             }

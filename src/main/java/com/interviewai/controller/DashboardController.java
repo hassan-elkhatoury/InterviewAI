@@ -60,6 +60,7 @@ public class DashboardController {
     @FXML private Label chapterStatusLabel;
     @FXML private Label chapterProgressLabel;
     @FXML private Button startChapterButton;
+    @FXML private ProgressBar chapterProgressBar; // progress bar for chapter question completion
     
     // DAOs
     private ProgressDAO progressDAO;
@@ -100,6 +101,19 @@ public class DashboardController {
                 // Load user's course IDs
                 loadUserCourseIds();
                 
+                // If we have a last-used course set in session, prefer it and set view type accordingly
+                Integer lastCourseId = SessionContext.getActiveCourseId();
+                if (lastCourseId != null && lastCourseId > 0) {
+                    // Determine if lastCourseId is technical or soft-skills to set the toggle state
+                    if (lastCourseId == currentTechnicalCourseId) {
+                        isViewingTechnical = true;
+                    } else if (lastCourseId == currentSoftskillsCourseId) {
+                        isViewingTechnical = false;
+                    }
+                    // Switch to last used course
+                    switchToCourse(lastCourseId);
+                }
+
                 // Update course menu
                 updateCourseMenu();
                 
@@ -121,8 +135,34 @@ public class DashboardController {
      */
     private void loadUserCourseIds() {
         int userId = currentUser.getId();
-        currentTechnicalCourseId = interviewPrepDAO.getTechnicalCourseId(userId);
-        currentSoftskillsCourseId = interviewPrepDAO.getSoftskillsCourseId(userId);
+        // Strategy: select the pair whose technical OR soft-skills course matches the last used course
+        Integer lastUsedCourseId = SessionContext.getActiveCourseId();
+        var allPreps = interviewPrepDAO.getAllInterviewPreps(userId);
+        int selectedTech = -1;
+        int selectedSoft = -1;
+        if (lastUsedCourseId != null && lastUsedCourseId > 0) {
+            for (var prep : allPreps) {
+                if (prep.technicalCourseId == lastUsedCourseId || prep.softskillsCourseId == lastUsedCourseId) {
+                    selectedTech = prep.technicalCourseId;
+                    selectedSoft = prep.softskillsCourseId;
+                    break;
+                }
+            }
+        }
+        // Fallback: latest prep pair
+        if (selectedTech == -1 && !allPreps.isEmpty()) {
+            selectedTech = allPreps.get(0).technicalCourseId;
+            selectedSoft = allPreps.get(0).softskillsCourseId;
+        }
+        // As final fallback, use previous single fetch behavior
+        if (selectedTech == -1) {
+            selectedTech = interviewPrepDAO.getTechnicalCourseId(userId);
+        }
+        if (selectedSoft == -1) {
+            selectedSoft = interviewPrepDAO.getSoftskillsCourseId(userId);
+        }
+        currentTechnicalCourseId = selectedTech;
+        currentSoftskillsCourseId = selectedSoft;
         
         System.out.println("Loaded course IDs - Technical: " + currentTechnicalCourseId + 
                          ", Soft-skills: " + currentSoftskillsCourseId);
@@ -198,7 +238,16 @@ public class DashboardController {
         try {
             stageTrack.getChildren().clear();
 
-            // If activeCourse is not set, fetch the latest one
+            // If activeCourse is not set, prefer session's last used course; else fetch the latest
+            if (activeCourse == null) {
+                Integer preferredCourseId = SessionContext.getActiveCourseId();
+                if (preferredCourseId != null && preferredCourseId > 0) {
+                    GeneratedCourse preferred = courseProgressDAO.getCourseById(preferredCourseId);
+                    if (preferred != null) {
+                        activeCourse = preferred;
+                    }
+                }
+            }
             if (activeCourse == null) {
                 var optionalCourse = courseProgressDAO.findLatestActiveCourseWithChapters(currentUser.getId());
                 if (optionalCourse.isEmpty()) {
@@ -241,10 +290,16 @@ public class DashboardController {
                 return;
             }
 
-            selectedChapter = courseChapters.stream()
-                .filter(chapter -> chapter.getStatus() != Chapter.ChapterStatus.COMPLETED)
+            // Auto-select first incomplete (unlocked) or last if all completed
+            Chapter firstIncomplete = courseChapters.stream()
+                .filter(ch -> ch.getStatus() != Chapter.ChapterStatus.COMPLETED)
                 .findFirst()
-                .orElse(courseChapters.get(courseChapters.size() - 1));
+                .orElse(null);
+            if (firstIncomplete != null) {
+                selectedChapter = firstIncomplete;
+            } else {
+                selectedChapter = courseChapters.get(courseChapters.size() - 1); // all completed
+            }
 
             if (selectedChapter != null) {
                 SessionContext.setActiveChapterId(selectedChapter.getId());
@@ -279,9 +334,37 @@ public class DashboardController {
             return;
         }
 
+        // Refresh counts for all chapters to keep mini labels in sync with DB
+        if (courseProgressDAO != null) {
+            for (Chapter ch : courseChapters) {
+                try {
+                    var counts = courseProgressDAO.refreshChapterCounts(ch.getId());
+                    ch.setTotalQuestions(counts.getOrDefault("total", ch.getTotalQuestions()));
+                    ch.setCompletedQuestions(counts.getOrDefault("completed", ch.getCompletedQuestions()));
+                } catch (SQLException e) {
+                    // Log and continue; stale numbers are acceptable temporarily
+                    System.err.println("Failed to refresh counts for chapter " + ch.getId() + ": " + e.getMessage());
+                }
+            }
+        }
+
+        // Gating: only completed chapters and the first incomplete chapter are unlocked
+        boolean firstIncompleteSeen = false;
+
         for (int index = 0; index < courseChapters.size(); index++) {
             Chapter chapter = courseChapters.get(index);
-            VBox node = createStageNode(chapter, index + 1);
+
+            boolean canClick;
+            if (chapter.getStatus() == Chapter.ChapterStatus.COMPLETED) {
+                canClick = true;
+            } else if (!firstIncompleteSeen) {
+                canClick = true;
+                firstIncompleteSeen = true; // only the first incomplete is unlocked
+            } else {
+                canClick = false; // locked until previous completed
+            }
+
+            VBox node = createStageNode(chapter, index + 1, canClick);
             stageTrack.getChildren().add(node);
 
             if (index < courseChapters.size() - 1) {
@@ -295,7 +378,7 @@ public class DashboardController {
         }
     }
 
-    private VBox createStageNode(Chapter chapter, int displayNumber) {
+    private VBox createStageNode(Chapter chapter, int displayNumber, boolean canClick) {
         VBox wrapper = new VBox(8);
         wrapper.setAlignment(Pos.TOP_CENTER);
         wrapper.getStyleClass().add("stage-node");
@@ -326,7 +409,13 @@ public class DashboardController {
         numberLabel.getStyleClass().add("stage-number");
         circle.getChildren().add(numberLabel);
 
-        circle.setOnMouseClicked(event -> selectChapter(chapter));
+        if (canClick) {
+            circle.setOnMouseClicked(event -> selectChapter(chapter));
+        } else {
+            // Visually indicate locked by reducing opacity and disabling mouse
+            wrapper.setOpacity(0.65);
+            circle.setMouseTransparent(true);
+        }
 
         Label titleLabel = new Label(chapter.getName());
         titleLabel.setWrapText(true);
@@ -344,10 +433,53 @@ public class DashboardController {
         if (chapter == null) {
             return;
         }
+
+        // Enforce gating: prevent selecting chapters beyond the first incomplete
+        if (!isChapterUnlocked(chapter)) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Chapter Locked");
+            alert.setHeaderText("Complete previous chapter first");
+            alert.setContentText("Please complete the previous chapter before unlocking this one.");
+            alert.showAndWait();
+            return;
+        }
         selectedChapter = chapter;
         SessionContext.setActiveChapterId(chapter.getId());
+        // Persist last-used (both course and chapter) for this user
+        try {
+            if (currentUser != null && activeCourse != null) {
+                new com.interviewai.dao.UserDAO().updateLastUsed(currentUser.getId(), activeCourse.getId(), chapter.getId());
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to update last-used: " + e.getMessage());
+        }
         rebuildStageTrack();
         updateSelectedChapterDetails();
+
+        // Update lesson button visibility in sidebar
+        MainLayoutController mainLayout = MainLayoutController.getInstance();
+        if (mainLayout != null && mainLayout.getSidebarController() != null) {
+            mainLayout.getSidebarController().updateLessonButtonVisibility();
+        }
+    }
+
+    /**
+     * Return true if the chapter is selectable: completed, or the first incomplete chapter.
+     */
+    private boolean isChapterUnlocked(Chapter chapter) {
+        int firstIncompleteIndex = -1;
+        for (int i = 0; i < courseChapters.size(); i++) {
+            if (courseChapters.get(i).getStatus() != Chapter.ChapterStatus.COMPLETED) {
+                firstIncompleteIndex = i;
+                break;
+            }
+        }
+        int idx = courseChapters.indexOf(chapter);
+        if (idx < 0) return false;
+        if (chapter.getStatus() == Chapter.ChapterStatus.COMPLETED) return true;
+        // If all completed, nothing to unlock specifically, but allow selection
+        if (firstIncompleteIndex == -1) return true;
+        return idx == firstIncompleteIndex;
     }
 
     private void updateSelectedChapterDetails() {
@@ -356,6 +488,9 @@ public class DashboardController {
             chapterSummaryLabel.setText("Pick a chapter from the path to begin.");
             chapterStatusLabel.setText("Locked");
             chapterProgressLabel.setText("0/0 questions completed");
+            if (chapterProgressBar != null) {
+                chapterProgressBar.setProgress(0);
+            }
             startChapterButton.setDisable(true);
             updateStatusPill(Chapter.ChapterStatus.NOT_STARTED);
             return;
@@ -370,20 +505,51 @@ public class DashboardController {
     chapterStatusLabel.setText(status == Chapter.ChapterStatus.COMPLETED ? "Completed" : status == Chapter.ChapterStatus.IN_PROGRESS ? "In progress" : "Ready to start");
     updateStatusPill(status);
 
+        // Always refresh counts from DB for dynamic accuracy
         int total = selectedChapter.getTotalQuestions();
         int completed = selectedChapter.getCompletedQuestions();
+        if (courseProgressDAO != null) {
+            try {
+                var counts = courseProgressDAO.refreshChapterCounts(selectedChapter.getId());
+                total = counts.getOrDefault("total", total);
+                completed = counts.getOrDefault("completed", completed);
+                // update cached values on selectedChapter
+                selectedChapter.setTotalQuestions(total);
+                selectedChapter.setCompletedQuestions(completed);
+            } catch (SQLException e) {
+                System.err.println("Failed to refresh chapter counts: " + e.getMessage());
+            }
+        }
     String questionLabel = pluralize(total, "question", "questions");
-    chapterProgressLabel.setText(completed + "/" + total + " " + questionLabel + " complete");
+    double pct = total == 0 ? 0.0 : (completed * 100.0 / total);
+    chapterProgressLabel.setText(String.format("%d/%d %s (%.0f%%)", completed, total, questionLabel, pct));
+        if (chapterProgressBar != null) {
+            chapterProgressBar.setProgress(total == 0 ? 0 : (completed / (double) total));
+        }
 
-        boolean chapterDone = status == Chapter.ChapterStatus.COMPLETED || total == 0;
-        startChapterButton.setDisable(chapterDone);
-        if (chapterDone) {
+    boolean chapterDone = status == Chapter.ChapterStatus.COMPLETED || total == 0;
+    boolean unlocked = isChapterUnlocked(selectedChapter);
+    startChapterButton.setDisable(chapterDone || !unlocked);
+    // Set button label based on chapter state
+        if (!unlocked && !chapterDone) {
+            startChapterButton.setText("Locked");
+        } else if (chapterDone) {
             startChapterButton.setText("Completed");
         } else if (status == Chapter.ChapterStatus.IN_PROGRESS) {
             startChapterButton.setText("Continue Learning");
         } else {
             startChapterButton.setText("Start Learning");
         }
+    }
+
+    /**
+     * Public hook to be called after answering a question or returning from lesson view
+     * to ensure the dashboard reflects the latest progress for the selected chapter.
+     */
+    public void refreshSelectedChapterProgress() {
+        if (selectedChapter == null) return;
+        updateSelectedChapterDetails();
+        rebuildStageTrack(); // also update mini progress numbers on nodes
     }
 
     private void updateStatusPill(Chapter.ChapterStatus status) {
@@ -443,7 +609,20 @@ public class DashboardController {
         SessionContext.setActiveCourseId(activeCourse != null ? activeCourse.getId() : 0);
         SessionContext.setActiveChapterId(selectedChapter.getId());
         System.out.println("Start chapter " + selectedChapter.getChapterNumber() + " - navigate to lesson view");
-        // TODO: hook into navigation when lesson scene is ready.
+        
+        // Navigate to lesson view using MainLayout (keeps sidebar persistent)
+        MainLayoutController mainLayout = MainLayoutController.getInstance();
+        if (mainLayout != null) {
+            mainLayout.loadContent("/fxml/LessonView.fxml", "lesson");
+            
+            // Ensure sidebar lesson button is activated after loading
+            javafx.application.Platform.runLater(() -> {
+                if (mainLayout.getSidebarController() != null) {
+                    mainLayout.getSidebarController().setActiveButton("lesson");
+                    System.out.println("✓ Sidebar lesson button activated from dashboard");
+                }
+            });
+        }
     }
 
     // ===== LOAD DAILY QUESTS =====
@@ -600,12 +779,20 @@ public class DashboardController {
     
     @FXML
     private void onCreateNewCourse() {
-        System.out.println("Create new course clicked");
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Create New Course");
-        alert.setHeaderText("Start a New Interview Prep Course");
-        alert.setContentText("This will take you to the onboarding flow to create a new personalized interview course.\n\nFeature coming soon!");
-        alert.showAndWait();
+        System.out.println("Create new course clicked - launching onboarding flow");
+        // Set flag so onboarding knows we came from dashboard
+        SessionContext.setOnboardingFromDashboard(true);
+        try {
+            // Switch root scene to onboarding flow
+            Stage stage = (Stage) startChapterButton.getScene().getWindow();
+            com.interviewai.util.SceneNavigator.switchTo(stage, com.interviewai.util.Routes.ONBOARDING, stage.getWidth()-15, stage.getHeight()-38);
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Navigation Error");
+            alert.setHeaderText("Failed to Open Onboarding");
+            alert.setContentText("Could not open the onboarding flow: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
     
     @FXML
@@ -618,6 +805,7 @@ public class DashboardController {
         }
         
         isViewingTechnical = true;
+        // Ensure we switch to the technical course in the currently selected pair only
         switchToCourse(currentTechnicalCourseId);
         updateCourseMenu();
     }
@@ -632,6 +820,7 @@ public class DashboardController {
         }
         
         isViewingTechnical = false;
+        // Ensure we switch to the soft-skills course in the currently selected pair only
         switchToCourse(currentSoftskillsCourseId);
         updateCourseMenu();
     }
@@ -658,6 +847,14 @@ public class DashboardController {
             if (course != null) {
                 activeCourse = course;
                 SessionContext.setActiveCourseId(courseId);
+                // Persist last-used course (chapter unknown here)
+                try {
+                    if (currentUser != null) {
+                        new com.interviewai.dao.UserDAO().updateLastUsed(currentUser.getId(), courseId, SessionContext.getActiveChapterId());
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to persist last-used course: " + e.getMessage());
+                }
                 
                 // Reload dashboard with new course
                 loadCourseProgress();

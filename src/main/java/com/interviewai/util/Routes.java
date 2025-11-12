@@ -8,7 +8,8 @@ public final class Routes {
 
     public static final String LOGIN = "/fxml/LoginView.fxml";
     public static final String ONBOARDING = "/fxml/OnboardingView.fxml";
-    public static final String DASHBOARD = "/fxml/DashboardView.fxml";
+    public static final String DASHBOARD = "/fxml/MainLayout.fxml"; // Changed to use MainLayout with sidebar
+    public static final String DASHBOARD_CONTENT = "/fxml/DashboardContent.fxml";
     public static final String COURSE_MAP = "/fxml/CourseMapView.fxml";
     public static final String LESSON = "/fxml/LessonView.fxml";
     public static final String SIMULATION = "/fxml/SimulationView.fxml";

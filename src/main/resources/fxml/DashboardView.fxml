@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
@@ -14,6 +13,11 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<!-- 
+    DEPRECATED: This file is kept for backwards compatibility.
+    New approach: Use MainLayout.fxml which includes the persistent sidebar
+    and loads DashboardContent.fxml as the content.
+-->
 <!-- Ultra Modern Professional Dashboard Layout -->
 
 <BorderPane stylesheets="@../css/dashboard.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.DashboardController">
@@ -121,11 +125,11 @@
                                     <items>
                                         <MenuItem text="🎯 Active Course" />
                                         <SeparatorMenuItem />
-                                        <MenuItem text="🎯 Technical" onAction="#onSelectTechnical" />
-                                        <MenuItem text="💬 Soft Skills" onAction="#onSelectSoftSkills" />
+                                        <MenuItem onAction="#onSelectTechnical" text="🎯 Technical" />
+                                        <MenuItem onAction="#onSelectSoftSkills" text="💬 Soft Skills" />
                                         <SeparatorMenuItem />
-                                        <MenuItem text="➕ New Course" onAction="#onCreateNewCourse" />
-                                <MenuItem text="⇄ Switch Course" onAction="#onSwitchCourse" />
+                                        <MenuItem onAction="#onCreateNewCourse" text="➕ New Course" />
+                                <MenuItem onAction="#onSwitchCourse" text="⇄ Switch Course" />
                             </items>
                         </MenuButton>
                         
@@ -146,7 +150,7 @@
                         <VBox styleClass="card, course-map-card">
                             <VBox styleClass="card-header-enhanced">
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="card-icon-large" text="🗺" />
+                                    <Label prefHeight="47.0" prefWidth="59.0" styleClass="card-icon-large" text="🗺" />
                                     <VBox spacing="6">
                                         <Label fx:id="courseTitleLabel" styleClass="card-title-large" text="Your Learning Journey" wrapText="true" />
                                         <Label fx:id="courseSubtitleLabel" styleClass="text-secondary" text="8 chapters • 3 completed" wrapText="true" />
@@ -161,20 +165,20 @@
                         <!-- Enhanced Chapter Detail Card -->
                         <VBox styleClass="card, chapter-detail-card">
                             <VBox styleClass="card-body-enhanced">
-                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                <HBox alignment="CENTER_LEFT" prefHeight="57.0" prefWidth="719.0" spacing="12">
                                     <Label styleClass="chapter-indicator" text="📖" />
                                     <VBox spacing="2">
                                         <Label styleClass="card-label" text="CURRENT CHAPTER" />
+                                      <!-- Status pill placed under chapter title -->
+                                      <Label fx:id="chapterStatusLabel" styleClass="status-pill" text="Ready to start" />
                                     </VBox>
                                 </HBox>
                                 <Label fx:id="chapterTitleLabel" styleClass="chapter-title" text="Introduction to Behavioral Questions" wrapText="true" />
                                 <Label fx:id="chapterSummaryLabel" styleClass="chapter-description" text="Learn the fundamentals of answering behavioral interview questions using the STAR method." wrapText="true" />
 
                                 <HBox alignment="CENTER_LEFT" spacing="20" styleClass="chapter-meta-row">
-                                    <VBox spacing="6" styleClass="meta-item">
-                                        <Label styleClass="meta-label" text="STATUS" />
-                                        <Label fx:id="chapterStatusLabel" styleClass="status-pill, status-pill-active" text="In Progress" />
-                                    </VBox>
+                                    <!-- Left meta slot kept for future data; status moved above, under the title -->
+                                    <VBox spacing="6" styleClass="meta-item" />
                                     <VBox spacing="6" styleClass="meta-item">
                                         <Label styleClass="meta-label" text="PROGRESS" />
                                         <HBox alignment="CENTER_LEFT" spacing="8">
