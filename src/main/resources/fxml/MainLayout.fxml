@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<!-- Main Layout with Persistent Sidebar -->
+<BorderPane stylesheets="@../css/dashboard.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.MainLayoutController">
+    
+    <!-- LEFT: Persistent Sidebar -->
+    <left>
+        <fx:include fx:id="sidebar" source="SidebarComponent.fxml" />
+    </left>
+
+    <!-- CENTER: Dynamic Content Area -->
+    <center>
+        <StackPane fx:id="contentArea" />
+    </center>
+    
+</BorderPane>

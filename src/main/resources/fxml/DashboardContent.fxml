@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Dashboard Content (without sidebar) -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="dashboard-scroll" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.DashboardController">
+    <VBox styleClass="content-wrapper">
+
+        <!-- Enhanced Header Section -->
+        <VBox styleClass="header-block">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label fx:id="welcomeTitleLabel" styleClass="page-title" text="Welcome back, Hassan! 👋" />
+                    <Label styleClass="page-subtitle" text="You're making great progress. Let's keep the momentum going!" wrapText="true" />
+                </VBox>
+                
+                <!-- Course Actions Dropdown -->
+                <MenuButton fx:id="courseMenuButton" styleClass="course-menu-button" text="⚙ Course">
+                    <items>
+                        <MenuItem text="🎯 Active Course" />
+                        <SeparatorMenuItem />
+                        <MenuItem text="🎯 Technical" onAction="#onSelectTechnical" />
+                        <MenuItem text="💬 Soft Skills" onAction="#onSelectSoftSkills" />
+                        <SeparatorMenuItem />
+                        <MenuItem text="➕ New Course" onAction="#onCreateNewCourse" />
+                        <MenuItem text="⇄ Switch Course" onAction="#onSwitchCourse" />
+                    </items>
+                </MenuButton>
+                
+                <VBox styleClass="header-badge">
+                    <Label fx:id="badgeLabel" styleClass="badge-label" text="LEVEL 0" />
+                    <Label fx:id="badgeSublabel" styleClass="badge-sublabel" text="Beginner" />
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <!-- Main Content Grid -->
+        <HBox alignment="TOP_LEFT" styleClass="section-grid">
+
+            <!-- Left Column: Main Content -->
+            <VBox spacing="24" styleClass="main-column" HBox.hgrow="ALWAYS">
+
+                <!-- Enhanced Course Map Card -->
+                <VBox styleClass="card, course-map-card">
+                    <VBox styleClass="card-header-enhanced">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label styleClass="card-icon-large" text="🗺" />
+                            <VBox spacing="6">
+                                <Label fx:id="courseTitleLabel" styleClass="card-title-large" text="Your Learning Journey" wrapText="true" />
+                                <Label fx:id="courseSubtitleLabel" styleClass="text-secondary" text="8 chapters • 3 completed" wrapText="true" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                    <ScrollPane fitToHeight="false" fitToWidth="true" hbarPolicy="AS_NEEDED" pannable="true" styleClass="map-scroll" vbarPolicy="NEVER">
+                        <HBox fx:id="stageTrack" alignment="CENTER_LEFT" spacing="36" styleClass="stage-track" />
+                    </ScrollPane>
+                </VBox>
+
+                <!-- Enhanced Chapter Detail Card -->
+                <VBox styleClass="card, chapter-detail-card">
+                    <VBox styleClass="card-body-enhanced">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label styleClass="chapter-indicator" text="📖" />
+                            <VBox spacing="2">
+                                <Label styleClass="card-label" text="CURRENT CHAPTER" />
+                            </VBox>
+                        </HBox>
+                        <Label fx:id="chapterTitleLabel" styleClass="chapter-title" text="Introduction to Behavioral Questions" wrapText="true" />
+                        <Label fx:id="chapterSummaryLabel" styleClass="chapter-description" text="Learn the fundamentals of answering behavioral interview questions using the STAR method." wrapText="true" />
+
+                        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="chapter-meta-row">
+                            <VBox spacing="6" styleClass="meta-item">
+                                <Label styleClass="meta-label" text="STATUS" />
+                                <Label fx:id="chapterStatusLabel" styleClass="status-pill, status-pill-active" text="In Progress" />
+                            </VBox>
+                            <VBox spacing="6" styleClass="meta-item">
+                                <Label styleClass="meta-label" text="PROGRESS" />
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <ProgressBar fx:id="chapterProgressBar" prefWidth="120" progress="0.4" styleClass="chapter-progress" />
+                                    <Label fx:id="chapterProgressLabel" styleClass="progress-text" text="4/10" />
+                                </HBox>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button fx:id="startChapterButton" onAction="#onStartChapter" styleClass="btn-primary, btn-large">
+                                <graphic>
+                                    <HBox alignment="CENTER" spacing="8">
+                                        <Label styleClass="btn-icon" text="▶ " />
+                                        <Label styleClass="btn-text" text="Start Learning" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </VBox>
+
+                <!-- Enhanced AI Coach Widget -->
+                <VBox styleClass="card, card-accent, coach-card">
+                    <VBox styleClass="card-body">
+                        <HBox alignment="TOP_LEFT" spacing="16">
+                            <Label styleClass="chapter-indicator" text="🤖" />
+                            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label styleClass="coach-title" text="AI Coach" />
+                                    <Label styleClass="coach-badge" text="ACTIVE" />
+                                </HBox>
+                                <Label fx:id="coachMessageLabel" styleClass="coach-message" text="Great job! You're maintaining a 7-day streak. Keep it up and you'll unlock the Achievement Hunter badge! 💪✨" wrapText="true" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <!-- Right Column: Enhanced Stats & Activities -->
+            <VBox spacing="24" styleClass="side-column">
+
+                <!-- Premium Stats Card -->
+                <VBox styleClass="card, stats-card">
+                    <VBox styleClass="card-body">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label styleClass="card-icon-medium" text="📈" />
+                            <Label styleClass="card-title-medium" text="Your Performance" />
+                        </HBox>
+
+                        <VBox styleClass="stat-item-large">
+                            <HBox alignment="CENTER_LEFT" spacing="14">
+                                <Label styleClass="stat-icon-large" text="🔥" />
+                                <VBox spacing="4">
+                                    <Label fx:id="streakLabel" styleClass="stat-value-xlarge" text="7" />
+                                    <Label styleClass="stat-label" text="Day Streak" />
+                                </VBox>
+                            </HBox>
+                            <Label styleClass="stat-caption" text="Longest: 12 days" />
+                        </VBox>
+
+                        <Separator styleClass="card-separator" />
+
+                        <VBox spacing="10" styleClass="stat-item">
+                            <HBox alignment="CENTER_LEFT" spacing="14">
+                                <Label styleClass="stat-icon-large" text="⭐" />
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <HBox alignment="CENTER_LEFT" spacing="10">
+                                        <Label styleClass="stat-value-large" text="1,250" fx:id="xpLabel" />
+                                        <Label styleClass="stat-unit" text="XP" />
+                                    </HBox>
+                                    <ProgressBar prefWidth="200" progress="0.62" styleClass="xp-progress" fx:id="xpProgressBar" />
+                                    <Label styleClass="stat-progress-label" text="750 XP until Level 6" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <Separator styleClass="card-separator" />
+
+                        <HBox alignment="CENTER" spacing="24" styleClass="stat-grid">
+                            <VBox spacing="6" styleClass="stat-block-enhanced">
+                                <Label styleClass="stat-icon" text="✅" />
+                                <Label fx:id="lessonsCompletedLabel" styleClass="stat-value-medium" text="24" />
+                                <Label styleClass="stat-label-small" text="Completed" />
+                            </VBox>
+                            <VBox spacing="6" styleClass="stat-block-enhanced">
+                                <Label styleClass="stat-icon" text="📚" />
+                                <Label fx:id="interviewsLabel" styleClass="stat-value-medium" text="12" />
+                                <Label styleClass="stat-label-small" text="Chapters" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+
+                <!-- Enhanced Leaderboard Preview -->
+                <VBox styleClass="card, leaderboard-card">
+                    <VBox styleClass="card-header">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label styleClass="card-icon-medium, leaderboard-icon" text="🏆" />
+                            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                <Label styleClass="card-title-medium" text="Top Learners" />
+                                <Label styleClass="leaderboard-subtitle" text="Weekly Champions" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                    <Separator styleClass="card-separator" />
+                    <ScrollPane fitToHeight="true" hbarPolicy="NEVER" prefHeight="220.0" styleClass="leaderboard-scroll-pane" vbarPolicy="AS_NEEDED">
+                        <VBox fx:id="leaderboardBox" spacing="10" styleClass="leaderboard-list" />
+                    </ScrollPane>
+                </VBox>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>

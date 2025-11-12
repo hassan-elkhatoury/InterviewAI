@@ -106,6 +106,39 @@ public class UserDAO {
         return null;
     }
 
+    /**
+     * Fetch last used course & chapter IDs for a user. Returns Integer[]{courseId, chapterId} where values may be null.
+     */
+    public Integer[] getLastUsedIds(int userId) throws SQLException {
+        String sql = "SELECT last_course_id, last_chapter_id FROM users WHERE id = ?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Integer courseId = rs.getObject("last_course_id") != null ? rs.getInt("last_course_id") : null;
+                    Integer chapterId = rs.getObject("last_chapter_id") != null ? rs.getInt("last_chapter_id") : null;
+                    return new Integer[]{ courseId, chapterId };
+                }
+            }
+        }
+        return new Integer[]{ null, null };
+    }
+
+    /**
+     * Update last used course/chapter for a user. Pass null to clear a value.
+     */
+    public boolean updateLastUsed(int userId, Integer lastCourseId, Integer lastChapterId) throws SQLException {
+        String sql = "UPDATE users SET last_course_id = ?, last_chapter_id = ? WHERE id = ?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            if (lastCourseId != null) ps.setInt(1, lastCourseId); else ps.setNull(1, java.sql.Types.INTEGER);
+            if (lastChapterId != null) ps.setInt(2, lastChapterId); else ps.setNull(2, java.sql.Types.INTEGER);
+            ps.setInt(3, userId);
+            return ps.executeUpdate() == 1;
+        }
+    }
+
     private static String sha256(String text) {
         try {
             java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");

@@ -12,6 +12,7 @@ public final class SessionContext {
     private static OnboardingData onboardingData;
     private static Integer activeCourseId;
     private static Integer activeChapterId;
+    private static boolean onboardingFromDashboard;
 
     private SessionContext() {}
 
@@ -45,5 +46,14 @@ public final class SessionContext {
 
     public static Integer getActiveChapterId() {
         return activeChapterId;
+    }
+
+    // Track if onboarding was launched from Dashboard "Create New Course"
+    public static void setOnboardingFromDashboard(boolean fromDashboard) {
+        onboardingFromDashboard = fromDashboard;
+    }
+
+    public static boolean isOnboardingFromDashboard() {
+        return onboardingFromDashboard;
     }
 }
