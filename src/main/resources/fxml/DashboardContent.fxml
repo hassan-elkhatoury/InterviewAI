@@ -81,10 +81,6 @@
 
                         <HBox alignment="CENTER_LEFT" spacing="20" styleClass="chapter-meta-row">
                             <VBox spacing="6" styleClass="meta-item">
-                                <Label styleClass="meta-label" text="STATUS" />
-                                <Label fx:id="chapterStatusLabel" styleClass="status-pill, status-pill-active" text="In Progress" />
-                            </VBox>
-                            <VBox spacing="6" styleClass="meta-item">
                                 <Label styleClass="meta-label" text="PROGRESS" />
                                 <HBox alignment="CENTER_LEFT" spacing="8">
                                     <ProgressBar fx:id="chapterProgressBar" prefWidth="120" progress="0.4" styleClass="chapter-progress" />

@@ -1,5 +1,11 @@
 package com.interviewai.controller;
 
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.interviewai.dao.CourseProgressDAO;
 import com.interviewai.dao.ProgressDAO;
 import com.interviewai.dao.QuestionDAO;
@@ -7,20 +13,23 @@ import com.interviewai.model.Chapter;
 import com.interviewai.model.Question;
 import com.interviewai.model.User;
 import com.interviewai.util.SessionContext;
+
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-
-import java.net.URL;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Controller for the modern futuristic lesson/question view

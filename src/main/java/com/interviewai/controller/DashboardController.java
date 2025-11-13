@@ -1,11 +1,24 @@
 package com.interviewai.controller;
 
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import com.interviewai.dao.CourseProgressDAO;
+import com.interviewai.dao.InterviewPrepDAO;
+import com.interviewai.dao.ProgressDAO;
+import com.interviewai.model.Chapter;
+import com.interviewai.model.GeneratedCourse;
+import com.interviewai.model.User;
+import com.interviewai.util.SessionContext;
+
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -17,21 +30,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import com.interviewai.dao.CourseProgressDAO;
-import com.interviewai.dao.InterviewPrepDAO;
-import com.interviewai.dao.ProgressDAO;
-import com.interviewai.model.Chapter;
-import com.interviewai.model.GeneratedCourse;
-import com.interviewai.model.User;
-import com.interviewai.util.SessionContext;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 public class DashboardController {
     
@@ -57,7 +55,6 @@ public class DashboardController {
     @FXML private Label courseSubtitleLabel;
     @FXML private Label chapterTitleLabel;
     @FXML private Label chapterSummaryLabel;
-    @FXML private Label chapterStatusLabel;
     @FXML private Label chapterProgressLabel;
     @FXML private Button startChapterButton;
     @FXML private ProgressBar chapterProgressBar; // progress bar for chapter question completion
@@ -320,10 +317,8 @@ public class DashboardController {
         courseSubtitleLabel.setText("Generate a course to start your journey");
         chapterTitleLabel.setText("Nothing to show");
         chapterSummaryLabel.setText("Create your first interview course to unlock the path.");
-        chapterStatusLabel.setText("Locked");
         chapterProgressLabel.setText("0/0 questions completed");
         startChapterButton.setDisable(true);
-        updateStatusPill(Chapter.ChapterStatus.NOT_STARTED);
         lessonsCompletedLabel.setText("0");
         interviewsLabel.setText("0");
     }
@@ -486,13 +481,11 @@ public class DashboardController {
         if (selectedChapter == null) {
             chapterTitleLabel.setText("Select a chapter to view details");
             chapterSummaryLabel.setText("Pick a chapter from the path to begin.");
-            chapterStatusLabel.setText("Locked");
             chapterProgressLabel.setText("0/0 questions completed");
             if (chapterProgressBar != null) {
                 chapterProgressBar.setProgress(0);
             }
             startChapterButton.setDisable(true);
-            updateStatusPill(Chapter.ChapterStatus.NOT_STARTED);
             return;
         }
 
@@ -502,8 +495,6 @@ public class DashboardController {
         : selectedChapter.getDescription());
 
     Chapter.ChapterStatus status = selectedChapter.getStatus();
-    chapterStatusLabel.setText(status == Chapter.ChapterStatus.COMPLETED ? "Completed" : status == Chapter.ChapterStatus.IN_PROGRESS ? "In progress" : "Ready to start");
-    updateStatusPill(status);
 
         // Always refresh counts from DB for dynamic accuracy
         int total = selectedChapter.getTotalQuestions();
@@ -530,16 +521,29 @@ public class DashboardController {
     boolean chapterDone = status == Chapter.ChapterStatus.COMPLETED || total == 0;
     boolean unlocked = isChapterUnlocked(selectedChapter);
     startChapterButton.setDisable(chapterDone || !unlocked);
+    
     // Set button label based on chapter state
-        if (!unlocked && !chapterDone) {
-            startChapterButton.setText("Locked");
-        } else if (chapterDone) {
-            startChapterButton.setText("Completed");
-        } else if (status == Chapter.ChapterStatus.IN_PROGRESS) {
-            startChapterButton.setText("Continue Learning");
-        } else {
-            startChapterButton.setText("Start Learning");
-        }
+    String buttonText;
+    if (!unlocked && !chapterDone) {
+        buttonText = "Locked";
+    } else if (chapterDone) {
+        buttonText = "Completed";
+    } else if (status == Chapter.ChapterStatus.IN_PROGRESS) {
+        buttonText = "Continue Learning";
+    } else {
+        buttonText = "Start Learning";
+    }
+    
+    // Update button with icon and text
+    HBox buttonContent = new HBox(8);
+    buttonContent.setAlignment(Pos.CENTER);
+    Label icon = new Label("▶ ");
+    icon.getStyleClass().add("btn-icon");
+    Label text = new Label(buttonText);
+    text.getStyleClass().add("btn-text");
+    buttonContent.getChildren().addAll(icon, text);
+    startChapterButton.setGraphic(buttonContent);
+    startChapterButton.setText("");
     }
 
     /**
@@ -550,31 +554,6 @@ public class DashboardController {
         if (selectedChapter == null) return;
         updateSelectedChapterDetails();
         rebuildStageTrack(); // also update mini progress numbers on nodes
-    }
-
-    private void updateStatusPill(Chapter.ChapterStatus status) {
-        List<String> styles = chapterStatusLabel.getStyleClass();
-        styles.removeAll(Arrays.asList("status-pill-locked", "status-pill-active", "status-pill-complete"));
-        if (!styles.contains("status-pill")) {
-            styles.add("status-pill");
-        }
-
-        String nextStyle;
-        switch (status) {
-            case COMPLETED:
-                nextStyle = "status-pill-complete";
-                break;
-            case IN_PROGRESS:
-                nextStyle = "status-pill-active";
-                break;
-            default:
-                nextStyle = "status-pill-locked";
-                break;
-        }
-
-        if (!styles.contains(nextStyle)) {
-            styles.add(nextStyle);
-        }
     }
 
     private String pluralize(int count, String singular, String plural) {
@@ -686,6 +665,8 @@ public class DashboardController {
             // Get top 5 learners for dashboard preview
             List<Map<String, Object>> topUsers = progressDAO.getTopLearners(5);
             
+            System.out.println("Loading leaderboard - found " + topUsers.size() + " users");
+            
             leaderboardBox.getChildren().clear();
             
             int rank = 1;
@@ -693,48 +674,109 @@ public class DashboardController {
                 String username = (String) user.getOrDefault("username", "Unknown");
                 int xpValue = ((Number) user.getOrDefault("total_xp", 0)).intValue();
                 
+                System.out.println("User #" + rank + ": " + username + " - XP: " + xpValue);
+                
                 HBox row = createLeaderboardItem(String.valueOf(rank), username, String.format("%,d", xpValue));
                 leaderboardBox.getChildren().add(row);
                 rank++;
             }
         } catch (SQLException e) {
             System.err.println("Error loading leaderboard: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
     private HBox createLeaderboardItem(String rank, String name, String xp) {
-        HBox item = new HBox(14);
+        HBox item = new HBox(16);
         item.setAlignment(Pos.CENTER_LEFT);
         item.getStyleClass().add("leaderboard-item");
+        item.setMaxWidth(Double.MAX_VALUE);
+        item.setPrefWidth(Double.MAX_VALUE);
         
-        // Rank badge with special styling for top 3
-        Label rankLabel = new Label("#" + rank);
-        rankLabel.getStyleClass().add("leaderboard-rank");
         int rankNum = Integer.parseInt(rank);
+        
+        // Rank badge with medal icons for top 3
+        VBox rankContainer = new VBox(2);
+        rankContainer.setAlignment(Pos.CENTER);
+        rankContainer.setMinWidth(50);
+        rankContainer.setMaxWidth(50);
+        
+        Label rankBadge = new Label();
+        rankBadge.getStyleClass().add("leaderboard-rank-badge");
+        
         if (rankNum == 1) {
-            rankLabel.getStyleClass().add("leaderboard-rank-1");
+            rankBadge.setText("🥇");
+            rankBadge.getStyleClass().add("rank-gold");
         } else if (rankNum == 2) {
-            rankLabel.getStyleClass().add("leaderboard-rank-2");
+            rankBadge.setText("🥈");
+            rankBadge.getStyleClass().add("rank-silver");
         } else if (rankNum == 3) {
-            rankLabel.getStyleClass().add("leaderboard-rank-3");
+            rankBadge.setText("🥉");
+            rankBadge.getStyleClass().add("rank-bronze");
+        } else {
+            rankBadge.setText("#" + rank);
+            rankBadge.getStyleClass().add("rank-number");
         }
         
-        // Name with icon
+        rankContainer.getChildren().add(rankBadge);
+        
+        // Avatar circle with first letter
+        StackPane avatar = new StackPane();
+        avatar.getStyleClass().add("leaderboard-avatar");
+        avatar.setMinSize(40, 40);
+        avatar.setMaxSize(40, 40);
+        
+        Label initial = new Label(name.substring(0, 1).toUpperCase());
+        initial.getStyleClass().add("avatar-initial");
+        avatar.getChildren().add(initial);
+        
+        // Name and rank position
+        VBox nameContainer = new VBox(2);
+        nameContainer.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(nameContainer, Priority.ALWAYS);
+        
         Label nameLabel = new Label(name);
         nameLabel.getStyleClass().add("leaderboard-name");
-        nameLabel.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(nameLabel, Priority.ALWAYS);
         
-        // XP display
-        VBox xpBox = new VBox(2);
-        xpBox.setAlignment(Pos.CENTER_RIGHT);
-        Label xpLabel = new Label(xp);
-        xpLabel.getStyleClass().add("leaderboard-xp");
-        Label xpSubLabel = new Label("XP");
-        xpSubLabel.getStyleClass().add("leaderboard-xp-label");
-        xpBox.getChildren().addAll(xpLabel, xpSubLabel);
+        Label positionLabel = new Label("Rank #" + rank);
+        positionLabel.getStyleClass().add("leaderboard-position");
         
-        item.getChildren().addAll(rankLabel, nameLabel, xpBox);
+        nameContainer.getChildren().addAll(nameLabel, positionLabel);
+        
+        // XP display with progress indicator
+        VBox xpContainer = new VBox(4);
+        xpContainer.setAlignment(Pos.CENTER_RIGHT);
+        xpContainer.setMinWidth(80);
+        
+        HBox xpDisplay = new HBox(4);
+        xpDisplay.setAlignment(Pos.CENTER_RIGHT);
+        
+        Label xpIcon = new Label("⚡");
+        xpIcon.getStyleClass().add("xp-icon");
+        
+        Label xpValue = new Label(xp);
+        xpValue.getStyleClass().add("leaderboard-xp-value");
+        
+        xpDisplay.getChildren().addAll(xpIcon, xpValue);
+        
+        // Progress bar showing relative XP
+        ProgressBar xpBar = new ProgressBar();
+        xpBar.getStyleClass().add("leaderboard-xp-bar");
+        xpBar.setPrefWidth(70);
+        xpBar.setPrefHeight(4);
+        
+        // Calculate progress relative to top player (if this is top, show 100%)
+        double progress = rankNum == 1 ? 1.0 : Math.max(0.3, 1.0 - (rankNum * 0.15));
+        xpBar.setProgress(progress);
+        
+        xpContainer.getChildren().addAll(xpDisplay, xpBar);
+        
+        item.getChildren().addAll(rankContainer, avatar, nameContainer, xpContainer);
+        
+        // Add special styling for top 3
+        if (rankNum <= 3) {
+            item.getStyleClass().add("leaderboard-top-3");
+        }
         
         return item;
     }

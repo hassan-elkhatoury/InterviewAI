@@ -11,7 +11,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/loginView.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/LoginView.fxml"));
             primaryStage.setTitle("InterviewAI");
             primaryStage.setScene(new Scene(root));
             primaryStage.show();

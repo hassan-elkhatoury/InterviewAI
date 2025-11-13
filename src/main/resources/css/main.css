@@ -72,6 +72,7 @@
     -fx-cursor: hand;
     -fx-pref-height: 44px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);
+    -fx-text-fill: #1a1f2e;
 }
 
 /* Primary button (Login, Create Account) */
@@ -173,7 +174,7 @@
 .dark-root {
     -fx-font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
     -fx-font-size: 14px;
-    -fx-background-color: #0f172a; /* slate-900 */
+    -fx-background-color: #0f1419;
 }
 
 /* Container without card, centered column */
@@ -185,7 +186,7 @@
 .title-dark {
     -fx-font-size: 28px;
     -fx-font-weight: 800;
-    -fx-text-fill: #e2e8f0; /* slate-200 */
+    -fx-text-fill: #f1f5f9;
     -fx-padding: 0 0 12 0;
 }
 
@@ -196,56 +197,61 @@
 
 /* Dark inputs */
 .input-dark {
-    -fx-background-color: #0b1220; /* inner background */
+    -fx-background-color: #1a1f2e;
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
-    -fx-border-color: #233041; /* slate-700 */
+    -fx-border-color: #2d3748;
     -fx-border-width: 1.6px;
     -fx-padding: 12px 16px;
-    -fx-text-fill: #e5eef7;
-    -fx-prompt-text-fill: #64748b; /* slate-500 */
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #64748b;
     -fx-pref-height: 48px;
 }
 
 .input-dark:hover {
-    -fx-border-color: #2d3e53;
+    -fx-border-color: #4a5568;
 }
 
 .input-dark:focused {
-    -fx-border-color: #34a6ff; /* blue focus */
-    -fx-effect: dropshadow(gaussian, rgba(52,166,255,0.35), 8, 0, 0, 2);
+    -fx-border-color: #10b981;
+    -fx-effect: dropshadow(gaussian, #10b981, 4, 0.15, 0, 0);
 }
 
-/* Primary blue button */
+/* Primary green button */
 .btn-primary-blue {
-    -fx-background-color: linear-gradient(to bottom, #53b9ff, #249dff);
-    -fx-text-fill: #04121a;
-    -fx-font-weight: 700;
-    -fx-background-radius: 12px;
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #10b981 0%, #059669 100%);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 600;
+    -fx-background-radius: 10px;
     -fx-padding: 12px 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 4, 0, 0, 2);
 }
 
 .btn-primary-blue:hover {
-    -fx-background-color: linear-gradient(to bottom, #6ac3ff, #36a7ff);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #059669 0%, #047857 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+    -fx-translate-y: -1;
 }
 
 .btn-primary-blue:pressed {
-    -fx-background-color: linear-gradient(to bottom, #3aaeff, #1f8fe0);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #047857 0%, #065f46 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 2, 0, 0, 1);
+    -fx-translate-y: 0;
 }
 
 /* Outline light pill button (top-right) */
 .btn-outline-light {
     -fx-background-color: transparent;
     -fx-text-fill: #cbd5e1;
-    -fx-border-color: #2a3a4e;
+    -fx-border-color: #2d3748;
     -fx-border-radius: 999px;
     -fx-background-radius: 999px;
     -fx-padding: 8px 16px;
 }
 
 .btn-outline-light:hover {
-    -fx-border-color: #3a506a;
-    -fx-text-fill: white;
+    -fx-border-color: #10b981;
+    -fx-text-fill: #10b981;
 }
 
 /* Divider with label */
@@ -258,7 +264,7 @@
 /* Social buttons */
 .btn-social {
     -fx-background-color: transparent;
-    -fx-border-color: #223246;
+    -fx-border-color: #2d3748;
     -fx-text-fill: #cbd5e1;
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
@@ -266,7 +272,8 @@
 }
 
 .btn-social:hover {
-    -fx-border-color: #34506b;
+    -fx-border-color: #4a5568;
+    -fx-text-fill: #ffffff;
 }
 
 .footer-text {
@@ -279,14 +286,14 @@
 /* ======== Onboarding Styles ======== */
 /* Progress indicator */
 .progress-dot {
-    -fx-background-color: #233041;
+    -fx-background-color: #2d3748;
     -fx-background-radius: 50%;
     -fx-pref-width: 10px;
     -fx-pref-height: 10px;
 }
 
 .progress-dot-active {
-    -fx-background-color: #34a6ff;
+    -fx-background-color: #10b981;
     -fx-background-radius: 50%;
     -fx-pref-width: 10px;
     -fx-pref-height: 10px;
@@ -310,8 +317,8 @@
 
 /* Option cards (clickable tiles) */
 .option-card {
-    -fx-background-color: #0b1220;
-    -fx-border-color: #233041;
+    -fx-background-color: #1a1f2e;
+    -fx-border-color: #2d3748;
     -fx-border-width: 2px;
     -fx-border-radius: 14px;
     -fx-background-radius: 14px;
@@ -322,19 +329,19 @@
 }
 
 .option-card:hover {
-    -fx-border-color: #2d3e53;
-    -fx-background-color: #0f1829;
+    -fx-border-color: #4a5568;
+    -fx-background-color: #262930;
 }
 
 .option-card-selected {
-    -fx-background-color: #0f1829;
-    -fx-border-color: #34a6ff;
-    -fx-border-width: 2.5px;
-    -fx-effect: dropshadow(gaussian, rgba(52,166,255,0.4), 12, 0, 0, 2);
+    -fx-background-color: #1E2127;
+    -fx-border-color: #10b981;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, #10b981, 6, 0.2, 0, 0);
 }
 
 .option-card-selected:hover {
-    -fx-border-color: #4bb5ff;
+    -fx-border-color: #22C55E;
 }
 
 /* Option emoji/icon */
@@ -354,22 +361,27 @@
 
 /* Navigation buttons */
 .btn-next {
-    -fx-background-color: linear-gradient(to bottom, #53b9ff, #249dff);
-    -fx-text-fill: #04121a;
-    -fx-font-weight: 700;
-    -fx-background-radius: 12px;
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #10b981 0%, #059669 100%);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 600;
+    -fx-background-radius: 10px;
     -fx-padding: 14px 32px;
     -fx-font-size: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 4, 0, 0, 2);
 }
 
 .btn-next:hover {
-    -fx-background-color: linear-gradient(to bottom, #6ac3ff, #36a7ff);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #059669 0%, #047857 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+    -fx-translate-y: -1;
 }
 
 .btn-next:disabled {
-    -fx-background-color: #1e293b;
-    -fx-text-fill: #475569;
-    -fx-opacity: 0.6;
+    -fx-background-color: #2d3748;
+    -fx-text-fill: #64748b;
+    -fx-opacity: 1.0;
+    -fx-effect: none;
+    -fx-cursor: default;
 }
 
 .btn-back {
@@ -385,8 +397,8 @@
 
 /* Upload area */
 .upload-area {
-    -fx-background-color: #0b1220;
-    -fx-border-color: #233041;
+    -fx-background-color: #1a1f2e;
+    -fx-border-color: #2d3748;
     -fx-border-width: 2px;
     -fx-border-style: dashed;
     -fx-border-radius: 12px;
@@ -397,8 +409,9 @@
 }
 
 .upload-area:hover {
-    -fx-border-color: #34a6ff;
-    -fx-background-color: #0f1829;
+    -fx-border-color: #10b981;
+    -fx-background-color: #262930;
+    -fx-effect: dropshadow(gaussian, #10b981, 4, 0.1, 0, 0);
 }
 
 .upload-icon {

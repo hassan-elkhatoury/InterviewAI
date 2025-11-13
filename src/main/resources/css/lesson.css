@@ -304,7 +304,7 @@
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 3);
     -fx-border-width: 0;
-    -fx-transition: all 0.3s ease;
+    -fx-text-fill: #ffffff;
 }
 
 .btn-nav:hover {
@@ -322,25 +322,27 @@
 /* Primary Button - Submit & Next buttons */
 .btn-primary {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #3b82f6 0%, #8b5cf6 50%, #a78bfa 100%);
-    -fx-text-fill: #ffffff;
-    -fx-border-color: rgba(139, 92, 246, 0.4);
-    -fx-border-width: 2;
+    -fx-text-fill: #ffffff !important;
+    -fx-border-color: #8B5CF6;
+    -fx-border-width: 1;
     -fx-border-radius: 12;
 }
 
 .btn-primary:hover {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #2563eb 0%, #7c3aed 50%, #9333ea 100%);
-    -fx-effect: dropshadow(gaussian, rgba(139, 92, 246, 0.8), 16, 0.5, 0, 0);
-    -fx-border-color: rgba(167, 139, 250, 0.6);
+    -fx-effect: dropshadow(gaussian, #8B5CF6, 16, 0.5, 0, 0);
+    -fx-border-color: #A78BFA;
+    -fx-text-fill: #ffffff !important;
 }
 
 .btn-primary:pressed {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1e40af 0%, #6d28d9 50%, #7c3aed 100%);
+    -fx-text-fill: #ffffff !important;
 }
 
 .btn-primary:disabled {
     -fx-background-color: #334155;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #64748b !important;
     -fx-opacity: 0.6;
     -fx-effect: none;
     -fx-border-color: transparent;
@@ -349,26 +351,27 @@
 /* Secondary Button - Previous button */
 .btn-secondary {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #334155 0%, #475569 100%);
-    -fx-text-fill: #e2e8f0;
-    -fx-border-color: rgba(71, 85, 105, 0.5);
-    -fx-border-width: 2;
+    -fx-text-fill: #e2e8f0 !important;
+    -fx-border-color: #475569;
+    -fx-border-width: 1;
     -fx-border-radius: 12;
 }
 
 .btn-secondary:hover {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #475569 0%, #64748b 100%);
-    -fx-effect: dropshadow(gaussian, rgba(71, 85, 105, 0.8), 16, 0.4, 0, 0);
-    -fx-border-color: rgba(100, 116, 139, 0.7);
-    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, #475569, 16, 0.4, 0, 0);
+    -fx-border-color: #64748B;
+    -fx-text-fill: #ffffff !important;
 }
 
 .btn-secondary:pressed {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1e293b 0%, #334155 100%);
+    -fx-text-fill: #e2e8f0 !important;
 }
 
 .btn-secondary:disabled {
     -fx-background-color: #1e293b;
-    -fx-text-fill: #475569;
+    -fx-text-fill: #475569 !important;
     -fx-opacity: 0.5;
     -fx-effect: none;
     -fx-border-color: transparent;
@@ -378,19 +381,21 @@
 .btn-success {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #10b981 0%, #34d399 50%, #6ee7b7 100%);
     -fx-text-fill: #ffffff;
-    -fx-border-color: rgba(52, 211, 153, 0.4);
-    -fx-border-width: 2;
+    -fx-border-color: #34D399;
+    -fx-border-width: 1;
     -fx-border-radius: 12;
 }
 
 .btn-success:hover {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #059669 0%, #10b981 50%, #34d399 100%);
-    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.8), 16, 0.5, 0, 0);
-    -fx-border-color: rgba(110, 231, 183, 0.6);
+    -fx-effect: dropshadow(gaussian, #10B981, 16, 0.5, 0, 0);
+    -fx-border-color: #6EE7B7;
+    -fx-text-fill: #ffffff;
 }
 
 .btn-success:pressed {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #047857 0%, #059669 50%, #10b981 100%);
+    -fx-text-fill: #ffffff;
 }
 
 .btn-success:disabled {
