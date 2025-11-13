@@ -51,7 +51,6 @@ public class LessonController implements Initializable {
     @FXML private Label correctAnswerLabel;
     @FXML private VBox shortAnswerBox;
     @FXML private TextArea shortAnswerField;
-    @FXML private Button previousButton;
     @FXML private Button submitButton;
     @FXML private Button nextButton;
     @FXML private Button finishButton;
@@ -194,10 +193,6 @@ public class LessonController implements Initializable {
         feedbackBanner.setVisible(false);
         feedbackBanner.setManaged(false);
 
-    // Navigation buttons: show Previous; hide Next until submission
-    previousButton.setVisible(true);
-    previousButton.setManaged(true);
-    previousButton.setDisable(index == 0);
 
     submitButton.setVisible(true);
     submitButton.setManaged(true);
@@ -559,15 +554,7 @@ public class LessonController implements Initializable {
         }
     }
 
-    /**
-     * Navigate to previous question
-     */
-    @FXML
-    private void onPrevious() {
-        if (currentQuestionIndex > 0) {
-            displayQuestion(currentQuestionIndex - 1);
-        }
-    }
+   
 
     /**
      * Navigate to next question
@@ -575,6 +562,26 @@ public class LessonController implements Initializable {
     @FXML
     private void onNext() {
         if (currentQuestionIndex < questions.size() - 1) {
+
+            if(currentQuestion.getStatus()==Question.QuestionStatus.IN_PROGRESS){
+
+                try {
+                    
+                    Question.QuestionStatus newStatus = Question.QuestionStatus.COMPLETED;
+                    
+                    questionDAO.updateQuestionStatus(currentQuestion.getId(), newStatus);
+                    // Update the question object's status
+                    currentQuestion.setStatus(newStatus);
+                    
+                
+                 } catch (SQLException e) {
+                    System.err.println("Error updating question status: " + e.getMessage());
+                }
+
+            }
+
+
+
             displayQuestion(currentQuestionIndex + 1);
         }
     }
