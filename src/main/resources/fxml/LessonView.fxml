@@ -9,11 +9,14 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <!-- Modern Futuristic Question View (Sticky Navigation) -->
 
-<BorderPane styleClass="lesson-root" stylesheets="@../css/lesson.css,@../css/dashboard.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LessonController">
+<StackPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.LessonController">
+    <!-- Main Content -->
+    <BorderPane styleClass="lesson-root" stylesheets="@../css/lesson.css,@../css/dashboard.css">
     <!-- TOP: Header -->
     <top>
         <VBox prefHeight="39.0" prefWidth="650.0" styleClass="lesson-header">
@@ -33,14 +36,14 @@
     <!-- CENTER: Scrollable Content -->
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="lesson-scroll" vbarPolicy="AS_NEEDED">
-            <VBox spacing="32" styleClass="lesson-wrapper">
+            <VBox spacing="20" styleClass="lesson-wrapper">
                 <padding>
-                    <Insets bottom="32" left="32" right="32" top="32" />
+                    <Insets bottom="20" left="24" right="24" top="20" />
                 </padding>
                 <!-- Main Question Card -->
-                <VBox prefHeight="270.0" prefWidth="638.0" styleClass="question-card">
+                <VBox styleClass="question-card">
                     <!-- Question Number Badge -->
-                    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="question-header">
+                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="question-header">
                         <Label fx:id="questionNumberBadge" style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(34, 197, 94, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%);" styleClass="question-badge" text="Q1" />
                         <Label fx:id="questionTypeLabel" prefHeight="43.0" prefWidth="107.0" styleClass="question-type-label" text="Multiple Choice" />
                         <Region HBox.hgrow="ALWAYS" />
@@ -57,12 +60,12 @@
                     </VBox>
 
                     <!-- Choices Container -->
-                    <VBox fx:id="choicesContainer" spacing="14" styleClass="choices-container" />
+                    <VBox fx:id="choicesContainer" spacing="10" styleClass="choices-container" />
 
                     <!-- Answer Feedback Banner (Hidden by default) -->
-                    <HBox fx:id="feedbackBanner" alignment="CENTER_LEFT" managed="false" spacing="12" styleClass="feedback-banner" visible="false">
+                    <HBox fx:id="feedbackBanner" alignment="CENTER_LEFT" managed="false" spacing="10" styleClass="feedback-banner" visible="false">
                         <Label fx:id="feedbackIcon" styleClass="feedback-icon" text="✓" />
-                        <VBox spacing="2">
+                        <VBox spacing="4">
                             <Label fx:id="feedbackTitle" styleClass="feedback-title" text="Correct!" />
                             <Label fx:id="feedbackMessage" styleClass="feedback-message" text="Great job! You got it right." />
                         </VBox>
@@ -80,17 +83,29 @@
                             <Label fx:id="correctAnswerLabel" styleClass="correct-answer" text="" />
                         </HBox>
                     </VBox>
-                 <HBox alignment="CENTER" prefHeight="85.0" prefWidth="557.0" spacing="24" styleClass="lesson-navigation-sticky">
-                     <Button fx:id="submitButton" onAction="#onSubmitAnswer" prefHeight="70.0" prefWidth="113.0" style="-fx-background-color: rgba(34, 197, 94, 0.6);" styleClass="btn-nav btn-primary" text="Submit Answer" />
-                     <Button fx:id="nextButton" managed="false" onAction="#onNext" style="-fx-background-color: rgba(34, 197, 94, 0.6);" styleClass="btn-nav btn-primary" text="Next →" visible="false" />
-                     <Region prefHeight="50.0" prefWidth="370.0" HBox.hgrow="ALWAYS" />
-                     <Button fx:id="finishButton" managed="false" onAction="#onFinish" styleClass="btn-nav btn-success" text="✓ Finish Chapter" visible="false" />
-                 </HBox>
-               <VBox.margin>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="20.0" />
-               </VBox.margin>
                 </VBox>
             </VBox>
         </ScrollPane>
     </center>
+    
+    <!-- BOTTOM: Fixed Navigation Bar -->
+    <bottom>
+        <HBox alignment="CENTER" prefHeight="96.0" prefWidth="650.0" spacing="16" styleClass="lesson-navigation-sticky">
+            <padding>
+                <Insets bottom="16" left="24" right="24" top="16" />
+            </padding>
+            <Button fx:id="submitButton" onAction="#onSubmitAnswer" prefHeight="34.0" prefWidth="96.0" style="-fx-background-color: rgba(16, 185, 129, 0.6);" styleClass="btn-nav btn-primary" text="Submit Answer" />
+            <Button fx:id="nextButton" managed="false" onAction="#onNext" prefHeight="34.0" style="-fx-background-color: rgba(16, 185, 129, 0.6);" styleClass="btn-nav btn-primary" text="Next →" visible="false" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="finishButton" managed="false" onAction="#onFinish" styleClass="btn-nav btn-success" text="✓ Finish Chapter" visible="false" />
+        </HBox>
+    </bottom>
 </BorderPane>
+    
+    <!-- Toast Notification Overlay (On top of everything) -->
+    <StackPane fx:id="toastOverlay" alignment="TOP_RIGHT" pickOnBounds="false" styleClass="toast-overlay">
+        <padding>
+            <Insets right="20" top="20" />
+        </padding>
+    </StackPane>
+</StackPane>

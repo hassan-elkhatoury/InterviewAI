@@ -22,7 +22,7 @@
 
 .lesson-header {
     -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, rgba(31, 34, 40, 0.95) 0%, rgba(26, 29, 35, 0.9) 100%);
-    -fx-padding: 28 36;
+    -fx-padding: 20 28;
     -fx-border-color: transparent transparent rgba(59, 130, 246, 0.2) transparent;
     -fx-border-width: 0 0 2 0;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 10, 0, 0, 2);
@@ -71,8 +71,8 @@
 .question-card {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(31, 34, 40, 0.95) 0%, rgba(26, 29, 35, 0.9) 100%);
     -fx-background-radius: 16;
-    -fx-padding: 36;
-    -fx-spacing: 26;
+    -fx-padding: 24;
+    -fx-spacing: 18;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 24, 0, 0, 6);
     -fx-border-color: rgba(59, 130, 246, 0.25);
     -fx-border-radius: 16;
@@ -80,7 +80,7 @@
 }
 
 .question-header {
-    -fx-padding: 0 0 12 0;
+    -fx-padding: 0 0 10 0;
     -fx-border-color: transparent transparent #2d3748 transparent;
     -fx-border-width: 0 0 1 0;
 }
@@ -110,12 +110,12 @@
 }
 
 .question-text {
-    -fx-font-size: 20px;
+    -fx-font-size: 18px;
     -fx-font-weight: 600;
     -fx-text-fill: #f1f5f9;
-    -fx-line-spacing: 4;
+    -fx-line-spacing: 3;
     -fx-wrap-text: true;
-    -fx-padding: 8 0;
+    -fx-padding: 4 0;
 }
 
 /* ==========================================
@@ -128,10 +128,10 @@
 
 .choice-box {
     -fx-background-color: #0f1419;
-    -fx-background-radius: 12;
-    -fx-padding: 18 20;
+    -fx-background-radius: 10;
+    -fx-padding: 14 16;
     -fx-border-color: #2d3748;
-    -fx-border-radius: 12;
+    -fx-border-radius: 10;
     -fx-border-width: 2;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 0, 2);
@@ -207,7 +207,7 @@
 }
 
 .choice-label {
-    -fx-font-size: 16px;
+    -fx-font-size: 15px;
     -fx-text-fill: #e2e8f0;
     -fx-wrap-text: true;
 }
@@ -232,8 +232,8 @@
 .explanation-panel {
     -fx-background-color: rgba(59, 130, 246, 0.08);
     -fx-background-radius: 12;
-    -fx-padding: 20;
-    -fx-spacing: 12;
+    -fx-padding: 16;
+    -fx-spacing: 10;
     -fx-border-color: rgba(59, 130, 246, 0.3);
     -fx-border-radius: 12;
     -fx-border-width: 1;
@@ -290,21 +290,22 @@
 
 /* Sticky bottom navigation (outside scroll) */
 .lesson-navigation-sticky {
-    -fx-padding: 14 24;
-    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, rgba(31, 34, 40, 0.95), rgba(26, 29, 35, 0.95));
-    -fx-border-color: rgba(59, 130, 246, 0.2) transparent transparent transparent;
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, rgba(31, 34, 40, 0.98), rgba(26, 29, 35, 0.98));
+    -fx-border-color: rgba(59, 130, 246, 0.25) transparent transparent transparent;
     -fx-border-width: 2 0 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, -2);
 }
 
 .btn-nav {
-    -fx-font-size: 15px;
+    -fx-font-size: 14px;
     -fx-font-weight: 700;
-    -fx-padding: 14 32;
-    -fx-background-radius: 12;
+    -fx-padding: 12 28;
+    -fx-background-radius: 10;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
     -fx-border-width: 0;
     -fx-text-fill: #ffffff;
+    -fx-min-width: 120px;
 }
 
 .btn-nav:hover {
@@ -411,7 +412,7 @@
    ========================================== */
 
 .feedback-banner {
-    -fx-padding: 20 32;
+    -fx-padding: 14 20;
     -fx-background-color: rgba(16, 185, 129, 0.15);
     -fx-border-color: #10b981 transparent transparent transparent;
     -fx-border-width: 3 0 0 0;
@@ -472,4 +473,40 @@
 }
 .short-answer-area:focused {
     -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 14, 0, 0, 0);
+}
+
+/* ==========================================
+   CUSTOM ALERT NOTIFICATION (IN-PAGE)
+   ========================================== */
+.custom-alert {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 14 20;
+    -fx-spacing: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0, 0, 2);
+}
+
+.custom-alert-error {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+    -fx-border-color: #ef4444 transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+}
+
+.custom-alert-warning {
+    -fx-background-color: rgba(251, 191, 36, 0.15);
+    -fx-border-color: #fbbf24 transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+}
+
+.custom-alert-info {
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+    -fx-border-color: #3b82f6 transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+}
+
+/* ==========================================
+   TOAST OVERLAY (DOESN'T INTERFERE WITH LAYOUT)
+   ========================================== */
+.toast-overlay {
+    -fx-background-color: transparent;
 }

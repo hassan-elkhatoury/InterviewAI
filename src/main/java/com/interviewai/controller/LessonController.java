@@ -18,7 +18,6 @@ import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
@@ -58,6 +57,11 @@ public class LessonController implements Initializable {
     @FXML private Label feedbackIcon;
     @FXML private Label feedbackTitle;
     @FXML private Label feedbackMessage;
+    @FXML private javafx.scene.layout.StackPane toastOverlay;
+
+    // Alert notification components (will be created dynamically)
+    private VBox alertNotification;
+    private VBox toastNotification;
 
     // Data
     private QuestionDAO questionDAO;
@@ -402,9 +406,8 @@ public class LessonController implements Initializable {
      * Show XP gained notification
      */
     private void showXPNotification(int xp) {
-        // Update feedback message to include XP
-        String currentMessage = feedbackMessage.getText();
-        feedbackMessage.setText(currentMessage + " +" + xp + " XP earned! 🎉");
+        // XP notification is now handled in toast notification
+        System.out.println("✓ Awarded " + xp + " XP");
     }
 
     /**
@@ -485,23 +488,88 @@ public class LessonController implements Initializable {
      * Show feedback banner
      */
     private void showFeedback(boolean isCorrect) {
-        feedbackBanner.setVisible(true);
-        feedbackBanner.setManaged(true);
-
-        if (isCorrect) {
-            feedbackBanner.getStyleClass().remove("feedback-banner-incorrect");
-            feedbackIcon.setText("✓");
-            feedbackIcon.getStyleClass().remove("feedback-icon-incorrect");
-            feedbackTitle.setText("Correct!");
-            feedbackTitle.getStyleClass().remove("feedback-title-incorrect");
-            feedbackMessage.setText("Great job! You got it right.");
-        } else {
-            feedbackBanner.getStyleClass().add("feedback-banner-incorrect");
-            feedbackIcon.setText("✗");
-            feedbackIcon.getStyleClass().add("feedback-icon-incorrect");
-            feedbackTitle.setText("Incorrect");
-            feedbackTitle.getStyleClass().add("feedback-title-incorrect");
-            feedbackMessage.setText("Don't worry, check the explanation below to learn more.");
+        // Hide inline feedback banner - we'll use toast instead
+        feedbackBanner.setVisible(false);
+        feedbackBanner.setManaged(false);
+        
+        // Show toast notification
+        showToastNotification(isCorrect);
+    }
+    
+    /**
+     * Show floating toast notification for answer feedback
+     */
+    private void showToastNotification(boolean isCorrect) {
+        // Clear any existing toast from overlay
+        if (toastOverlay != null) {
+            toastOverlay.getChildren().clear();
+        }
+        
+        // Create toast container
+        toastNotification = new VBox(6);
+        toastNotification.setAlignment(Pos.CENTER_LEFT);
+        toastNotification.setMaxWidth(280);
+        toastNotification.setMinWidth(280);
+        toastNotification.setMaxHeight(VBox.USE_PREF_SIZE);
+        toastNotification.setPrefHeight(VBox.USE_COMPUTED_SIZE);
+        toastNotification.setStyle(
+            "-fx-background-color: " + (isCorrect ? 
+                "linear-gradient(from 0% 0% to 100% 100%, rgba(16, 185, 129, 0.96) 0%, rgba(5, 150, 105, 0.96) 100%)" : 
+                "linear-gradient(from 0% 0% to 100% 100%, rgba(239, 68, 68, 0.96) 0%, rgba(220, 38, 38, 0.96) 100%)") + ";" +
+            "-fx-background-radius: 10;" +
+            "-fx-padding: 14 18;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0, 0, 3);" +
+            "-fx-border-color: " + (isCorrect ? "#34d399" : "#f87171") + ";" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 10;" +
+            "-fx-max-height: 100;"
+        );
+        
+        // Icon and title in HBox
+        Label icon = new Label(isCorrect ? "✓" : "✗");
+        icon.setStyle("-fx-font-size: 20px; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
+        
+        Label title = new Label(isCorrect ? "Correct!" : "Incorrect");
+        title.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        
+        HBox headerBox = new HBox(10, icon, title);
+        headerBox.setAlignment(Pos.CENTER_LEFT);
+        
+        // Message
+        Label message = new Label(isCorrect ? 
+            "+" + XP_PER_CORRECT_ANSWER + " XP earned! 🎉" : 
+            "Check the explanation below");
+        message.setStyle("-fx-font-size: 13px; -fx-text-fill: rgba(255, 255, 255, 0.95); -fx-wrap-text: true;");
+        message.setWrapText(true);
+        message.setMaxWidth(250);
+        
+        toastNotification.getChildren().addAll(headerBox, message);
+        
+        // Add to overlay (doesn't affect layout)
+        if (toastOverlay != null) {
+            toastOverlay.getChildren().add(toastNotification);
+            
+            // Fade in animation
+            toastNotification.setOpacity(0);
+            javafx.animation.Timeline fadeIn = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(Duration.ZERO, new javafx.animation.KeyValue(toastNotification.opacityProperty(), 0)),
+                new javafx.animation.KeyFrame(Duration.millis(200), new javafx.animation.KeyValue(toastNotification.opacityProperty(), 1.0))
+            );
+            fadeIn.play();
+            
+            // Auto-hide after 3 seconds with fade out animation
+            PauseTransition pause = new PauseTransition(Duration.seconds(3));
+            pause.setOnFinished(event -> {
+                javafx.animation.Timeline fadeOut = new javafx.animation.Timeline(
+                    new javafx.animation.KeyFrame(Duration.ZERO, new javafx.animation.KeyValue(toastNotification.opacityProperty(), 1.0)),
+                    new javafx.animation.KeyFrame(Duration.millis(300), new javafx.animation.KeyValue(toastNotification.opacityProperty(), 0.0))
+                );
+                fadeOut.setOnFinished(e -> {
+                    toastOverlay.getChildren().clear();
+                });
+                fadeOut.play();
+            });
+            pause.play();
         }
     }
 
@@ -631,14 +699,65 @@ public class LessonController implements Initializable {
     }
 
     /**
+     * Show custom styled alert notification instead of default dialog
+     */
+    private void showCustomAlert(String title, String message, String type) {
+        // Remove any existing alert
+        if (alertNotification != null && choicesContainer.getParent() instanceof VBox) {
+            VBox parent = (VBox) choicesContainer.getParent();
+            parent.getChildren().remove(alertNotification);
+        }
+
+        // Create new alert notification
+        alertNotification = new VBox(8);
+        alertNotification.setStyle(
+            "-fx-background-color: " + (type.equals("error") ? "rgba(239, 68, 68, 0.15)" : "rgba(251, 191, 36, 0.15)") + ";" +
+            "-fx-border-color: " + (type.equals("error") ? "#ef4444" : "#fbbf24") + ";" +
+            "-fx-border-width: 2 0 0 0;" +
+            "-fx-padding: 14 20;" +
+            "-fx-background-radius: 8;" +
+            "-fx-border-radius: 8;"
+        );
+
+        // Icon
+        Label icon = new Label(type.equals("error") ? "⚠" : "ℹ");
+        icon.setStyle("-fx-font-size: 24px; -fx-text-fill: " + (type.equals("error") ? "#ef4444" : "#fbbf24") + ";");
+
+        // Title
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: " + 
+            (type.equals("error") ? "#ef4444" : "#fbbf24") + ";");
+
+        // Message
+        Label messageLabel = new Label(message);
+        messageLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #cbd5e1; -fx-wrap-text: true;");
+        messageLabel.setWrapText(true);
+        messageLabel.setMaxWidth(Double.MAX_VALUE);
+
+        VBox textBox = new VBox(4, titleLabel, messageLabel);
+        HBox contentBox = new HBox(12, icon, textBox);
+        contentBox.setAlignment(Pos.CENTER_LEFT);
+
+        alertNotification.getChildren().add(contentBox);
+
+        // Add to parent container
+        if (choicesContainer.getParent() instanceof VBox) {
+            VBox parent = (VBox) choicesContainer.getParent();
+            int index = parent.getChildren().indexOf(choicesContainer);
+            parent.getChildren().add(index, alertNotification);
+
+            // Auto-hide after 4 seconds
+            PauseTransition pause = new PauseTransition(Duration.seconds(4));
+            pause.setOnFinished(event -> parent.getChildren().remove(alertNotification));
+            pause.play();
+        }
+    }
+
+    /**
      * Show alert dialog
      */
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        showCustomAlert(title, message, "error");
     }
 }
 
