@@ -1,7 +1,7 @@
 package com.interviewai.controller;
 
 import com.interviewai.util.SessionContext;
-import javafx.application.Platform;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -14,6 +14,7 @@ public class SidebarController {
     @FXML private Button dashboardButton;
     @FXML private Button lessonButton;
     @FXML private Button progressButton;
+    @FXML private Button reviewButton;
     @FXML private Button questsButton;
     @FXML private Button leaderboardButton;
     @FXML private Button profileButton;
@@ -75,6 +76,12 @@ public class SidebarController {
                 if (!progressButton.getStyleClass().contains("nav-active")) {
                     progressButton.getStyleClass().add("nav-active");
                     System.out.println("✓ Progress button activated");
+                }
+                break;
+            case "review":
+                if (!reviewButton.getStyleClass().contains("nav-active")) {
+                    reviewButton.getStyleClass().add("nav-active");
+                    System.out.println("✓ Review button activated");
                 }
                 break;
             case "quests":
@@ -141,6 +148,14 @@ public class SidebarController {
     private void onOpenProgress() {
         System.out.println("Progress view - Coming soon!");
         // MainLayoutController.getInstance().loadContent("/fxml/ProgressView.fxml", "progress");
+    }
+
+    @FXML
+    private void onOpenReview() {
+        MainLayoutController mainLayout = MainLayoutController.getInstance();
+        if (mainLayout != null) {
+            mainLayout.loadContent("/fxml/ReviewView.fxml", "review");
+        }
     }
 
     @FXML

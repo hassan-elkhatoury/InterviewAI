@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Review Incorrect Questions View -->
+
+<BorderPane styleClass="review-root" stylesheets="@../css/review.css,@../css/dashboard.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.ReviewController">
+    <!-- TOP: Header -->
+    <top>
+        <VBox styleClass="review-header">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label fx:id="reviewTitleLabel" styleClass="review-title" text="Review Incorrect Questions" />
+                    <Label fx:id="reviewSubtitleLabel" styleClass="review-subtitle" text="Master the questions you missed" />
+                </VBox>
+                <VBox alignment="CENTER_RIGHT" spacing="8">
+                    <HBox spacing="10" alignment="CENTER_RIGHT">
+                        <Label text="📊" styleClass="stats-icon" />
+                        <VBox spacing="2">
+                            <Label fx:id="incorrectCountLabel" styleClass="stats-number" text="12" />
+                            <Label styleClass="stats-label" text="To Review" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- CENTER: Scrollable Content -->
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="review-scroll" vbarPolicy="AS_NEEDED">
+            <VBox spacing="16" styleClass="review-wrapper">
+                <padding>
+                    <Insets bottom="24" left="24" right="24" top="24" />
+                </padding>
+                
+                <!-- Filter Section -->
+                <HBox spacing="12" styleClass="filter-section" alignment="CENTER_LEFT">
+                    <Label text="Filter by:" styleClass="filter-label" />
+                    <Button fx:id="filterAllBtn" styleClass="filter-btn filter-btn-active" text="All (12)" />
+                    <Button fx:id="filterChapterBtn" styleClass="filter-btn" text="Current Chapter (5)" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button fx:id="retryAllBtn" styleClass="btn-retry-all" text="🔄 Retry All" />
+                </HBox>
+
+                <!-- Questions List Container -->
+                <VBox fx:id="questionsContainer" spacing="14" styleClass="questions-list">
+                    <!-- Question Card 1 - Placeholder -->
+                    <VBox styleClass="review-question-card">
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="review-question-header">
+                            <Label styleClass="question-number-badge" text="Q3" />
+                            <Label styleClass="chapter-tag" text="Chapter 2: OOP Basics" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label styleClass="status-badge-incorrect" text="✗ Incorrect" />
+                        </HBox>
+                        
+                        <Label styleClass="review-question-text" text="What is the main principle of Object-Oriented Programming that allows a class to inherit properties from another class?" wrapText="true" />
+                    </VBox>
+
+                    <!-- Question Card 2 - Placeholder -->
+                    <VBox styleClass="review-question-card">
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="review-question-header">
+                            <Label styleClass="question-number-badge" text="Q7" />
+                            <Label styleClass="chapter-tag" text="Chapter 3: Java Basics" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label styleClass="status-badge-incorrect" text="✗ Incorrect" />
+                        </HBox>
+                        
+                        <Label styleClass="review-question-text" text="Which keyword is used to prevent a method from being overridden in a subclass?" wrapText="true" />
+                    </VBox>
+
+                    <!-- Question Card 3 - Placeholder -->
+                    <VBox styleClass="review-question-card">
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="review-question-header">
+                            <Label styleClass="question-number-badge" text="Q15" />
+                            <Label styleClass="chapter-tag" text="Chapter 4: Data Structures" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label styleClass="status-badge-incorrect" text="✗ Incorrect" />
+                        </HBox>
+                        
+                        <Label styleClass="review-question-text" text="What is the time complexity of searching for an element in a balanced Binary Search Tree?" wrapText="true" />
+                    </VBox>
+                    
+                    <!-- Question Card 4 - Placeholder -->
+                    <VBox styleClass="review-question-card">
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="review-question-header">
+                            <Label styleClass="question-number-badge" text="Q18" />
+                            <Label styleClass="chapter-tag" text="Chapter 5: Algorithms" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label styleClass="status-badge-incorrect" text="✗ Incorrect" />
+                        </HBox>
+                        
+                        <Label styleClass="review-question-text" text="Which sorting algorithm has the best average-case time complexity?" wrapText="true" />
+                    </VBox>
+                    
+                    <!-- Question Card 5 - Placeholder -->
+                    <VBox styleClass="review-question-card">
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="review-question-header">
+                            <Label styleClass="question-number-badge" text="Q22" />
+                            <Label styleClass="chapter-tag" text="Chapter 2: OOP Basics" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label styleClass="status-badge-incorrect" text="✗ Incorrect" />
+                        </HBox>
+                        
+                        <Label styleClass="review-question-text" text="What is polymorphism in object-oriented programming?" wrapText="true" />
+                    </VBox>
+
+                    <!-- Empty State (hidden when questions exist) -->
+                    <VBox fx:id="emptyStateBox" managed="false" visible="false" alignment="CENTER" spacing="16" styleClass="empty-state">
+                        <Label styleClass="empty-icon" text="🎉" />
+                        <Label styleClass="empty-title" text="All Caught Up!" />
+                        <Label styleClass="empty-message" text="You don't have any incorrect questions to review." wrapText="true" />
+                        <Button styleClass="btn-primary" text="Continue Learning" />
+                    </VBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <!-- BOTTOM: Action Bar -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="16" styleClass="review-action-bar">
+            <padding>
+                <Insets bottom="16" left="24" right="24" top="16" />
+            </padding>
+            <Button fx:id="backToDashboardBtn" styleClass="btn-nav btn-secondary" text="← Back to Dashboard" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="progressLabel" styleClass="progress-text" text="12 questions to review" />
+            <Button fx:id="startReviewBtn" styleClass="btn-nav btn-primary" text="Start Review →" />
+        </HBox>
+    </bottom>
+</BorderPane>
