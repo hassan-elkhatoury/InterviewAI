@@ -21,8 +21,8 @@
                     <Label fx:id="reviewSubtitleLabel" styleClass="review-subtitle" text="Master the questions you missed" />
                 </VBox>
                 <VBox alignment="CENTER_RIGHT" spacing="8">
-                    <HBox spacing="10" alignment="CENTER_RIGHT">
-                        <Label text="📊" styleClass="stats-icon" />
+                    <HBox alignment="CENTER_RIGHT" spacing="10">
+                        <Label styleClass="stats-icon" text="🔍" />
                         <VBox spacing="2">
                             <Label fx:id="incorrectCountLabel" styleClass="stats-number" text="12" />
                             <Label styleClass="stats-label" text="To Review" />
@@ -42,10 +42,10 @@
                 </padding>
                 
                 <!-- Filter Section -->
-                <HBox spacing="12" styleClass="filter-section" alignment="CENTER_LEFT">
-                    <Label text="Filter by:" styleClass="filter-label" />
-                    <Button fx:id="filterAllBtn" styleClass="filter-btn filter-btn-active" text="All (12)" />
-                    <Button fx:id="filterChapterBtn" styleClass="filter-btn" text="Current Chapter (5)" />
+                <HBox alignment="CENTER_LEFT" spacing="12" styleClass="filter-section">
+                    <Label styleClass="filter-label" text="Filter by:" />
+                    <Button fx:id="filterAllBtn" style="-fx-background-color: none; -fx-border-color: white; -fx-border-radius: 20px; -fx-background-radius: 20px;" styleClass="filter-btn filter-btn-active" text="All (12)" />
+                    <Button fx:id="filterChapterBtn" style="-fx-border-color: white; -fx-border-radius: 20px; -fx-background-radius: 20px;" styleClass="filter-btn" text="Current Chapter (5)" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button fx:id="retryAllBtn" styleClass="btn-retry-all" text="🔄 Retry All" />
                 </HBox>
@@ -113,7 +113,7 @@
                     </VBox>
 
                     <!-- Empty State (hidden when questions exist) -->
-                    <VBox fx:id="emptyStateBox" managed="false" visible="false" alignment="CENTER" spacing="16" styleClass="empty-state">
+                    <VBox fx:id="emptyStateBox" alignment="CENTER" managed="false" spacing="16" styleClass="empty-state" visible="false">
                         <Label styleClass="empty-icon" text="🎉" />
                         <Label styleClass="empty-title" text="All Caught Up!" />
                         <Label styleClass="empty-message" text="You don't have any incorrect questions to review." wrapText="true" />
@@ -130,10 +130,10 @@
             <padding>
                 <Insets bottom="16" left="24" right="24" top="16" />
             </padding>
-            <Button fx:id="backToDashboardBtn" styleClass="btn-nav btn-secondary" text="← Back to Dashboard" />
+            <Button fx:id="backToDashboardBtn" style="-fx-background-color: #22C55E;" styleClass="btn-nav btn-secondary" text="← Back to Dashboard" />
             <Region HBox.hgrow="ALWAYS" />
             <Label fx:id="progressLabel" styleClass="progress-text" text="12 questions to review" />
-            <Button fx:id="startReviewBtn" styleClass="btn-nav btn-primary" text="Start Review →" />
+            <Button fx:id="startReviewBtn" style="-fx-background-color: #22C55E;" styleClass="btn-nav btn-primary" text="Start Review →" />
         </HBox>
     </bottom>
 </BorderPane>

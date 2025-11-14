@@ -117,7 +117,7 @@ public class LessonController implements Initializable {
     private int findFirstUnansweredQuestion() {
         for (int i = 0; i < questions.size(); i++) {
             Question q = questions.get(i);
-            if (q.getStatus() != Question.QuestionStatus.COMPLETED) {
+            if ((q.getStatus() != Question.QuestionStatus.COMPLETED) && (q.getStatus() != Question.QuestionStatus.INCORRECT)) {
                 System.out.println("Found first unanswered question at index: " + i);
                 return i;
             }
@@ -635,7 +635,7 @@ public class LessonController implements Initializable {
 
                 try {
                     
-                    Question.QuestionStatus newStatus = Question.QuestionStatus.COMPLETED;
+                    Question.QuestionStatus newStatus = Question.QuestionStatus.INCORRECT;
                     
                     questionDAO.updateQuestionStatus(currentQuestion.getId(), newStatus);
                     // Update the question object's status

@@ -23,6 +23,7 @@ public class Question {
     public enum QuestionStatus {
         NOT_STARTED,
         IN_PROGRESS,
+        INCORRECT,
         COMPLETED;
 
         public static QuestionStatus fromString(String value) {

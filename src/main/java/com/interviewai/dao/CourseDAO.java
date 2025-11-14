@@ -136,4 +136,33 @@ public class CourseDAO {
 
         return haveCourse;
     }
+
+    /**
+     * Get chapter information by chapter ID
+     * @param chapterId The chapter ID
+     * @return Chapter object with basic info (no questions loaded)
+     */
+    public Chapter getChapterById(int chapterId) throws SQLException {
+        String sql = "SELECT id, chapter_number, name, description, status FROM chapters WHERE id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, chapterId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Chapter chapter = new Chapter();
+                    chapter.setId(rs.getInt("id"));
+                    chapter.setChapterNumber(rs.getInt("chapter_number"));
+                    chapter.setName(rs.getString("name"));
+                    chapter.setDescription(rs.getString("description"));
+                    chapter.setStatus(rs.getString("status"));
+                    return chapter;
+                }
+            }
+        }
+        
+        return null;
+    }
 }

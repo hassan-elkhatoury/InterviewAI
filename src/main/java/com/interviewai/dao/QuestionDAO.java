@@ -1,13 +1,13 @@
 package com.interviewai.dao;
 
-import com.interviewai.model.Question;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.interviewai.model.Question;
 
 /**
  * Data Access Object for managing questions
@@ -149,4 +149,113 @@ public class QuestionDAO {
 
         return null;
     }
+
+
+    /**
+     * Get all incorrect questions for a specific course
+     * @param courseId The course ID to get incorrect questions from
+     * @return List of questions with INCORRECT status
+     */
+    public List<Question> getIncorrectQuestionsByCourseId(int courseId) throws SQLException {
+        List<Question> questions = new ArrayList<>();
+        
+        String sql = "SELECT q.id, q.question, q.question_type, q.correct_answer, q.explanation, q.status, q.chapter_id " +
+                     "FROM questions q " +
+                     "INNER JOIN chapters c ON q.chapter_id = c.id " +
+                     "WHERE c.course_id = ? AND q.status = 'INCORRECT' " +
+                     "ORDER BY q.chapter_id, q.id";
+        
+        List<QuestionData> questionDataList = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, courseId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    QuestionData data = new QuestionData();
+                    data.id = rs.getInt("id");
+                    data.questionText = rs.getString("question");
+                    data.questionType = rs.getString("question_type");
+                    data.correctAnswer = rs.getString("correct_answer");
+                    data.explanation = rs.getString("explanation");
+                    data.status = rs.getString("status");
+                    questionDataList.add(data);
+                }
+            }
+        }
+        
+        // Load choices for each question
+        for (QuestionData data : questionDataList) {
+            List<String> choices = getChoicesForQuestion(data.id);
+            
+            Question question = new Question(
+                data.id,
+                data.questionText,
+                Question.typeFromString(data.questionType),
+                choices,
+                data.correctAnswer,
+                data.explanation
+            );
+            question.setStatus(data.status);
+            questions.add(question);
+        }
+
+        return questions;
+    }
+
+    /**
+     * Get all incorrect questions for a specific chapter
+     * @param chapterId The chapter ID to get incorrect questions from
+     * @return List of questions with INCORRECT status
+     */
+    public List<Question> getIncorrectQuestionsByChapterId(int chapterId) throws SQLException {
+        List<Question> questions = new ArrayList<>();
+        
+        String sql = "SELECT id, question, question_type, correct_answer, explanation, status " +
+                     "FROM questions WHERE chapter_id = ? AND status = 'INCORRECT' " +
+                     "ORDER BY id";
+        
+        List<QuestionData> questionDataList = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, chapterId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    QuestionData data = new QuestionData();
+                    data.id = rs.getInt("id");
+                    data.questionText = rs.getString("question");
+                    data.questionType = rs.getString("question_type");
+                    data.correctAnswer = rs.getString("correct_answer");
+                    data.explanation = rs.getString("explanation");
+                    data.status = rs.getString("status");
+                    questionDataList.add(data);
+                }
+            }
+        }
+        
+        // Load choices for each question
+        for (QuestionData data : questionDataList) {
+            List<String> choices = getChoicesForQuestion(data.id);
+            
+            Question question = new Question(
+                data.id,
+                data.questionText,
+                Question.typeFromString(data.questionType),
+                choices,
+                data.correctAnswer,
+                data.explanation
+            );
+            question.setStatus(data.status);
+            questions.add(question);
+        }
+
+        return questions;
+    }
+
+   
 }

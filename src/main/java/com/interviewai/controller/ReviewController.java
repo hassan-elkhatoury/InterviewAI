@@ -1,12 +1,27 @@
 package com.interviewai.controller;
 
 import java.net.URL;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+
+import com.interviewai.dao.CourseDAO;
+import com.interviewai.dao.QuestionDAO;
+import com.interviewai.model.Chapter;
+import com.interviewai.model.Question;
+import com.interviewai.util.SessionContext;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 /**
@@ -34,14 +49,28 @@ public class ReviewController implements Initializable {
     @FXML private Button startReviewBtn;
     @FXML private Label progressLabel;
 
+    // Data
+    private QuestionDAO questionDAO;
+    private CourseDAO courseDAO;
+    private List<Question> allIncorrectQuestions;
+    private Map<Integer, String> chapterNames; // questionId -> chapterName
+    private boolean filterByCurrentChapter = false;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // TODO: Load incorrect questions from database
+        questionDAO = new QuestionDAO();
+        courseDAO = new CourseDAO();
+        chapterNames = new HashMap<>();
+        allIncorrectQuestions = new ArrayList<>();
+        
         setupEventHandlers();
         loadIncorrectQuestions();
         activateReviewSidebarButton();
     }
     
+    
+
+
     /**
      * Activate the review button in sidebar
      */
@@ -84,24 +113,184 @@ public class ReviewController implements Initializable {
 
     /**
      * Load incorrect questions from database
-     * TODO: Implement database integration
      */
     private void loadIncorrectQuestions() {
-        // Placeholder - will be implemented with real data
-        System.out.println("Loading incorrect questions...");
+        // Clear previous content
+        questionsContainer.getChildren().clear();
+        chapterNames.clear();
         
-        // Update stats
+        // Get current course and chapter
+        Integer courseId = SessionContext.getActiveCourseId();
+        Integer currentChapterId = SessionContext.getActiveChapterId();
+        
+        if (courseId == null) {
+            System.err.println("No active course selected");
+            showEmptyState("No Course Selected", "Please select a course from the dashboard first.");
+            return;
+        }
+        
+        try {
+            // Load incorrect questions based on filter
+            if (filterByCurrentChapter && currentChapterId != null) {
+                allIncorrectQuestions = questionDAO.getIncorrectQuestionsByChapterId(currentChapterId);
+            } else {
+                allIncorrectQuestions = questionDAO.getIncorrectQuestionsByCourseId(courseId);
+            }
+            
+            // Update stats
+            if (incorrectCountLabel != null) {
+                incorrectCountLabel.setText(String.valueOf(allIncorrectQuestions.size()));
+            }
+            if (progressLabel != null) {
+                progressLabel.setText("Showing " + allIncorrectQuestions.size() + " question(s)");
+            }
+            
+            // Check if there are questions to display
+            if (allIncorrectQuestions.isEmpty()) {
+                showEmptyState("No Incorrect Questions", "Great job! You haven't answered any questions incorrectly yet.");
+                return;
+            }
+            
+            // Hide empty state
+            if (emptyStateBox != null) {
+                emptyStateBox.setVisible(false);
+                emptyStateBox.setManaged(false);
+            }
+            
+            // Load chapter names for questions
+            loadChapterNamesForQuestions();
+            
+            // Display all questions
+            for (int i = 0; i < allIncorrectQuestions.size(); i++) {
+                Question question = allIncorrectQuestions.get(i);
+                String chapterName = chapterNames.getOrDefault(question.getId(), "Unknown Chapter");
+                createQuestionCard(question, i + 1, chapterName);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error loading incorrect questions: " + e.getMessage());
+            e.printStackTrace();
+            showEmptyState("Error Loading Questions", "Failed to load incorrect questions from database.");
+        }
+    }
+    
+    /**
+     * Load chapter names for all questions
+     */
+    private void loadChapterNamesForQuestions() {
+        try {
+            // Query database to get chapter info for each question
+            for (Question question : allIncorrectQuestions) {
+                try {
+                    Chapter chapter = getChapterForQuestion(question.getId());
+                    if (chapter != null) {
+                        chapterNames.put(question.getId(), chapter.getName());
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error loading chapter for question " + question.getId() + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading chapter names: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Get chapter for a specific question
+     */
+    private Chapter getChapterForQuestion(int questionId) throws Exception {
+        String sql = "SELECT c.id, c.chapter_number, c.name, c.description, c.status " +
+                     "FROM chapters c " +
+                     "INNER JOIN questions q ON c.id = q.chapter_id " +
+                     "WHERE q.id = ?";
+        
+        try (java.sql.Connection conn = com.interviewai.dao.DBConnection.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, questionId);
+            
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Chapter chapter = new Chapter();
+                    chapter.setId(rs.getInt("id"));
+                    chapter.setChapterNumber(rs.getInt("chapter_number"));
+                    chapter.setName(rs.getString("name"));
+                    chapter.setDescription(rs.getString("description"));
+                    chapter.setStatus(rs.getString("status"));
+                    return chapter;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Show empty state message
+     */
+    private void showEmptyState(String title, String message) {
+        questionsContainer.getChildren().clear();
+        
+        if (emptyStateBox != null) {
+            emptyStateBox.setVisible(true);
+            emptyStateBox.setManaged(true);
+        }
+        
+        // Update counts
         if (incorrectCountLabel != null) {
-            incorrectCountLabel.setText("12");
+            incorrectCountLabel.setText("0");
         }
         if (progressLabel != null) {
-            progressLabel.setText("Showing 3 of 12 questions");
+            progressLabel.setText(message);
         }
+    }
+    
+    /**
+     * Create a question card UI element
+     */
+    private void createQuestionCard(Question question, int displayNumber, String chapterName) {
+        VBox questionCard = new VBox();
+        questionCard.getStyleClass().add("review-question-card");
+        
+        // Question Header
+        HBox questionHeader = new HBox();
+        questionHeader.setAlignment(Pos.CENTER_LEFT);
+        questionHeader.setSpacing(12);
+        questionHeader.getStyleClass().add("review-question-header");
+        
+        // Question number badge
+        Label questionNumber = new Label();
+        questionNumber.setText("Q" + displayNumber);
+        questionNumber.getStyleClass().add("question-number-badge");
+        
+        // Chapter tag
+        Label chapterTag = new Label();
+        chapterTag.setText(chapterName);
+        chapterTag.getStyleClass().add("chapter-tag");
 
-        // Check if there are questions to display
-        // If no questions, show empty state
-        // emptyStateBox.setVisible(true);
-        // emptyStateBox.setManaged(true);
+        // Spacer
+        Region divider = new Region();
+        HBox.setHgrow(divider, Priority.ALWAYS);
+
+        // Status badge
+        Label questionStatus = new Label();
+        questionStatus.setText("Incorrect");
+        questionStatus.getStyleClass().add("status-badge-incorrect");
+
+        // Assemble header
+        questionHeader.getChildren().addAll(questionNumber, chapterTag, divider, questionStatus);
+
+        // Question text
+        Label questionText = new Label();
+        questionText.setText(question.getQuestion());
+        questionText.getStyleClass().add("review-question-text");
+        questionText.setWrapText(true);
+
+        // Assemble card
+        questionCard.getChildren().addAll(questionHeader, questionText);
+        
+        // Add to container
+        questionsContainer.getChildren().add(questionCard);
     }
 
     /**
@@ -110,11 +299,14 @@ public class ReviewController implements Initializable {
     private void onFilterAll() {
         System.out.println("Filter: All questions");
         
+        // Update filter state
+        filterByCurrentChapter = false;
+        
         // Update button styles
         filterAllBtn.getStyleClass().add("filter-btn-active");
         filterChapterBtn.getStyleClass().remove("filter-btn-active");
         
-        // TODO: Load all incorrect questions
+        // Reload questions
         loadIncorrectQuestions();
     }
 
@@ -124,11 +316,21 @@ public class ReviewController implements Initializable {
     private void onFilterByChapter() {
         System.out.println("Filter: Current chapter");
         
+        Integer currentChapterId = SessionContext.getActiveChapterId();
+        if (currentChapterId == null) {
+            System.err.println("No active chapter selected");
+            return;
+        }
+        
+        // Update filter state
+        filterByCurrentChapter = true;
+        
         // Update button styles
         filterChapterBtn.getStyleClass().add("filter-btn-active");
         filterAllBtn.getStyleClass().remove("filter-btn-active");
         
-        // TODO: Load chapter-specific questions
+        // Reload questions
+        loadIncorrectQuestions();
     }
 
     /**
