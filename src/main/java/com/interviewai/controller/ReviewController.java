@@ -22,6 +22,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /**
  * Controller for the Review Incorrect Questions page
@@ -345,14 +346,22 @@ public class ReviewController implements Initializable {
     /**
      * Start reviewing incorrect questions
      */
-    private void onStartReview() {
+    private void onStartReview()  {
         System.out.println("Starting review session");
+        Stage stage = (Stage) progressLabel.getScene().getWindow();
+        // try{
+
+            
+        //     SceneNavigator.switchTo(stage, Routes.REVIEWQUESTIONS, stage.getWidth()-15, stage.getHeight()-38);
+        // } catch(IOException e){
         
-        // TODO: Navigate to lesson view with incorrect questions
-        // For now, just show a message
+        //     System.err.println("failed to load review questions page");
+        // }
+
         MainLayoutController mainLayout = MainLayoutController.getInstance();
         if (mainLayout != null) {
             // Will load ReviewLessonView in the future
+            mainLayout.loadContent("/fxml/ReviewQuestionsView.fxml", "review");
             System.out.println("Review lesson page not yet implemented");
         }
     }

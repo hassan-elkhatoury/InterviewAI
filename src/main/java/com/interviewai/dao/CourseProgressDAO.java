@@ -1,9 +1,5 @@
 package com.interviewai.dao;
 
-import com.interviewai.model.Chapter;
-import com.interviewai.model.GeneratedCourse;
-import com.interviewai.model.Question;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.interviewai.model.Chapter;
+import com.interviewai.model.GeneratedCourse;
+import com.interviewai.model.Question;
 
 /**
  * DAO focused on retrieving learning-path information (courses, chapters, questions)
@@ -38,7 +38,7 @@ public class CourseProgressDAO {
 
     private static final String QUESTION_COUNTS_SQL =
             "SELECT COUNT(*) AS total_questions, " +
-            "SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) AS completed_questions " +
+            "SUM(CASE WHEN status = 'COMPLETED' OR status = 'INCORRECT' THEN 1 ELSE 0 END) AS completed_questions " +
             "FROM questions WHERE chapter_id = ?";
 
     private static final String QUESTIONS_SQL =

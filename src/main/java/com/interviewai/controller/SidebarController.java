@@ -79,8 +79,9 @@ public class SidebarController {
                 }
                 break;
             case "review":
-                if (!reviewButton.getStyleClass().contains("nav-active")) {
+                if (reviewButton != null &&  !reviewButton.getStyleClass().contains("nav-active")) {
                     reviewButton.getStyleClass().add("nav-active");
+                    
                     System.out.println("✓ Review button activated");
                 }
                 break;
