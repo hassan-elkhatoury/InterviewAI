@@ -53,6 +53,9 @@ public class SidebarController {
             lessonButton.getStyleClass().remove("nav-active");
         }
         progressButton.getStyleClass().remove("nav-active");
+        if (reviewButton != null) {
+            reviewButton.getStyleClass().remove("nav-active");
+        }
         questsButton.getStyleClass().remove("nav-active");
         leaderboardButton.getStyleClass().remove("nav-active");
         profileButton.getStyleClass().remove("nav-active");
@@ -147,8 +150,10 @@ public class SidebarController {
 
     @FXML
     private void onOpenProgress() {
-        System.out.println("Progress view - Coming soon!");
-        // MainLayoutController.getInstance().loadContent("/fxml/ProgressView.fxml", "progress");
+       MainLayoutController mainLayout = MainLayoutController.getInstance();
+        if (mainLayout != null) {
+            mainLayout.loadContent("/fxml/ProgressView.fxml", "progress");
+        } 
     }
 
     @FXML

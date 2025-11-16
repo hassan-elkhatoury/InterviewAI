@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- Reusable Sidebar Component -->
+
 <VBox styleClass="sidebar" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.SidebarController">
     <!-- Logo & Branding -->
     <VBox styleClass="sidebar-header">
@@ -24,17 +25,17 @@
     <VBox styleClass="sidebar-nav-section">
         <Label styleClass="nav-section-title" text="MAIN MENU" />
         <VBox styleClass="sidebar-nav">
-            <Button fx:id="dashboardButton" onAction="#onOpenDashboard" styleClass="nav-button, nav-active">
+            <Button fx:id="dashboardButton" onAction="#onOpenDashboard" prefWidth="220.0" styleClass="nav-button, nav-active">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="14">
                         <Label styleClass="nav-icon" text="🏠" />
-                        <Label styleClass="nav-label" text="Dashboard" />
+                        <Label prefHeight="18.0" prefWidth="92.0" styleClass="nav-label" text="Dashboard" />
                     </HBox>
                 </graphic>
             </Button>
             
             <!-- Dynamic Lesson Button - Only shows when chapter is selected -->
-            <Button fx:id="lessonButton" onAction="#onOpenLesson" styleClass="nav-button" visible="false" managed="false">
+            <Button fx:id="lessonButton" managed="false" onAction="#onOpenLesson" prefWidth="220.0" styleClass="nav-button" visible="false">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="14">
                         <Label styleClass="nav-icon" text="📚" />
@@ -43,37 +44,37 @@
                 </graphic>
             </Button>
             
-            <Button fx:id="progressButton" onAction="#onOpenProgress" styleClass="nav-button">
+            <Button fx:id="progressButton" onAction="#onOpenProgress" prefWidth="220.0" styleClass="nav-button">
                 <graphic>
-                    <HBox alignment="CENTER_LEFT" spacing="14">
+                    <HBox alignment="CENTER_LEFT" prefHeight="18.0" prefWidth="109.0" spacing="14">
                         <Label styleClass="nav-icon" text="📊" />
                         <Label styleClass="nav-label" text="Progress" />
                     </HBox>
                 </graphic>
             </Button>
             
-            <Button fx:id="reviewButton" onAction="#onOpenReview" styleClass="nav-button">
+            <Button fx:id="reviewButton" onAction="#onOpenReview" prefHeight="26.0" prefWidth="220.0" styleClass="nav-button">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="14">
                         <Label styleClass="nav-icon" text="🔄" />
-                        <Label styleClass="nav-label" text="Review" />
+                        <Label prefHeight="18.0" prefWidth="98.0" styleClass="nav-label" text="Review" />
                     </HBox>
                 </graphic>
             </Button>
             
-            <Button fx:id="questsButton" onAction="#onOpenQuests" styleClass="nav-button">
+            <Button fx:id="questsButton" onAction="#onOpenQuests" prefWidth="220.0" styleClass="nav-button">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="14">
                         <Label styleClass="nav-icon" text="🎯" />
-                        <Label styleClass="nav-label" text="Quests" />
+                        <Label prefHeight="18.0" prefWidth="92.0" styleClass="nav-label" text="Quests" />
                     </HBox>
                 </graphic>
             </Button>
-            <Button fx:id="leaderboardButton" onAction="#onOpenLeaderboards" styleClass="nav-button">
+            <Button fx:id="leaderboardButton" onAction="#onOpenLeaderboards" prefWidth="220.0" styleClass="nav-button">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="14">
                         <Label styleClass="nav-icon" text="🏆" />
-                        <Label styleClass="nav-label" text="Leaderboard" />
+                        <Label prefHeight="18.0" prefWidth="91.0" styleClass="nav-label" text="Leaderboard" />
                     </HBox>
                 </graphic>
             </Button>
@@ -84,19 +85,19 @@
     <VBox styleClass="sidebar-nav-section">
         <Label styleClass="nav-section-title" text="ACCOUNT" />
         <VBox styleClass="sidebar-nav">
-            <Button fx:id="profileButton" onAction="#onOpenProfile" styleClass="nav-button">
+            <Button fx:id="profileButton" onAction="#onOpenProfile" prefWidth="220.0" styleClass="nav-button">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="14">
                         <Label styleClass="nav-icon" text="👤" />
-                        <Label styleClass="nav-label" text="Profile" />
+                        <Label prefHeight="18.0" prefWidth="91.0"  styleClass="nav-label" text="Profile" />
                     </HBox>
                 </graphic>
             </Button>
-            <Button fx:id="settingsButton" onAction="#onOpenSettings" styleClass="nav-button">
+            <Button fx:id="settingsButton" onAction="#onOpenSettings" prefWidth="220.0" styleClass="nav-button">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="14">
                         <Label styleClass="nav-icon" text="⚙" />
-                        <Label styleClass="nav-label" text="Settings" />
+                        <Label prefHeight="18.0" prefWidth="92.0" styleClass="nav-label" text="Settings" />
                     </HBox>
                 </graphic>
             </Button>
