@@ -416,19 +416,27 @@ public class LessonController implements Initializable {
     private void checkAndUpdateChapterCompletion() {
         try {
             Integer chapterId = SessionContext.getActiveChapterId();
-            if (chapterId == null) return;
+            if (chapterId == null) {
+                System.out.println("⚠ Cannot check chapter completion: No active chapter ID");
+                return;
+            }
             
+            System.out.println("🔍 Checking chapter " + chapterId + " completion status...");
             boolean allCompleted = courseProgressDAO.areAllQuestionsCompleted(chapterId);
+            
+            System.out.println("📊 All questions answered? " + allCompleted);
             
             if (allCompleted) {
                 courseProgressDAO.updateChapterStatus(chapterId, Chapter.ChapterStatus.COMPLETED);
-                System.out.println("✓ Chapter " + chapterId + " marked as COMPLETED");
+                System.out.println("✅ Chapter " + chapterId + " marked as COMPLETED");
             } else {
                 // Mark chapter as IN_PROGRESS if not already
                 courseProgressDAO.ensureChapterInProgress(chapterId);
+                System.out.println("📝 Chapter " + chapterId + " marked as IN_PROGRESS");
             }
         } catch (SQLException e) {
-            System.err.println("Error checking chapter completion: " + e.getMessage());
+            System.err.println("❌ Error checking chapter completion: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -659,9 +667,26 @@ public class LessonController implements Initializable {
      */
     @FXML
     private void onFinish() {
+        // Mark current question as INCORRECT if still IN_PROGRESS
+        if(currentQuestion.getStatus()==Question.QuestionStatus.IN_PROGRESS){
+            try {
+                Question.QuestionStatus newStatus = Question.QuestionStatus.INCORRECT;
+                questionDAO.updateQuestionStatus(currentQuestion.getId(), newStatus);
+                // Update the question object's status
+                currentQuestion.setStatus(newStatus);
+            } catch (SQLException e) {
+                System.err.println("Error updating question status: " + e.getMessage());
+            }
+        }
+
+        // Check if all questions are completed and update chapter status
+        checkAndUpdateChapterCompletion();
+
         // Refresh dashboard progress before navigating back
         MainLayoutController mainLayout = MainLayoutController.getInstance();
+            
         if (mainLayout != null) {
+            
             mainLayout.loadContent("/fxml/DashboardContent.fxml", "dashboard");
             
             // Refresh dashboard chapter progress after a short delay to ensure view is loaded

@@ -55,7 +55,7 @@ public class CourseProgressDAO {
             "UPDATE questions SET status = ? WHERE id = ?";
 
     private static final String REMAINING_QUESTIONS_SQL =
-            "SELECT COUNT(*) AS remaining FROM questions WHERE chapter_id = ? AND status <> 'COMPLETED'";
+            "SELECT COUNT(*) AS remaining FROM questions WHERE chapter_id = ? AND (status = 'NOT_STARTED' OR status = 'IN_PROGRESS')";
 
     private static final String SINGLE_CHAPTER_SQL =
             "SELECT id, course_id, chapter_number, name, description, status " +
@@ -195,7 +195,9 @@ public class CourseProgressDAO {
             stmt.setInt(1, chapterId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("remaining") == 0;
+                    int remaining = rs.getInt("remaining");
+                    System.out.println("📊 Chapter " + chapterId + " has " + remaining + " unanswered questions (NOT_STARTED or IN_PROGRESS)");
+                    return remaining == 0;
                 }
             }
         }
