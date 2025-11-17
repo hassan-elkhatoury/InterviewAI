@@ -1,7 +1,17 @@
 package com.interviewai.dao;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * ProgressDAO - Handles all progress-related database operations.
@@ -12,6 +22,8 @@ public class ProgressDAO {
     /**
      * Get total XP for a user from all their progress records
      */
+
+    
     public int getTotalXPForUser(int userId) throws SQLException {
         String query = "SELECT COALESCE(SUM(xp), 0) as total_xp FROM progress WHERE user_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -24,6 +36,40 @@ public class ProgressDAO {
         }
         return 0;
     }
+
+   public Map<String, Integer> getLast7DaysXp(int userId) throws SQLException {
+
+    String query =
+        "SELECT xp, DATE(last_updated) AS day_date " +
+        "FROM progress " +
+        "WHERE user_id = ? " +
+        "AND last_updated >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) " +
+        "ORDER BY last_updated ASC";
+
+    Map<String, Integer> xpByDay = new LinkedHashMap<>();
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        stmt.setInt(1, userId);
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            int xp = rs.getInt("xp");
+            LocalDate date = rs.getDate("day_date").toLocalDate();
+
+            // Convert date → day name (e.g., "Monday")
+            String dayName = date.getDayOfWeek()
+                                 .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+            // Sum XP for that day
+            xpByDay.put(dayName, xpByDay.getOrDefault(dayName, 0) + xp);
+        }
+    }
+
+    return xpByDay;
+}
+
     
     /**
      * Calculate user's current streak (days of consecutive activity)

@@ -1,7 +1,13 @@
 package com.interviewai.controller;
 
 import java.net.URL;
+import java.sql.SQLException;
+import java.util.Map;
 import java.util.ResourceBundle;
+
+import com.interviewai.dao.ProgressDAO;
+import com.interviewai.model.User;
+import com.interviewai.util.SessionContext;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -63,10 +69,15 @@ public class ProgressController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setupEventHandlers();
-        loadPlaceholderData();
-        setupCharts();
-        activateProgressSidebarButton();
+        try {
+            setupEventHandlers();
+            loadPlaceholderData();
+            setupCharts();
+            activateProgressSidebarButton();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle the exception appropriately, e.g., show an error message or log it
+        }
     }
 
     /**
@@ -99,7 +110,7 @@ public class ProgressController implements Initializable {
     /**
      * Setup charts with placeholder data
      */
-    private void setupCharts() {
+    private void setupCharts() throws SQLException {
         setupXPChart();
         setupStreakChart();
     }
@@ -107,25 +118,30 @@ public class ProgressController implements Initializable {
     /**
      * Setup XP Line Chart with placeholder data
      */
-    private void setupXPChart() {
+    private void setupXPChart() throws SQLException {
         if (xpChart == null) return;
 
-        // Clear any existing data
-        xpChart.getData().clear();
+        User user = SessionContext.getCurrentUser();
 
-        // Create series for XP data
+        ProgressDAO progress = new ProgressDAO();
+        Map<String, Integer> last7DaysXp = progress.getLast7DaysXp(user.getId());
+
         XYChart.Series<String, Number> xpSeries = new XYChart.Series<>();
         xpSeries.setName("Daily XP");
+        xpChart.getData().clear();
 
-        // Placeholder data for last 7 days
-        xpSeries.getData().add(new XYChart.Data<>("Mon", 320));
-        xpSeries.getData().add(new XYChart.Data<>("Tue", 280));
-        xpSeries.getData().add(new XYChart.Data<>("Wed", 420));
-        xpSeries.getData().add(new XYChart.Data<>("Thu", 380));
-        xpSeries.getData().add(new XYChart.Data<>("Fri", 450));
-        xpSeries.getData().add(new XYChart.Data<>("Sat", 290));
-        xpSeries.getData().add(new XYChart.Data<>("Sun", 310));
+        if (last7DaysXp != null && !last7DaysXp.isEmpty()) {
 
+            for (Map.Entry<String, Integer> entry : last7DaysXp.entrySet()) {
+
+                String day = entry.getKey();
+                Integer xp = entry.getValue();
+
+                xpSeries.getData().add(new XYChart.Data<>(day, xp));
+            }
+        }
+       
+       
         // Add series to chart
         xpChart.getData().add(xpSeries);
         
@@ -285,7 +301,7 @@ public class ProgressController implements Initializable {
      * Refresh progress data
      * Call this method when returning to the progress page to update stats
      */
-    public void refreshProgressData() {
+    public void refreshProgressData() throws SQLException {
         System.out.println("Refreshing progress data");
         
         // TODO: In production, fetch latest data from database
