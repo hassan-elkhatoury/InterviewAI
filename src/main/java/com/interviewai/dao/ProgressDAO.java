@@ -1,6 +1,7 @@
 package com.interviewai.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,6 +69,56 @@ public class ProgressDAO {
     }
 
     return xpByDay;
+}
+
+
+public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException {
+    // Calculate the date 7 days ago
+    LocalDate today = LocalDate.now();
+    LocalDate sevenDaysAgo = today.minusDays(6); // includes today
+
+    String query = "SELECT xp, DATE(last_updated) AS day_date " +
+                   "FROM progress " +
+                   "WHERE user_id = ? " +
+                   "AND last_updated >= ? " +
+                   "ORDER BY last_updated ASC";
+
+    // Initialize map with all last 7 days set to false
+    Map<String, Boolean> progressByDay = new LinkedHashMap<>();
+    for (int i = 0; i < 7; i++) {
+        LocalDate date = sevenDaysAgo.plusDays(i);
+        String dayName = date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        progressByDay.put(dayName, false);
+    }
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        stmt.setInt(1, userId);
+        stmt.setDate(2, Date.valueOf(sevenDaysAgo));
+
+        ResultSet rs = stmt.executeQuery();
+
+        // Track XP per day
+        Map<LocalDate, Integer> xpPerDay = new HashMap<>();
+        while (rs.next()) {
+            int xp = rs.getInt("xp");
+            LocalDate date = rs.getDate("day_date").toLocalDate();
+
+            xpPerDay.put(date, Math.max(xpPerDay.getOrDefault(date, 0), xp));
+        }
+
+        // Compare XP to see if any progress was made
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = sevenDaysAgo.plusDays(i);
+            String dayName = date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+            // If XP exists and > 0, mark progress as true
+            progressByDay.put(dayName, xpPerDay.getOrDefault(date, 0) > 0);
+        }
+    }
+
+    return progressByDay;
 }
 
     

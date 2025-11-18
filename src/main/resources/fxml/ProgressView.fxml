@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.chart.LineChart?>
-<?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.chart.BarChart?>
-<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.paint.LinearGradient?>
+<?import javafx.scene.paint.Stop?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
 
 <!-- Progress Overview View -->
 
@@ -31,7 +38,7 @@
                 <HBox alignment="CENTER_RIGHT" spacing="20">
                     <VBox alignment="CENTER" spacing="2">
                         <Label styleClass="stats-icon" text="⚡" />
-                        <Label fx:id="xpLabel" styleClass="stats-number" text="2,450" />
+                        <Label styleClass="stats-number" text="2,450" fx:id="xpLabel" />
                         <Label styleClass="stats-label" text="Total XP" />
                     </VBox>
                     <VBox alignment="CENTER" spacing="2">
@@ -70,7 +77,7 @@
                     <!-- XP Progress Chart -->
                     <VBox spacing="12" styleClass="chart-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
                         <Label styleClass="chart-title" text="⚡ XP Progress (Last 7 Days)" />
-                        <LineChart fx:id="xpChart" animated="false" createSymbols="true" legendVisible="false" styleClass="xp-line-chart">
+                        <LineChart animated="false" createSymbols="true" legendVisible="false" styleClass="xp-line-chart" fx:id="xpChart">
                             <xAxis>
                                 <CategoryAxis side="BOTTOM" styleClass="chart-axis" />
                             </xAxis>
@@ -81,16 +88,274 @@
                     </VBox>
                     
                     <!-- Streak Activity Chart -->
-                    <VBox spacing="12" styleClass="chart-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <Label styleClass="chart-title" text="🔥 Activity Streak (Last 7 Days)" />
-                        <BarChart fx:id="streakChart" animated="false" barGap="3" categoryGap="10" legendVisible="false" styleClass="streak-bar-chart">
-                            <xAxis>
-                                <CategoryAxis side="BOTTOM" styleClass="chart-axis" />
-                            </xAxis>
-                            <yAxis>
-                                <NumberAxis side="LEFT" styleClass="chart-axis" />
-                            </yAxis>
-                        </BarChart>
+                    <VBox alignment="CENTER" spacing="12" styleClass="chart-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                  <ImageView fitHeight="125.0" fitWidth="112.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../../../../../Users/pp/Downloads/NicePng_emoji-fire-png_421566.png" />
+                     </image>
+                  </ImageView>
+                        <Label fx:id="streakCount" prefHeight="94.0" prefWidth="502.0" style="-fx-alignment: center;" styleClass="streak-count" text="4" textAlignment="CENTER">
+                     <font>
+                        <Font size="39.0" />
+                     </font></Label>
+                  <Label prefHeight="37.0" prefWidth="262.0" style="-fx-alignment: center;" text="Days Streak" textAlignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="37.0" />
+                     </font>
+                  </Label>
+                  <HBox fx:id="streakDaysContainer" prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(31, 34, 40, 0.95) 0%, rgba(26, 29, 35, 0.9) 1rgba(30, 41, 59, 0.3)00%); -fx-background-radius: 20px;" styleClass="goal-item">
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="72.0">
+                           <children>
+                              <Label prefHeight="32.0" prefWidth="100.0" style="-fx-alignment: center;" text="Mon" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <StackPane prefHeight="150.0" prefWidth="200.0">
+                                 <children>
+                                    <Circle radius="18.0" strokeType="INSIDE" style="-fx-fill: linear-gradient(from 25.7576% 0.0% to 100.0% 100.0%, #27b159 0.0%, #006323 100.0%); -fx-stroke: linear-gradient(from 25.7576% 0.0% to 100.0% 100.0%, #27b159 0.0%, #053b0f 100.0%);" styleClass="streak-checked">
+                                       <stroke>
+                                          <LinearGradient endX="1.0" endY="1.0" startX="0.257575764800563">
+                                             <stops>
+                                                <Stop>
+                                                   <color>
+                                                      <Color red="0.1518128663301468" green="0.6947368383407593" blue="0.3508850038051605" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="1.0">
+                                                   <color>
+                                                      <Color red="0.01801169663667679" green="0.23157894611358643" blue="0.060725145041942596" />
+                                                   </color>
+                                                </Stop>
+                                             </stops>
+                                          </LinearGradient>
+                                       </stroke>
+                                       <fill>
+                                          <LinearGradient endX="1.0" endY="1.0" startX="0.257575764800563">
+                                             <stops>
+                                                <Stop>
+                                                   <color>
+                                                      <Color red="0.1518128663301468" green="0.6947368383407593" blue="0.3508850038051605" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="1.0">
+                                                   <color>
+                                                      <Color green="0.38947367668151855" blue="0.13631579279899597" />
+                                                   </color>
+                                                </Stop>
+                                             </stops>
+                                          </LinearGradient>
+                                       </fill>
+                                    </Circle>
+                                    <Label style="-fx-text-fill: #043b18;" text="✔" textFill="#043b18">
+                                       <font>
+                                          <Font name="Ebrima" size="19.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </StackPane>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="72.0">
+                           <children>
+                              <Label prefHeight="32.0" prefWidth="100.0" style="-fx-alignment: center;" text="Twe" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <StackPane prefHeight="150.0" prefWidth="200.0">
+                                 <children>
+                                    <Circle fill="#151515" radius="18.0" strokeType="INSIDE" style="-fx-stroke: linear-gradient(from 25.7576% 0.0% to 100.0% 100.0%, #27b05994 0.0%, #053b0fdc 100.0%); -fx-fill: #151515;" styleClass="streak-unchecked">
+                                       <stroke>
+                                          <LinearGradient endX="1.0" endY="1.0" startX="0.257575764800563">
+                                             <stops>
+                                                <Stop>
+                                                   <color>
+                                                      <Color red="0.1518000066280365" green="0.6899999976158142" blue="0.3491399884223938" opacity="0.5805471539497375" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="1.0">
+                                                   <color>
+                                                      <Color red="0.018400000408291817" green="0.23000000417232513" blue="0.06072000041604042" opacity="0.8632218837738037" />
+                                                   </color>
+                                                </Stop>
+                                             </stops>
+                                          </LinearGradient>
+                                       </stroke>
+                                    </Circle>
+                                    <Label textFill="WHITE" />
+                                 </children>
+                              </StackPane>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="72.0">
+                           <children>
+                              <Label prefHeight="32.0" prefWidth="100.0" style="-fx-alignment: center;" text="The" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <StackPane prefHeight="150.0" prefWidth="200.0">
+                                 <children>
+                                    <Circle fill="#151515" radius="18.0" strokeType="INSIDE" style="-fx-stroke: linear-gradient(from 25.7576% 0.0% to 100.0% 100.0%, #27b05994 0.0%, #053b0fdc 100.0%);">
+                                       <stroke>
+                                          <LinearGradient endX="1.0" endY="1.0" startX="0.257575764800563">
+                                             <stops>
+                                                <Stop>
+                                                   <color>
+                                                      <Color red="0.1518128663301468" green="0.6947368383407593" blue="0.3508850038051605" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="0.4414634146341463">
+                                                   <color>
+                                                      <Color red="0.15294118225574493" green="0.6901960968971252" blue="0.3490196168422699" opacity="0.5799999833106995" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="1.0">
+                                                   <color>
+                                                      <Color green="0.38947367668151855" blue="0.13631579279899597" />
+                                                   </color>
+                                                </Stop>
+                                             </stops>
+                                          </LinearGradient>
+                                       </stroke>
+                                    </Circle>
+                                    <Label textFill="WHITE" />
+                                 </children>
+                              </StackPane>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="72.0">
+                           <children>
+                              <Label prefHeight="32.0" prefWidth="100.0" style="-fx-alignment: center;" text="Wed" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <StackPane prefHeight="150.0" prefWidth="200.0">
+                                 <children>
+                                    <Circle fill="#151515" radius="18.0" strokeType="INSIDE" style="-fx-stroke: linear-gradient(from 25.7576% 0.0% to 100.0% 100.0%, #27b05994 0.0%, #053b0fdc 100.0%);">
+                                       <stroke>
+                                          <LinearGradient endX="1.0" endY="1.0" startX="0.257575764800563">
+                                             <stops>
+                                                <Stop>
+                                                   <color>
+                                                      <Color red="0.1518128663301468" green="0.6947368383407593" blue="0.3508850038051605" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="1.0">
+                                                   <color>
+                                                      <Color green="0.38947367668151855" blue="0.13631579279899597" />
+                                                   </color>
+                                                </Stop>
+                                             </stops>
+                                          </LinearGradient>
+                                       </stroke>
+                                    </Circle>
+                                    <Label textFill="WHITE" />
+                                 </children>
+                              </StackPane>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="72.0">
+                           <children>
+                              <Label prefHeight="32.0" prefWidth="100.0" style="-fx-alignment: center;" text="Fri" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <StackPane prefHeight="150.0" prefWidth="200.0">
+                                 <children>
+                                    <Circle fill="#151515" radius="18.0" strokeType="INSIDE" style="-fx-stroke: linear-gradient(from 25.7576% 0.0% to 100.0% 100.0%, #27b05994 0.0%, #053b0fdc 100.0%);">
+                                       <stroke>
+                                          <LinearGradient endX="1.0" endY="1.0" startX="0.257575764800563">
+                                             <stops>
+                                                <Stop>
+                                                   <color>
+                                                      <Color red="0.1518128663301468" green="0.6947368383407593" blue="0.3508850038051605" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="1.0">
+                                                   <color>
+                                                      <Color green="0.38947367668151855" blue="0.13631579279899597" />
+                                                   </color>
+                                                </Stop>
+                                             </stops>
+                                          </LinearGradient>
+                                       </stroke>
+                                    </Circle>
+                                    <Label textFill="WHITE" />
+                                 </children>
+                              </StackPane>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="72.0">
+                           <children>
+                              <Label prefHeight="32.0" prefWidth="100.0" style="-fx-alignment: center;" text="Sat" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <StackPane prefHeight="150.0" prefWidth="200.0">
+                                 <children>
+                                    <Circle fill="#151515" radius="18.0" strokeType="INSIDE" style="-fx-stroke: linear-gradient(from 25.7576% 0.0% to 100.0% 100.0%, #27b05994 0.0%, #053b0fdc 100.0%);">
+                                       <stroke>
+                                          <LinearGradient endX="1.0" endY="1.0" startX="0.257575764800563">
+                                             <stops>
+                                                <Stop>
+                                                   <color>
+                                                      <Color red="0.1518128663301468" green="0.6947368383407593" blue="0.3508850038051605" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="1.0">
+                                                   <color>
+                                                      <Color green="0.38947367668151855" blue="0.13631579279899597" />
+                                                   </color>
+                                                </Stop>
+                                             </stops>
+                                          </LinearGradient>
+                                       </stroke>
+                                    </Circle>
+                                    <Label textFill="WHITE" />
+                                 </children>
+                              </StackPane>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="72.0">
+                           <children>
+                              <Label prefHeight="32.0" prefWidth="100.0" style="-fx-alignment: center;" text="Sun" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <StackPane prefHeight="150.0" prefWidth="200.0">
+                                 <children>
+                                    <Circle fill="#151515" radius="18.0" strokeType="INSIDE" style="-fx-stroke: linear-gradient(from 25.7576% 0.0% to 100.0% 100.0%, #27b05994 0.0%, #053b0fdc 100.0%);">
+                                       <stroke>
+                                          <LinearGradient endX="1.0" endY="1.0" startX="0.257575764800563">
+                                             <stops>
+                                                <Stop>
+                                                   <color>
+                                                      <Color red="0.1518128663301468" green="0.6947368383407593" blue="0.3508850038051605" />
+                                                   </color>
+                                                </Stop>
+                                                <Stop offset="1.0">
+                                                   <color>
+                                                      <Color green="0.38947367668151855" blue="0.13631579279899597" />
+                                                   </color>
+                                                </Stop>
+                                             </stops>
+                                          </LinearGradient>
+                                       </stroke>
+                                    </Circle>
+                                    <Label textFill="WHITE" />
+                                 </children>
+                              </StackPane>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
                     </VBox>
                 </GridPane>
 

@@ -11,13 +11,17 @@ import com.interviewai.util.SessionContext;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 
 /**
  * Controller for the Progress Overview page
@@ -67,8 +71,19 @@ public class ProgressController implements Initializable {
     @FXML private Button backToDashboardBtn;
     @FXML private Label motivationLabel;
 
+    @FXML private Label  streakCount ;
+    @FXML private HBox streakDaysContainer;
+
+
+    User user;
+
+    ProgressDAO progressDAO;
+        
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        progressDAO = new ProgressDAO();
+         user = SessionContext.getCurrentUser();
+
         try {
             setupEventHandlers();
             loadPlaceholderData();
@@ -121,7 +136,6 @@ public class ProgressController implements Initializable {
     private void setupXPChart() throws SQLException {
         if (xpChart == null) return;
 
-        User user = SessionContext.getCurrentUser();
 
         ProgressDAO progress = new ProgressDAO();
         Map<String, Integer> last7DaysXp = progress.getLast7DaysXp(user.getId());
@@ -153,31 +167,69 @@ public class ProgressController implements Initializable {
     /**
      * Setup Streak Bar Chart with placeholder data
      */
-    private void setupStreakChart() {
-        if (streakChart == null) return;
+    private void setupStreakChart() throws  SQLException {
 
-        // Clear any existing data
-        streakChart.getData().clear();
+            int streak = progressDAO.calculateUserStreak(user.getId());
+            Map<String, Boolean> Last7DaysProgress = progressDAO.getLast7DaysProgress(user.getId());
+            streakLabel.setText(String.valueOf(streak));
+            streakCount.setText(String.valueOf(streak));
 
-        // Create series for streak data
-        XYChart.Series<String, Number> streakSeries = new XYChart.Series<>();
-        streakSeries.setName("Minutes Studied");
+            
+            streakDaysContainer.getChildren().clear();
+            
+        if (Last7DaysProgress != null && !Last7DaysProgress.isEmpty()) {
 
-        // Placeholder data for last 7 days (minutes studied per day)
-        streakSeries.getData().add(new XYChart.Data<>("Mon", 45));
-        streakSeries.getData().add(new XYChart.Data<>("Tue", 30));
-        streakSeries.getData().add(new XYChart.Data<>("Wed", 60));
-        streakSeries.getData().add(new XYChart.Data<>("Thu", 50));
-        streakSeries.getData().add(new XYChart.Data<>("Fri", 75));
-        streakSeries.getData().add(new XYChart.Data<>("Sat", 40));
-        streakSeries.getData().add(new XYChart.Data<>("Sun", 35));
+            for (Map.Entry<String, Boolean> entry : Last7DaysProgress.entrySet()){
 
-        // Add series to chart
-        streakChart.getData().add(streakSeries);
+                VBox dayStreak = new VBox();
+                dayStreak.setAlignment(Pos.CENTER);
+                dayStreak.setPrefHeight(150.0);
+                dayStreak.setPrefWidth(200.0);
+
+                Label dayLabel = new Label();
+                dayLabel.setText(entry.getKey());
+
+                dayStreak.getChildren().add(dayLabel);
+
+                StackPane circleContainer = new StackPane();
+                circleContainer.setPrefHeight(150.0);
+                circleContainer.setPrefWidth(200.0);
+
+                Circle checked = new Circle();
+                checked.setRadius(18.0);
+
+                Label checkedIcon = new Label();
+
+                if(entry.getValue()){
+                checked.getStyleClass().add("streak-checked");
+                checkedIcon.setText("✔");
+                
+                checked.getStyleClass().add("checked-icon");
+                checkedIcon.setStyle("-fx-text-fill: #043b18;");
+
+
+                }else{
+
+                    checked.getStyleClass().add("streak-unchecked");
+                
+                }
+
+
+                circleContainer.getChildren().add(checked);
+                circleContainer.getChildren().add(checkedIcon);
+
+                dayStreak.getChildren().add(circleContainer);
+                
+                streakDaysContainer.getChildren().add(dayStreak);
+
+            }
+
+
+
+        }
+
+       
         
-        // Styling
-        streakChart.setLegendVisible(false);
-        streakChart.setAnimated(false);
     }
 
     /**
