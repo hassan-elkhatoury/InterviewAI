@@ -147,11 +147,12 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
     public List<Map<String, Object>> getUserCourses(int userId) throws SQLException {
         List<Map<String, Object>> courses = new ArrayList<>();
         String query = "SELECT gc.id as course_id, gc.course_title, gc.created_at, " +
-                       "COALESCE(p.xp, 0) as user_xp, " +
-                       "ROUND((COALESCE(p.xp, 0) / 1000 * 100), 0) as progress_percentage " +
+                       "COALESCE(MAX(p.xp), 0) as user_xp, " +
+                       "ROUND((COALESCE(MAX(p.xp), 0) / 1000 * 100), 0) as progress_percentage " +
                        "FROM generated_courses gc " +
                        "LEFT JOIN progress p ON p.course_id = gc.id AND p.user_id = ? " +
                        "WHERE gc.user_id = ? AND gc.status = 'ACTIVE' " +
+                       "GROUP BY gc.id, gc.course_title, gc.created_at " +
                        "ORDER BY gc.created_at DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {

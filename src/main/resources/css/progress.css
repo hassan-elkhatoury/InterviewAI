@@ -516,3 +516,27 @@
     -fx-text-fill: #94a3b8;
     -fx-font-weight: 600;
 }
+
+/* Scrollbar styling */
+.scroll-bar {
+    -fx-font-size: 12px;
+}
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-radius: 5em;
+    -fx-background-color: #64748b;
+    -fx-padding: 4px;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #475569;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}

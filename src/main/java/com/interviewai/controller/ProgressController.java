@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.interviewai.dao.ProgressDAO;
+import com.interviewai.dao.CourseProgressDAO;
 import com.interviewai.model.User;
+import com.interviewai.model.GeneratedCourse;
+import com.interviewai.model.Chapter;
 import com.interviewai.util.SessionContext;
 
 import javafx.fxml.FXML;
@@ -18,6 +21,8 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -60,6 +65,7 @@ public class ProgressController implements Initializable {
 
     // FXML Components - Courses
     @FXML private VBox courseProgressContainer;
+    @FXML private GridPane courseProgressGrid;
     @FXML private Label course1ProgressLabel;
     @FXML private ProgressBar course1ProgressBar;
     @FXML private Label course2ProgressLabel;
@@ -78,17 +84,20 @@ public class ProgressController implements Initializable {
     User user;
 
     ProgressDAO progressDAO;
+    CourseProgressDAO courseProgressDAO;
         
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         progressDAO = new ProgressDAO();
-         user = SessionContext.getCurrentUser();
+        courseProgressDAO = new CourseProgressDAO();
+        user = SessionContext.getCurrentUser();
 
         try {
             setupEventHandlers();
             loadPlaceholderData();
             setupCharts();
             activateProgressSidebarButton();
+            loadCourseProgress();
         } catch (SQLException e) {
             e.printStackTrace();
             // Handle the exception appropriately, e.g., show an error message or log it
@@ -230,6 +239,263 @@ public class ProgressController implements Initializable {
 
        
         
+    }
+
+    /**
+     * Load course progress cards dynamically from database for active user
+     * Fetches real courses and chapters with completion data from the database
+     */
+    private void loadCourseProgress(){
+        courseProgressGrid.getChildren().clear();
+
+        if (user == null) {
+            System.err.println("ERROR: No active user set in SessionContext");
+            return;
+        }
+
+        try {
+            // Fetch all ACTIVE courses for the current user from database
+            java.util.List<java.util.Map<String, Object>> userCourses = progressDAO.getUserCourses(user.getId());
+            
+            if (userCourses == null || userCourses.isEmpty()) {
+                System.out.println("INFO: No active courses found for user " + user.getId());
+                return;
+            }
+
+            // Limit to 3 courses max for the grid layout
+            int courseIndex = 0;
+            for (java.util.Map<String, Object> courseMap : userCourses) {
+                if (courseIndex >= 3) break;
+
+                int courseId = (int) courseMap.get("course_id");
+                String courseTitle = (String) courseMap.get("course_title");
+                int progressPercentage = (int) courseMap.get("progress_percentage");
+
+                // Fetch full course data with chapters from database
+                GeneratedCourse course = courseProgressDAO.getCourseById(courseId);
+                if (course == null) {
+                    System.err.println("WARNING: Could not load course data for courseId " + courseId);
+                    continue;
+                }
+
+                // Create main course card
+                VBox courseCard = new VBox();
+                courseCard.setAlignment(Pos.TOP_LEFT);
+                courseCard.getStyleClass().add("course-card");
+                courseCard.setSpacing(14.0);
+
+                // Create course header
+                HBox cardHeader = new HBox();
+                cardHeader.getStyleClass().add("course-header");
+                cardHeader.setAlignment(Pos.CENTER_LEFT);
+                cardHeader.setSpacing(12.0);
+
+                // Course icon - simple emoji based on course type
+                String courseIcon = getCourseIcon(courseTitle);
+                Label courseIconLabel = new Label(courseIcon);
+                courseIconLabel.getStyleClass().add("course-icon");
+
+                // Course info (name and stats)
+                VBox courseInfo = new VBox();
+                courseInfo.setSpacing(4.0);
+
+                Label courseName = new Label(courseTitle);
+                courseName.getStyleClass().add("course-name");
+
+                // Build stats: chapters and questions count
+                java.util.List<Chapter> chapters = course.getChapters();
+                int totalChapters = chapters != null ? chapters.size() : 0;
+                int completedChapters = 0;
+                int totalQuestions = 0;
+
+                if (chapters != null) {
+                    completedChapters = (int) chapters.stream()
+                        .filter(ch -> ch.getStatus() == Chapter.ChapterStatus.COMPLETED)
+                        .count();
+                    totalQuestions = chapters.stream()
+                        .mapToInt(Chapter::getTotalQuestions)
+                        .sum();
+                }
+
+                String statsText = completedChapters + " / " + totalChapters + " chapters • " + totalQuestions + " questions";
+                Label questionsInfo = new Label(statsText);
+                questionsInfo.getStyleClass().add("course-stats");
+
+                courseInfo.getChildren().addAll(courseName, questionsInfo);
+                HBox.setHgrow(courseInfo, javafx.scene.layout.Priority.ALWAYS);
+
+                // Course percentage
+                Label coursePercentage = new Label(progressPercentage + "%");
+                coursePercentage.getStyleClass().add("course-percentage");
+
+                cardHeader.getChildren().addAll(courseIconLabel, courseInfo, coursePercentage);
+
+                // Course progress bar
+                ProgressBar courseProgressBar = new ProgressBar();
+                double progressValue = progressPercentage / 100.0;
+                courseProgressBar.setProgress(progressValue);
+                courseProgressBar.setPrefHeight(8.0);
+                courseProgressBar.getStyleClass().add("course-progress-bar");
+
+                // Course body - scrollable chapters list (max 4 chapters visible)
+                VBox chaptersContent = new VBox();
+                chaptersContent.setAlignment(Pos.TOP_LEFT);
+                chaptersContent.setSpacing(8.0);
+                chaptersContent.getStyleClass().add("chapters-list");
+
+                // Add chapter items from database (limited to visible chapters, rest scroll)
+                int chapterCount = 0;
+                if (chapters != null) {
+                    for (Chapter chapter : chapters) {
+                        HBox chapterCard = new HBox();
+                        chapterCard.setAlignment(Pos.CENTER_LEFT);
+                        chapterCard.setSpacing(10.0);
+                        chapterCard.getStyleClass().add("chapter-item");
+
+                        // Chapter status icon and class based on chapter status
+                        String statusIcon = getStatusIcon(chapter.getStatus());
+                        String statusClass = getStatusClass(chapter.getStatus());
+                        Label statusIconLabel = new Label(statusIcon);
+                        statusIconLabel.getStyleClass().add("chapter-status-icon");
+                        statusIconLabel.getStyleClass().add(statusClass);
+
+                        // Chapter info
+                        VBox chapterInfo = new VBox();
+                        chapterInfo.setSpacing(2.0);
+                        HBox.setHgrow(chapterInfo, javafx.scene.layout.Priority.ALWAYS);
+
+                        Label chapterName = new Label(chapter.getName());
+                        chapterName.getStyleClass().add("chapter-name");
+                        if (statusClass.equals("locked")) {
+                            chapterName.getStyleClass().add("locked");
+                        }
+
+                        // Progress text: "X / Y questions • ZZ%"
+                        int completed = chapter.getCompletedQuestions();
+                        int total = chapter.getTotalQuestions();
+                        int percent = total > 0 ? (int)(100.0 * completed / total) : 0;
+                        String progressText = completed + " / " + total + " questions • " + percent + "%";
+                        
+                        Label chapterProgress = new Label(progressText);
+                        chapterProgress.getStyleClass().add("chapter-progress-text");
+
+                        chapterInfo.getChildren().addAll(chapterName, chapterProgress);
+
+                        // Chapter progress bar
+                        ProgressBar chapterProgressBar = new ProgressBar();
+                        chapterProgressBar.setPrefHeight(4.0);
+                        double chapterProgress_value = total > 0 ? (double) completed / total : 0.0;
+                        chapterProgressBar.setProgress(chapterProgress_value);
+                        chapterProgressBar.getStyleClass().add("chapter-mini-progress");
+
+                        chapterCard.getChildren().addAll(statusIconLabel, chapterInfo, chapterProgressBar);
+                        chaptersContent.getChildren().add(chapterCard);
+                        chapterCount++;
+                    }
+                }
+
+                // Wrap chapters in a ScrollPane if more than 4 chapters
+                javafx.scene.layout.VBox courseBody = new javafx.scene.layout.VBox();
+                courseBody.setStyle("-fx-padding: 0;");
+                
+                if (chapterCount > 4) {
+                    ScrollPane scrollPane = new ScrollPane(chaptersContent);
+                    scrollPane.setFitToWidth(true);
+                    scrollPane.setPrefHeight(280); // Show ~4 chapters at a time
+                    scrollPane.setStyle("-fx-control-inner-background: transparent; -fx-padding: 0;");
+                    scrollPane.getStyleClass().add("chapters-scroll");
+                    
+                    // Minimal scrollbar styling
+                    scrollPane.setStyle(
+                        "-fx-control-inner-background: transparent; " +
+                        "-fx-padding: 0; " +
+                        "-fx-font-size: 12;"
+                    );
+                    
+                    courseBody.getChildren().add(scrollPane);
+                    VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
+                } else {
+                    // No scroll needed, add directly
+                    courseBody.getChildren().add(chaptersContent);
+                }
+
+                // Assemble course card
+                courseCard.getChildren().addAll(cardHeader, courseProgressBar, courseBody);
+
+                // Add course card to grid with proper positioning
+                // First course: column 0, row 0
+                // Second course: column 1, row 0
+                // Third course: column 0-1 span, row 1
+                if (courseIndex == 0) {
+                    GridPane.setColumnIndex(courseCard, 0);
+                    GridPane.setRowIndex(courseCard, 0);
+                } else if (courseIndex == 1) {
+                    GridPane.setColumnIndex(courseCard, 1);
+                    GridPane.setRowIndex(courseCard, 0);
+                } else if (courseIndex == 2) {
+                    GridPane.setColumnIndex(courseCard, 0);
+                    GridPane.setRowIndex(courseCard, 1);
+                    GridPane.setColumnSpan(courseCard, 2); // Span both columns
+                }
+
+                courseProgressGrid.getChildren().add(courseCard);
+                courseIndex++;
+            }
+
+            System.out.println("✓ Loaded " + courseIndex + " course(s) for user " + user.getId());
+
+        } catch (java.sql.SQLException e) {
+            System.err.println("ERROR loading course progress: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Get emoji icon based on course title
+     */
+    private String getCourseIcon(String courseTitle) {
+        if (courseTitle == null) return "📚";
+        String lower = courseTitle.toLowerCase();
+        if (lower.contains("java")) return "☕";
+        if (lower.contains("data") || lower.contains("struct")) return "🗂️";
+        if (lower.contains("web") || lower.contains("html") || lower.contains("css")) return "🌐";
+        if (lower.contains("python")) return "🐍";
+        if (lower.contains("javascript")) return "⚛️";
+        if (lower.contains("database") || lower.contains("sql")) return "🗄️";
+        if (lower.contains("react")) return "⚛️";
+        return "📚"; // Default
+    }
+
+    /**
+     * Get status icon based on chapter status
+     */
+    private String getStatusIcon(Chapter.ChapterStatus status) {
+        if (status == null) status = Chapter.ChapterStatus.NOT_STARTED;
+        switch (status) {
+            case COMPLETED:
+                return "✓";
+            case IN_PROGRESS:
+                return "▶";
+            case NOT_STARTED:
+            default:
+                return "🔒";
+        }
+    }
+
+    /**
+     * Get CSS status class based on chapter status
+     */
+    private String getStatusClass(Chapter.ChapterStatus status) {
+        if (status == null) status = Chapter.ChapterStatus.NOT_STARTED;
+        switch (status) {
+            case COMPLETED:
+                return "completed";
+            case IN_PROGRESS:
+                return "in-progress";
+            case NOT_STARTED:
+            default:
+                return "locked";
+        }
     }
 
     /**

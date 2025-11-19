@@ -459,7 +459,7 @@
                     <Label styleClass="section-title" text="📖 Course Progress" />
                     
                     <!-- Courses Grid -->
-                    <GridPane hgap="16" styleClass="courses-grid" vgap="16">
+                    <GridPane fx:id="courseProgressGrid" hgap="16" styleClass="courses-grid" vgap="16">
                         <columnConstraints>
                             <ColumnConstraints hgrow="ALWAYS" minWidth="300" percentWidth="50" />
                             <ColumnConstraints hgrow="ALWAYS" minWidth="300" percentWidth="50" />
