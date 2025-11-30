@@ -124,21 +124,60 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
     
     /**
      * Calculate user's current streak (days of consecutive activity)
-     * Simplified: counts days with at least one progress entry
+     * Counts consecutive days from today/yesterday backwards.
+     * Streak resets to 0 if user skips a day.
      */
     public int calculateUserStreak(int userId) throws SQLException {
-        String query = "SELECT COUNT(DISTINCT DATE(last_updated)) as streak_days FROM progress " +
-                       "WHERE user_id = ? AND last_updated >= DATE_SUB(NOW(), INTERVAL 365 DAY) " +
-                       "ORDER BY DATE(last_updated) DESC";
+        // Get all distinct activity dates in descending order (most recent first)
+        String query = "SELECT DISTINCT DATE(last_updated) as activity_date " +
+                       "FROM progress " +
+                       "WHERE user_id = ? " +
+                       "ORDER BY activity_date DESC";
+        
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("streak_days");
+            
+            // If no activity, streak is 0
+            if (!rs.next()) {
+                return 0;
             }
+            
+            // Get today's date (date only, no time)
+            java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
+            java.sql.Date yesterday = new java.sql.Date(today.getTime() - 24 * 60 * 60 * 1000);
+            
+            // Get the most recent activity date
+            java.sql.Date mostRecentDate = rs.getDate("activity_date");
+            
+            // Check if the streak is still active (today or yesterday)
+            // If not, streak is 0
+            if (!mostRecentDate.equals(today) && !mostRecentDate.equals(yesterday)) {
+                return 0;
+            }
+            
+            // Start counting consecutive days
+            int streak = 1;
+            java.sql.Date expectedDate = new java.sql.Date(mostRecentDate.getTime() - 24 * 60 * 60 * 1000);
+            
+            // Iterate through remaining dates
+            while (rs.next()) {
+                java.sql.Date currentDate = rs.getDate("activity_date");
+                
+                // Check if current date is consecutive (one day before expected)
+                if (currentDate.equals(expectedDate)) {
+                    streak++;
+                    // Update expected date to one day before current
+                    expectedDate = new java.sql.Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
+                } else {
+                    // Gap found, stop counting
+                    break;
+                }
+            }
+            
+            return streak;
         }
-        return 0;
     }
     
     /**
@@ -172,31 +211,109 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
     }
     
     /**
-     * Get daily quests for user (mock implementation - in real app, fetch from quests table)
+     * Get number of questions answered by user today
+     */
+    public int getQuestionsAnsweredToday(int userId) throws SQLException {
+        String query = "SELECT COUNT(*) as count FROM questions q " +
+                       "JOIN chapters c ON q.chapter_id = c.id " +
+                       "JOIN generated_courses gc ON c.course_id = gc.id " +
+                       "WHERE gc.user_id = ? " +
+                       "AND (q.status = 'COMPLETED' OR q.status = 'INCORRECT') " +
+                       "AND DATE(q.updated_at) = CURDATE()";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get number of questions answered correctly by user today
+     */
+    public int getQuestionsAnsweredCorrectlyToday(int userId) throws SQLException {
+        String query = "SELECT COUNT(*) as count FROM questions q " +
+                       "JOIN chapters c ON q.chapter_id = c.id " +
+                       "JOIN generated_courses gc ON c.course_id = gc.id " +
+                       "WHERE gc.user_id = ? " +
+                       "AND q.status = 'COMPLETED' " +
+                       "AND DATE(q.updated_at) = CURDATE()";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get number of questions answered correctly by user this month
+     */
+    public int getQuestionsAnsweredCorrectlyThisMonth(int userId) throws SQLException {
+        String query = "SELECT COUNT(*) as count FROM questions q " +
+                       "JOIN chapters c ON q.chapter_id = c.id " +
+                       "JOIN generated_courses gc ON c.course_id = gc.id " +
+                       "WHERE gc.user_id = ? " +
+                       "AND q.status = 'COMPLETED' " +
+                       "AND MONTH(q.updated_at) = MONTH(CURDATE()) " +
+                       "AND YEAR(q.updated_at) = YEAR(CURDATE())";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get daily quests for user (Dynamic implementation based on real activity)
      */
     public List<Map<String, Object>> getDailyQuests(int userId) throws SQLException {
         List<Map<String, Object>> quests = new ArrayList<>();
         
-        // Mock daily quests - replace with real database query if quests table exists
+        // Quest 1: Earn 50 XP (Based on correct answers today)
+        // Assuming 10 XP per correct answer
+        int correctToday = getQuestionsAnsweredCorrectlyToday(userId);
+        int xpToday = correctToday * 10;
+        
         Map<String, Object> quest1 = new HashMap<>();
-        quest1.put("quest_name", "Answer 5 Interview Questions");
-        quest1.put("required_count", 5);
-        quest1.put("current_count", Math.min(5, Math.random() > 0.5 ? 3 : 2));
+        quest1.put("quest_name", "Earn 50 XP");
+        quest1.put("required_count", 50);
+        quest1.put("current_count", xpToday);
         quest1.put("xp_reward", 50);
         quests.add(quest1);
         
+        // Quest 2: Answer 5 Questions (Any status)
+        int answeredToday = getQuestionsAnsweredToday(userId);
+        
         Map<String, Object> quest2 = new HashMap<>();
-        quest2.put("quest_name", "Complete 1 Full Course Chapter");
-        quest2.put("required_count", 1);
-        quest2.put("current_count", 0);
-        quest2.put("xp_reward", 100);
+        quest2.put("quest_name", "Answer 5 Interview Questions");
+        quest2.put("required_count", 5);
+        quest2.put("current_count", answeredToday);
+        quest2.put("xp_reward", 30);
         quests.add(quest2);
         
+        // Quest 3: Extend Streak (Complete at least 1 question correctly today)
+        // If streak > 0 and we have activity today, it's extended.
+        // But for the quest progress, let's just say "Answer 1 Question Correctly"
+        
         Map<String, Object> quest3 = new HashMap<>();
-        quest3.put("quest_name", "Achieve 90% Accuracy");
+        quest3.put("quest_name", "Extend your streak");
         quest3.put("required_count", 1);
-        quest3.put("current_count", 0);
-        quest3.put("xp_reward", 75);
+        quest3.put("current_count", correctToday > 0 ? 1 : 0);
+        quest3.put("xp_reward", 20);
         quests.add(quest3);
         
         return quests;

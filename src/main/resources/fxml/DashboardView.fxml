@@ -64,14 +64,6 @@
                             </HBox>
                         </graphic>
                     </Button>
-                    <Button onAction="#onOpenLeaderboards" styleClass="nav-button">
-                        <graphic>
-                            <HBox alignment="CENTER_LEFT" spacing="14">
-                                <Label styleClass="nav-icon" text="🏆" />
-                                <Label styleClass="nav-label" text="Leaderboard" />
-                            </HBox>
-                        </graphic>
-                    </Button>
                 </VBox>
             </VBox>
 

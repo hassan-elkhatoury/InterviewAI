@@ -16,7 +16,6 @@ public class SidebarController {
     @FXML private Button progressButton;
     @FXML private Button reviewButton;
     @FXML private Button questsButton;
-    @FXML private Button leaderboardButton;
     @FXML private Button profileButton;
     @FXML private Button settingsButton;
 
@@ -57,7 +56,6 @@ public class SidebarController {
             reviewButton.getStyleClass().remove("nav-active");
         }
         questsButton.getStyleClass().remove("nav-active");
-        leaderboardButton.getStyleClass().remove("nav-active");
         profileButton.getStyleClass().remove("nav-active");
         settingsButton.getStyleClass().remove("nav-active");
 
@@ -92,12 +90,6 @@ public class SidebarController {
                 if (!questsButton.getStyleClass().contains("nav-active")) {
                     questsButton.getStyleClass().add("nav-active");
                     System.out.println("✓ Quests button activated");
-                }
-                break;
-            case "leaderboard":
-                if (!leaderboardButton.getStyleClass().contains("nav-active")) {
-                    leaderboardButton.getStyleClass().add("nav-active");
-                    System.out.println("✓ Leaderboard button activated");
                 }
                 break;
             case "profile":
@@ -166,14 +158,10 @@ public class SidebarController {
 
     @FXML
     private void onOpenQuests() {
-        System.out.println("Quests view - Coming soon!");
-        // MainLayoutController.getInstance().loadContent("/fxml/QuestsView.fxml", "quests");
-    }
-
-    @FXML
-    private void onOpenLeaderboards() {
-        System.out.println("Leaderboards view - Coming soon!");
-        // MainLayoutController.getInstance().loadContent("/fxml/LeaderboardView.fxml", "leaderboard");
+        MainLayoutController mainLayout = MainLayoutController.getInstance();
+        if (mainLayout != null) {
+            mainLayout.loadContent("/fxml/QuestsView.fxml", "quests");
+        }
     }
 
     @FXML

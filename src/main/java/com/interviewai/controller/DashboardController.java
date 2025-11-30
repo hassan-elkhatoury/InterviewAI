@@ -528,9 +528,7 @@ public class DashboardController {
         buttonText = "Locked";
     } else if (chapterDone) {
         buttonText = "Completed";
-    } else if (status == Chapter.ChapterStatus.IN_PROGRESS) {
-        buttonText = "Continue Learning";
-    } else {
+    }else {
         buttonText = "Start Learning";
     }
     
@@ -602,61 +600,6 @@ public class DashboardController {
                 }
             });
         }
-    }
-
-    // ===== LOAD DAILY QUESTS =====
-    private void loadDailyQuests() {
-        try {
-            int userId = currentUser.getId();
-            List<Map<String, Object>> quests = progressDAO.getDailyQuests(userId);
-            
-            questBox.getChildren().clear();
-            
-            for (Map<String, Object> quest : quests) {
-                String questName = (String) quest.get("quest_name");
-                int required = ((Number) quest.get("required_count")).intValue();
-                int current = ((Number) quest.get("current_count")).intValue();
-                int xpReward = ((Number) quest.get("xp_reward")).intValue();
-                
-                VBox questItem = createQuestItem(questName, "+" + xpReward + " XP", current, required);
-                questBox.getChildren().add(questItem);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error loading daily quests: " + e.getMessage());
-        }
-    }
-    
-    private VBox createQuestItem(String title, String reward, int progress, int total) {
-        VBox questItem = new VBox(8);
-        questItem.getStyleClass().add("quest-item");
-        questItem.setStyle("-fx-padding: 12; -fx-background-color: #334155; -fx-border-radius: 8;");
-        
-        // Title and reward
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_LEFT);
-        
-        Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold;");
-        titleLabel.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
-        
-        Label rewardLabel = new Label(reward);
-        rewardLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #22c55e; -fx-font-weight: bold;");
-        
-        header.getChildren().addAll(titleLabel, rewardLabel);
-        
-        // Progress bar
-        ProgressBar progressBar = new ProgressBar((double) progress / total);
-        progressBar.setPrefWidth(Double.MAX_VALUE);
-        progressBar.setStyle("-fx-padding: 0;");
-        
-        // Progress text
-        Label progressLabel = new Label(progress + "/" + total);
-        progressLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #94a3b8;");
-        
-        questItem.getChildren().addAll(header, progressBar, progressLabel);
-        
-        return questItem;
     }
     
     // ===== LOAD LEADERBOARD =====
@@ -813,7 +756,6 @@ public class DashboardController {
     @FXML private void onOpenHome() { System.out.println("Home clicked"); }
     @FXML private void onOpenProgress() { System.out.println("Progress clicked"); }
     @FXML private void onOpenQuests() { System.out.println("Quests clicked"); }
-    @FXML private void onOpenLeaderboards() { System.out.println("Leaderboards clicked"); }
     @FXML private void onOpenProfile() { System.out.println("Profile clicked"); }
     @FXML private void onOpenSettings() { System.out.println("Settings clicked"); }
     

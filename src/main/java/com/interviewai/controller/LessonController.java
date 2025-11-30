@@ -83,6 +83,9 @@ public class LessonController implements Initializable {
         questions = new ArrayList<>();
         choiceControls = new ArrayList<>();
 
+        // Record activity to update streak immediately when lesson is opened
+        recordActivity();
+
         // Load questions for the active chapter
         loadChapterQuestions();
         
@@ -188,7 +191,7 @@ public class LessonController implements Initializable {
         questionStatusLabel.setStyle("-fx-text-fill: #94a3b8;");
         questionTextLabel.setText(currentQuestion.getQuestion());
 
-    // Build answer UI
+    // Build answer UI (this will handle submit button visibility)
     buildAnswerUI();
 
         // Hide explanation and feedback
@@ -197,11 +200,7 @@ public class LessonController implements Initializable {
         feedbackBanner.setVisible(false);
         feedbackBanner.setManaged(false);
 
-
-    submitButton.setVisible(true);
-    submitButton.setManaged(true);
-    submitButton.setDisable(false);
-
+    // Hide next and finish buttons
     nextButton.setVisible(false);
     nextButton.setManaged(false);
 
@@ -216,12 +215,27 @@ public class LessonController implements Initializable {
         choicesContainer.getChildren().clear();
         choiceControls.clear();
         toggleGroup = new ToggleGroup();
+        
         // Short answer mode
         if (currentQuestion.getQuestionType() == Question.QuestionType.SHORT_ANSWER) {
             if (shortAnswerBox != null) {
                 shortAnswerBox.setVisible(true);
                 shortAnswerBox.setManaged(true);
                 shortAnswerField.clear();
+                
+                // Remove any existing listeners to avoid duplicates
+                shortAnswerField.textProperty().removeListener((observable, oldValue, newValue) -> {});
+                
+                // Add text listener to enable submit button when user types something
+                shortAnswerField.textProperty().addListener((observable, oldValue, newValue) -> {
+                    boolean hasText = newValue != null && !newValue.trim().isEmpty();
+                    submitButton.setVisible(hasText);
+                    submitButton.setManaged(hasText);
+                });
+                
+                // Initially hide submit button for short answer
+                submitButton.setVisible(false);
+                submitButton.setManaged(false);
             }
             // Hide choices
             choicesContainer.setVisible(false);
@@ -236,6 +250,10 @@ public class LessonController implements Initializable {
         }
         choicesContainer.setVisible(true);
         choicesContainer.setManaged(true);
+
+        // Show submit button for multiple choice questions
+        submitButton.setVisible(true);
+        submitButton.setManaged(true);
 
         List<String> choices = currentQuestion.getChoices();
         if (choices == null) choices = new ArrayList<>();
@@ -783,6 +801,23 @@ public class LessonController implements Initializable {
      */
     private void showAlert(String title, String message) {
         showCustomAlert(title, message, "error");
+    }
+
+    /**
+     * Record user activity to update streak
+     */
+    private void recordActivity() {
+        User currentUser = SessionContext.getCurrentUser();
+        Integer courseId = SessionContext.getActiveCourseId();
+        if (currentUser == null || courseId == null) return;
+
+        try {
+            // Record activity with 0 XP to update last_updated timestamp
+            progressDAO.saveProgress(currentUser.getId(), courseId, 0);
+            System.out.println("Recorded user activity for streak calculation");
+        } catch (SQLException e) {
+            System.err.println("Error recording activity: " + e.getMessage());
+        }
     }
 }
 

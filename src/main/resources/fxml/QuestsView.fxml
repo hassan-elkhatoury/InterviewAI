@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="dashboard-scroll" vbarPolicy="AS_NEEDED" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.QuestsController" stylesheets="@../css/quests.css">
+    <VBox styleClass="content-wrapper" spacing="30">
+        
+        <!-- Header -->
+        <VBox spacing="8">
+            <Label text="Quests &amp; Challenges" styleClass="page-title"/>
+            <Label text="Complete quests to earn XP and unlock exclusive badges." styleClass="page-subtitle"/>
+        </VBox>
+
+        <HBox spacing="30" alignment="TOP_LEFT">
+            <!-- Main Content Column -->
+            <VBox spacing="30" HBox.hgrow="ALWAYS">
+                
+                <!-- Monthly Challenge Card -->
+                <VBox styleClass="monthly-challenge-card" spacing="20">
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="NOVEMBER CHALLENGE" styleClass="challenge-badge"/>
+                            <Label fx:id="monthlyChallengeTitle" text="Interview Mastery Month" styleClass="challenge-title"/>
+                            <Label text="Complete 30 interview questions this month to earn the exclusive 'Master' badge." styleClass="challenge-description" wrapText="true"/>
+                        </VBox>
+                        <Label text="🏆" style="-fx-font-size: 80px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 5);"/>
+                    </HBox>
+                    
+                    <VBox styleClass="challenge-progress-container">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="Complete 30 questions" styleClass="challenge-progress-label"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="monthlyChallengeProgressLabel" text="0 / 30" styleClass="challenge-progress-label"/>
+                        </HBox>
+                        <ProgressBar fx:id="monthlyChallengeProgressBar" progress="0.0" maxWidth="Infinity" styleClass="challenge-progress-bar"/>
+                    </VBox>
+                </VBox>
+
+                <!-- Daily Quests Section -->
+                <VBox spacing="15">
+                    <HBox alignment="CENTER_LEFT" styleClass="section-header">
+                        <Label text="Daily Quests" styleClass="section-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="⏱ 24 HOURS LEFT" styleClass="timer-label"/>
+                    </HBox>
+
+                    <VBox fx:id="dailyQuestsContainer" spacing="16">
+                        <!-- Quests will be loaded dynamically here -->
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <!-- Right Sidebar (Badges & Stats) -->
+            <VBox spacing="20" minWidth="300" maxWidth="300">
+                <VBox styleClass="badges-sidebar" spacing="20">
+                    <Label text="Monthly Badge" styleClass="section-title"/>
+                    
+                    <VBox styleClass="badge-card">
+                        <Label text="🏅" styleClass="badge-icon-large"/>
+                        <Label text="November Scholar" styleClass="badge-title"/>
+                        <Label text="Complete the November Challenge to earn this exclusive badge." styleClass="badge-desc"/>
+                    </VBox>
+                </VBox>
+
+                <VBox styleClass="badges-sidebar" spacing="15">
+                    <Label text="Your Stats" styleClass="section-title"/>
+                    
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <Label text="🔥" style="-fx-font-size: 20px;"/>
+                        <VBox>
+                            <Label fx:id="streakLabel" text="0 Day Streak" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                            <Label text="Keep it up!" style="-fx-text-fill: #94A3B8; -fx-font-size: 12px;"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <Label text="⚡" style="-fx-font-size: 20px;"/>
+                        <VBox>
+                            <Label fx:id="totalXpLabel" text="0 Total XP" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                            <Label text="Lifetime earnings" style="-fx-text-fill: #94A3B8; -fx-font-size: 12px;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>
