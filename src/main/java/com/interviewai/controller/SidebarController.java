@@ -18,7 +18,7 @@ public class SidebarController {
     @FXML private Button questsButton;
     @FXML private Button leaderboardButton;
     @FXML private Button profileButton;
-    @FXML private Button settingsButton;
+    @FXML private Button logoutButton;
 
     @FXML
     public void initialize() {
@@ -59,7 +59,7 @@ public class SidebarController {
         questsButton.getStyleClass().remove("nav-active");
         leaderboardButton.getStyleClass().remove("nav-active");
         profileButton.getStyleClass().remove("nav-active");
-        settingsButton.getStyleClass().remove("nav-active");
+        logoutButton.getStyleClass().remove("nav-active");
 
         // Add active class to the specified button
         switch (buttonName.toLowerCase()) {
@@ -106,10 +106,10 @@ public class SidebarController {
                     System.out.println("✓ Profile button activated");
                 }
                 break;
-            case "settings":
-                if (!settingsButton.getStyleClass().contains("nav-active")) {
-                    settingsButton.getStyleClass().add("nav-active");
-                    System.out.println("✓ Settings button activated");
+            case "logout":
+                if (!logoutButton.getStyleClass().contains("nav-active")) {
+                    logoutButton.getStyleClass().add("nav-active");
+                    System.out.println("✓ Logout button activated");
                 }
                 break;
         }
@@ -178,13 +178,31 @@ public class SidebarController {
 
     @FXML
     private void onOpenProfile() {
-        System.out.println("Profile view - Coming soon!");
-        // MainLayoutController.getInstance().loadContent("/fxml/ProfileView.fxml", "profile");
+        System.out.println("Loading profile view...");
+        MainLayoutController.getInstance().loadContent("/fxml/ProfileView.fxml", "profile");
     }
 
     @FXML
-    private void onOpenSettings() {
-        System.out.println("Settings view - Coming soon!");
-        // MainLayoutController.getInstance().loadContent("/fxml/SettingsView.fxml", "settings");
+    private void onLogout() {
+        // Show confirmation alert
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Logout");
+        confirmDialog.setHeaderText("Confirm Logout");
+        confirmDialog.setContentText("Are you sure you want to logout?");
+        
+        var result = confirmDialog.showAndWait();
+        
+        if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
+            // Clear session and navigate to login (without sidebar)
+            SessionContext.clearSession();
+            try {
+                javafx.stage.Stage stage = (javafx.stage.Stage) dashboardButton.getScene().getWindow();
+                com.interviewai.util.SceneNavigator.switchTo(stage, com.interviewai.util.Routes.LOGIN, 
+                    stage.getWidth(), stage.getHeight());
+            } catch (Exception e) {
+                System.err.println("Error navigating to login: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 }

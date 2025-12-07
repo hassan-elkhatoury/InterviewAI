@@ -89,9 +89,9 @@
                     
                     <!-- Streak Activity Chart -->
                     <VBox alignment="CENTER" spacing="12" styleClass="chart-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                  <ImageView fitHeight="125.0" fitWidth="112.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="126.0" fitWidth="130.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../../../../../../../Users/pp/Downloads/NicePng_emoji-fire-png_421566.png" />
+                        <Image url="@../images/NicePng_emoji-fire-png_421566%20(1).png" />
                      </image>
                   </ImageView>
                         <Label fx:id="streakCount" prefHeight="94.0" prefWidth="502.0" style="-fx-alignment: center;" styleClass="streak-count" text="4" textAlignment="CENTER">

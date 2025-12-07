@@ -40,28 +40,39 @@ public class ProgressDAO {
 
    public Map<String, Integer> getLast7DaysXp(int userId) throws SQLException {
 
+    // Calculate the date 7 days ago
+    LocalDate today = LocalDate.now();
+    LocalDate sevenDaysAgo = today.minusDays(6); // includes today, so 7 days total
+
+    // Initialize map with all last 7 days set to 0 XP
+    Map<String, Integer> xpByDay = new LinkedHashMap<>();
+    for (int i = 0; i < 7; i++) {
+        LocalDate date = sevenDaysAgo.plusDays(i);
+        String dayName = date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+        xpByDay.put(dayName, 0); // Initialize with 0 XP
+    }
+
     String query =
         "SELECT xp, DATE(last_updated) AS day_date " +
         "FROM progress " +
         "WHERE user_id = ? " +
-        "AND last_updated >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) " +
+        "AND last_updated >= ? " +
         "ORDER BY last_updated ASC";
-
-    Map<String, Integer> xpByDay = new LinkedHashMap<>();
 
     try (Connection conn = DBConnection.getConnection();
          PreparedStatement stmt = conn.prepareStatement(query)) {
 
         stmt.setInt(1, userId);
+        stmt.setDate(2, Date.valueOf(sevenDaysAgo));
         ResultSet rs = stmt.executeQuery();
 
         while (rs.next()) {
             int xp = rs.getInt("xp");
             LocalDate date = rs.getDate("day_date").toLocalDate();
 
-            // Convert date → day name (e.g., "Monday")
+            // Convert date → day abbreviation (e.g., "Mon", "Tue")
             String dayName = date.getDayOfWeek()
-                                 .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                                 .getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
 
             // Sum XP for that day
             xpByDay.put(dayName, xpByDay.getOrDefault(dayName, 0) + xp);
@@ -258,5 +269,97 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
             }
         }
         return topLearners;
+    }
+    
+    /**
+     * Get total number of questions answered by user (completed questions)
+     * A question is considered "answered" if its status is COMPLETED
+     */
+    public int getTotalQuestionsAnswered(int userId) throws SQLException {
+        String query = "SELECT COUNT(DISTINCT q.id) as total_answered " +
+                       "FROM questions q " +
+                       "JOIN chapters c ON c.id = q.chapter_id " +
+                       "JOIN generated_courses gc ON gc.id = c.course_id " +
+                       "WHERE gc.user_id = ? AND q.status = 'COMPLETED'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("total_answered");
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Get total number of questions available to user across all their courses
+     */
+    public int getTotalQuestionsAvailable(int userId) throws SQLException {
+        String query = "SELECT COUNT(DISTINCT q.id) as total_questions " +
+                       "FROM questions q " +
+                       "JOIN chapters c ON c.id = q.chapter_id " +
+                       "JOIN generated_courses gc ON gc.id = c.course_id " +
+                       "WHERE gc.user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("total_questions");
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Get total number of courses user is enrolled in
+     */
+    public int getTotalCoursesEnrolled(int userId) throws SQLException {
+        String query = "SELECT COUNT(*) as total_courses " +
+                       "FROM generated_courses " +
+                       "WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("total_courses");
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Calculate estimated time spent by user (10 XP = 1 minute approximation)
+     * Returns time in minutes
+     */
+    public int getEstimatedTimeSpent(int userId) throws SQLException {
+        int totalXP = getTotalXPForUser(userId);
+        // Estimate: 10 XP = 1 minute
+        return totalXP / 10;
+    }
+    
+    /**
+     * Calculate user accuracy rate (percentage)
+     * Accuracy based on XP efficiency: Total XP / (Questions * 10)
+     * Since each correct answer gives 10 XP, perfect accuracy = 100%
+     * Note: This is a simplified calculation; in production you'd track correct/incorrect answers
+     */
+    public double calculateAccuracy(int userId) throws SQLException {
+        int questionsAnswered = getTotalQuestionsAnswered(userId);
+        if (questionsAnswered == 0) {
+            return 0.0;
+        }
+        
+        int totalXP = getTotalXPForUser(userId);
+        int maxPossibleXP = questionsAnswered * 10; // 10 XP per correct answer
+        
+        if (maxPossibleXP == 0) {
+            return 0.0;
+        }
+        
+        double accuracy = (double) totalXP / maxPossibleXP * 100;
+        return Math.min(accuracy, 100.0); // Cap at 100%
     }
 }

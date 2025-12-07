@@ -5,11 +5,11 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import com.interviewai.dao.ProgressDAO;
 import com.interviewai.dao.CourseProgressDAO;
-import com.interviewai.model.User;
-import com.interviewai.model.GeneratedCourse;
+import com.interviewai.dao.ProgressDAO;
 import com.interviewai.model.Chapter;
+import com.interviewai.model.GeneratedCourse;
+import com.interviewai.model.User;
 import com.interviewai.util.SessionContext;
 
 import javafx.fxml.FXML;
@@ -31,7 +31,7 @@ import javafx.scene.shape.Circle;
 /**
  * Controller for the Progress Overview page
  * Displays user statistics, XP, goals, and course/chapter progress with charts
- * NOTE: This controller uses PLACEHOLDER data for demonstration purposes
+ * Uses real data from the database for accurate progress tracking
  */
 public class ProgressController implements Initializable {
 
@@ -244,6 +244,7 @@ public class ProgressController implements Initializable {
     /**
      * Load course progress cards dynamically from database for active user
      * Fetches real courses and chapters with completion data from the database
+     * Uses responsive grid layout: 2 columns, last card spans full width if odd number
      */
     private void loadCourseProgress(){
         courseProgressGrid.getChildren().clear();
@@ -262,11 +263,11 @@ public class ProgressController implements Initializable {
                 return;
             }
 
-            // Limit to 3 courses max for the grid layout
+            // Load all courses with responsive grid layout
             int courseIndex = 0;
+            int totalCourses = userCourses.size();
+            
             for (java.util.Map<String, Object> courseMap : userCourses) {
-                if (courseIndex >= 3) break;
-
                 int courseId = (int) courseMap.get("course_id");
                 String courseTitle = (String) courseMap.get("course_title");
                 int progressPercentage = (int) courseMap.get("progress_percentage");
@@ -275,6 +276,7 @@ public class ProgressController implements Initializable {
                 GeneratedCourse course = courseProgressDAO.getCourseById(courseId);
                 if (course == null) {
                     System.err.println("WARNING: Could not load course data for courseId " + courseId);
+                    courseIndex++;
                     continue;
                 }
 
@@ -422,20 +424,21 @@ public class ProgressController implements Initializable {
                 // Assemble course card
                 courseCard.getChildren().addAll(cardHeader, courseProgressBar, courseBody);
 
-                // Add course card to grid with proper positioning
-                // First course: column 0, row 0
-                // Second course: column 1, row 0
-                // Third course: column 0-1 span, row 1
-                if (courseIndex == 0) {
-                    GridPane.setColumnIndex(courseCard, 0);
-                    GridPane.setRowIndex(courseCard, 0);
-                } else if (courseIndex == 1) {
-                    GridPane.setColumnIndex(courseCard, 1);
-                    GridPane.setRowIndex(courseCard, 0);
-                } else if (courseIndex == 2) {
-                    GridPane.setColumnIndex(courseCard, 0);
-                    GridPane.setRowIndex(courseCard, 1);
-                    GridPane.setColumnSpan(courseCard, 2); // Span both columns
+                // Calculate grid position with responsive logic:
+                // 2 columns layout
+                // If odd number of courses, last one spans both columns
+                int row = courseIndex / 2;
+                int col = courseIndex % 2;
+                
+                boolean isLastCard = (courseIndex == totalCourses - 1);
+                boolean isOddTotal = (totalCourses % 2 == 1);
+                
+                GridPane.setRowIndex(courseCard, row);
+                GridPane.setColumnIndex(courseCard, col);
+                
+                // If last card and odd total, span both columns
+                if (isLastCard && isOddTotal) {
+                    GridPane.setColumnSpan(courseCard, 2);
                 }
 
                 courseProgressGrid.getChildren().add(courseCard);
@@ -499,92 +502,124 @@ public class ProgressController implements Initializable {
     }
 
     /**
-     * Load placeholder data for demonstration
-     * In production, this would fetch real data from the database
+     * Load real data for the progress page
+     * Fetches actual statistics from the database instead of using placeholders
      */
     private void loadPlaceholderData() {
-        // Header Stats - Placeholder Data
-        if (xpLabel != null) {
-            xpLabel.setText("2,450");
-        }
-        if (streakLabel != null) {
-            streakLabel.setText("12");
-        }
-        if (accuracyLabel != null) {
-            accuracyLabel.setText("87%");
-        }
+        try {
+            // Header Stats - Load Real Data
+            if (xpLabel != null) {
+                int totalXP = progressDAO.getTotalXPForUser(user.getId());
+                xpLabel.setText(String.format("%,d", totalXP)); // Format with commas
+            }
+            if (streakLabel != null) {
+                int streak = progressDAO.calculateUserStreak(user.getId());
+                streakLabel.setText(String.valueOf(streak));
+            }
+            if (accuracyLabel != null) {
+                double accuracy = progressDAO.calculateAccuracy(user.getId());
+                accuracyLabel.setText(String.format("%.0f%%", accuracy));
+            }
 
-        // Overall Progress - Placeholder Data
-        if (questionsAnsweredLabel != null) {
-            questionsAnsweredLabel.setText("245 / 320");
-        }
-        if (questionsProgressBar != null) {
-            questionsProgressBar.setProgress(0.77); // 77%
-        }
-        if (timeSpentLabel != null) {
-            timeSpentLabel.setText("24h 35m");
-        }
-        if (timeProgressBar != null) {
-            timeProgressBar.setProgress(0.65); // 65%
-        }
-        if (coursesEnrolledLabel != null) {
-            coursesEnrolledLabel.setText("3 Courses");
-        }
-        if (coursesProgressBar != null) {
-            coursesProgressBar.setProgress(0.45); // 45%
-        }
+            // Overall Progress - Load Real Data
+            if (questionsAnsweredLabel != null) {
+                int answered = progressDAO.getTotalQuestionsAnswered(user.getId());
+                int total = progressDAO.getTotalQuestionsAvailable(user.getId());
+                questionsAnsweredLabel.setText(answered + " / " + total);
+                
+                if (questionsProgressBar != null && total > 0) {
+                    double progress = (double) answered / total;
+                    questionsProgressBar.setProgress(progress);
+                }
+            }
+            
+            if (timeSpentLabel != null) {
+                int minutes = progressDAO.getEstimatedTimeSpent(user.getId());
+                int hours = minutes / 60;
+                int remainingMinutes = minutes % 60;
+                timeSpentLabel.setText(hours + "h " + remainingMinutes + "m");
+                
+                if (timeProgressBar != null) {
+                    // Assume goal of 40 hours (2400 minutes)
+                    double progress = Math.min(1.0, (double) minutes / 2400);
+                    timeProgressBar.setProgress(progress);
+                }
+            }
+            
+            if (coursesEnrolledLabel != null) {
+                int coursesCount = progressDAO.getTotalCoursesEnrolled(user.getId());
+                coursesEnrolledLabel.setText(coursesCount + " Course" + (coursesCount != 1 ? "s" : ""));
+                
+                if (coursesProgressBar != null) {
+                    // Assume goal of completing 5 courses
+                    double progress = Math.min(1.0, (double) coursesCount / 5);
+                    coursesProgressBar.setProgress(progress);
+                }
+            }
 
-        // Goals - Placeholder Data
-        if (goal1ProgressLabel != null) {
-            goal1ProgressLabel.setText("75%");
-        }
-        if (goal1ProgressBar != null) {
-            goal1ProgressBar.setProgress(0.75);
-        }
-        if (goal2ProgressLabel != null) {
-            goal2ProgressLabel.setText("87%");
-        }
-        if (goal2ProgressBar != null) {
-            goal2ProgressBar.setProgress(0.87);
-        }
-        if (goal3ProgressLabel != null) {
-            goal3ProgressLabel.setText("40%");
-        }
-        if (goal3ProgressBar != null) {
-            goal3ProgressBar.setProgress(0.40);
-        }
+            // Goals - Placeholder Data (can be updated when goals feature is implemented)
+            if (goal1ProgressLabel != null) {
+                goal1ProgressLabel.setText("75%");
+            }
+            if (goal1ProgressBar != null) {
+                goal1ProgressBar.setProgress(0.75);
+            }
+            if (goal2ProgressLabel != null) {
+                goal2ProgressLabel.setText("87%");
+            }
+            if (goal2ProgressBar != null) {
+                goal2ProgressBar.setProgress(0.87);
+            }
+            if (goal3ProgressLabel != null) {
+                goal3ProgressLabel.setText("40%");
+            }
+            if (goal3ProgressBar != null) {
+                goal3ProgressBar.setProgress(0.40);
+            }
 
-        // Courses - Placeholder Data
-        if (course1ProgressLabel != null) {
-            course1ProgressLabel.setText("67%");
-        }
-        if (course1ProgressBar != null) {
-            course1ProgressBar.setProgress(0.67);
-        }
-        if (course2ProgressLabel != null) {
-            course2ProgressLabel.setText("30%");
-        }
-        if (course2ProgressBar != null) {
-            course2ProgressBar.setProgress(0.30);
-        }
-        if (course3ProgressLabel != null) {
-            course3ProgressLabel.setText("13%");
-        }
-        if (course3ProgressBar != null) {
-            course3ProgressBar.setProgress(0.13);
-        }
+            // Courses - Not used anymore (dynamic course cards replace these)
+            if (course1ProgressLabel != null) {
+                course1ProgressLabel.setText("67%");
+            }
+            if (course1ProgressBar != null) {
+                course1ProgressBar.setProgress(0.67);
+            }
+            if (course2ProgressLabel != null) {
+                course2ProgressLabel.setText("30%");
+            }
+            if (course2ProgressBar != null) {
+                course2ProgressBar.setProgress(0.30);
+            }
+            if (course3ProgressLabel != null) {
+                course3ProgressLabel.setText("13%");
+            }
+            if (course3ProgressBar != null) {
+                course3ProgressBar.setProgress(0.13);
+            }
 
-        // Motivation message
-        if (motivationLabel != null) {
-            String[] motivations = {
-                "Keep up the great work! 🚀",
-                "You're making amazing progress! 💪",
-                "Stay consistent and you'll succeed! ⭐",
-                "Learning journey in full swing! 🎯",
-                "Every question answered is progress! 📈"
-            };
-            int randomIndex = (int) (Math.random() * motivations.length);
-            motivationLabel.setText(motivations[randomIndex]);
+            // Motivation message
+            if (motivationLabel != null) {
+                String[] motivations = {
+                    "Keep up the great work! 🚀",
+                    "You're making amazing progress! 💪",
+                    "Stay consistent and you'll succeed! ⭐",
+                    "Learning journey in full swing! 🎯",
+                    "Every question answered is progress! 📈"
+                };
+                int randomIndex = (int) (Math.random() * motivations.length);
+                motivationLabel.setText(motivations[randomIndex]);
+            }
+        } catch (SQLException e) {
+            System.err.println("ERROR loading progress data: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Fallback to default values on error
+            if (xpLabel != null) xpLabel.setText("0");
+            if (streakLabel != null) streakLabel.setText("0");
+            if (accuracyLabel != null) accuracyLabel.setText("0%");
+            if (questionsAnsweredLabel != null) questionsAnsweredLabel.setText("0 / 0");
+            if (timeSpentLabel != null) timeSpentLabel.setText("0h 0m");
+            if (coursesEnrolledLabel != null) coursesEnrolledLabel.setText("0 Courses");
         }
     }
 
