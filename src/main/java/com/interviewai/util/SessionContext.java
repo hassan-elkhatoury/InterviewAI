@@ -60,11 +60,18 @@ public final class SessionContext {
     /**
      * Clear all session data (used during logout)
      */
-    public static void clearSession() {
+    public static void clear() {
         currentUser = null;
         onboardingData = null;
         activeCourseId = null;
         activeChapterId = null;
         onboardingFromDashboard = false;
+    }
+
+    /**
+     * Clear all session data (used during logout) - Deprecated alias
+     */
+    public static void clearSession() {
+        clear();
     }
 }

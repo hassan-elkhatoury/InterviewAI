@@ -509,4 +509,101 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
         }
         return 0;
     }
+
+    /**
+     * Calculate user's overall accuracy (correct answers / total answers)
+     */
+    public double calculateAccuracy(int userId) throws SQLException {
+        String query = "SELECT " +
+                       "COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as correct_count, " +
+                       "COUNT(*) as total_count " +
+                       "FROM questions q " +
+                       "JOIN chapters c ON q.chapter_id = c.id " +
+                       "JOIN generated_courses gc ON c.course_id = gc.id " +
+                       "WHERE gc.user_id = ? " +
+                       "AND (q.status = 'COMPLETED' OR q.status = 'INCORRECT')";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                int correct = rs.getInt("correct_count");
+                int total = rs.getInt("total_count");
+                if (total > 0) {
+                    return (double) correct / total * 100.0;
+                }
+            }
+        }
+        return 0.0;
+    }
+
+    /**
+     * Get total number of questions answered by user
+     */
+    public int getTotalQuestionsAnswered(int userId) throws SQLException {
+        String query = "SELECT COUNT(*) as count FROM questions q " +
+                       "JOIN chapters c ON q.chapter_id = c.id " +
+                       "JOIN generated_courses gc ON c.course_id = gc.id " +
+                       "WHERE gc.user_id = ? " +
+                       "AND (q.status = 'COMPLETED' OR q.status = 'INCORRECT')";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get total number of questions available for user
+     */
+    public int getTotalQuestionsAvailable(int userId) throws SQLException {
+        String query = "SELECT COUNT(*) as count FROM questions q " +
+                       "JOIN chapters c ON q.chapter_id = c.id " +
+                       "JOIN generated_courses gc ON c.course_id = gc.id " +
+                       "WHERE gc.user_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get estimated time spent by user in minutes
+     * Based on number of questions answered (assuming 2 mins per question)
+     * and lessons completed (assuming 15 mins per lesson)
+     */
+    public int getEstimatedTimeSpent(int userId) throws SQLException {
+        int questionsAnswered = getTotalQuestionsAnswered(userId);
+        int lessonsCompleted = getLessonsCompletedByUser(userId);
+        
+        return (questionsAnswered * 2) + (lessonsCompleted * 15);
+    }
+
+    /**
+     * Get total number of courses enrolled by user
+     */
+    public int getTotalCoursesEnrolled(int userId) throws SQLException {
+        String query = "SELECT COUNT(*) as count FROM generated_courses WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        }
+        return 0;
+    }
 }
