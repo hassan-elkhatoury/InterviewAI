@@ -62,9 +62,7 @@ public class SidebarController {
         }
         questsButton.getStyleClass().remove("nav-active");
         profileButton.getStyleClass().remove("nav-active");
-        if (logoutButton != null) {
-            logoutButton.getStyleClass().remove("nav-active");
-        }
+        logoutButton.getStyleClass().remove("nav-active");
 
         // Add active class to the specified button
         switch (buttonName.toLowerCase()) {
@@ -103,6 +101,12 @@ public class SidebarController {
                 if (!profileButton.getStyleClass().contains("nav-active")) {
                     profileButton.getStyleClass().add("nav-active");
                     System.out.println("✓ Profile button activated");
+                }
+                break;
+            case "logout":
+                if (!logoutButton.getStyleClass().contains("nav-active")) {
+                    logoutButton.getStyleClass().add("nav-active");
+                    System.out.println("✓ Logout button activated");
                 }
                 break;
         }
@@ -167,40 +171,31 @@ public class SidebarController {
 
     @FXML
     private void onOpenProfile() {
-        System.out.println("Profile view - Coming soon!");
-        // MainLayoutController.getInstance().loadContent("/fxml/ProfileView.fxml", "profile");
+        System.out.println("Loading profile view...");
+        MainLayoutController.getInstance().loadContent("/fxml/ProfileView.fxml", "profile");
     }
 
     @FXML
     private void onLogout() {
-        try {
-            // Clear session
-            SessionContext.clear();
-            
-            // Load login view
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/LoginView.fxml"));
-            Parent root = loader.load();
-            
-            // Get current stage
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            
-            // Set new scene
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/theme.css").toExternalForm());
-            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
-            
-            stage.setScene(scene);
-            stage.centerOnScreen();
-            stage.show();
-            
-            System.out.println("Logged out successfully");
-        } catch (IOException e) {
-            e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Logout Failed");
-            alert.setContentText("Could not load login view: " + e.getMessage());
-            alert.showAndWait();
+        // Show confirmation alert
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Logout");
+        confirmDialog.setHeaderText("Confirm Logout");
+        confirmDialog.setContentText("Are you sure you want to logout?");
+        
+        var result = confirmDialog.showAndWait();
+        
+        if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
+            // Clear session and navigate to login (without sidebar)
+            SessionContext.clearSession();
+            try {
+                javafx.stage.Stage stage = (javafx.stage.Stage) dashboardButton.getScene().getWindow();
+                com.interviewai.util.SceneNavigator.switchTo(stage, com.interviewai.util.Routes.LOGIN, 
+                    stage.getWidth(), stage.getHeight());
+            } catch (Exception e) {
+                System.err.println("Error navigating to login: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -40,28 +40,39 @@ public class ProgressDAO {
 
    public Map<String, Integer> getLast7DaysXp(int userId) throws SQLException {
 
+    // Calculate the date 7 days ago
+    LocalDate today = LocalDate.now();
+    LocalDate sevenDaysAgo = today.minusDays(6); // includes today, so 7 days total
+
+    // Initialize map with all last 7 days set to 0 XP
+    Map<String, Integer> xpByDay = new LinkedHashMap<>();
+    for (int i = 0; i < 7; i++) {
+        LocalDate date = sevenDaysAgo.plusDays(i);
+        String dayName = date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+        xpByDay.put(dayName, 0); // Initialize with 0 XP
+    }
+
     String query =
         "SELECT xp, DATE(last_updated) AS day_date " +
         "FROM progress " +
         "WHERE user_id = ? " +
-        "AND last_updated >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) " +
+        "AND last_updated >= ? " +
         "ORDER BY last_updated ASC";
-
-    Map<String, Integer> xpByDay = new LinkedHashMap<>();
 
     try (Connection conn = DBConnection.getConnection();
          PreparedStatement stmt = conn.prepareStatement(query)) {
 
         stmt.setInt(1, userId);
+        stmt.setDate(2, Date.valueOf(sevenDaysAgo));
         ResultSet rs = stmt.executeQuery();
 
         while (rs.next()) {
             int xp = rs.getInt("xp");
             LocalDate date = rs.getDate("day_date").toLocalDate();
 
-            // Convert date → day name (e.g., "Monday")
+            // Convert date → day abbreviation (e.g., "Mon", "Tue")
             String dayName = date.getDayOfWeek()
-                                 .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                                 .getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
 
             // Sum XP for that day
             xpByDay.put(dayName, xpByDay.getOrDefault(dayName, 0) + xp);

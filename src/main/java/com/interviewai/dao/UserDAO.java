@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -178,5 +181,54 @@ public class UserDAO {
             }
         }
         return learners;
+    }
+
+    /**
+     * Update user's email address
+     */
+    public boolean updateEmail(int userId, String newEmail) throws SQLException {
+        String sql = "UPDATE users SET email = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newEmail);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() == 1;
+        }
+    }
+
+    /**
+     * Update user's password hash
+     */
+    public boolean updatePassword(int userId, String newPasswordHash) throws SQLException {
+        String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newPasswordHash);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() == 1;
+        }
+    }
+
+    /**
+     * Get user by ID
+     */
+    public User getById(int userId) throws SQLException {
+        String sql = "SELECT id, username, email, role FROM users WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
+                    String role = rs.getString("role");
+                    user.setRole(role != null ? role : "CANDIDATE");
+                    return user;
+                }
+            }
+        }
+        return null;
     }
 }
