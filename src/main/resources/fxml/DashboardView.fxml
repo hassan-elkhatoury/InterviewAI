@@ -79,11 +79,11 @@
                             </HBox>
                         </graphic>
                     </Button>
-                    <Button onAction="#onOpenSettings" styleClass="nav-button">
+                    <Button onAction="#onLogout" styleClass="nav-button">
                         <graphic>
                             <HBox alignment="CENTER_LEFT" spacing="14">
-                                <Label styleClass="nav-icon" text="⚙" />
-                                <Label styleClass="nav-label" text="Settings" />
+                                <Label styleClass="nav-icon" text="🚪" />
+                                <Label styleClass="nav-label" text="Logout" />
                             </HBox>
                         </graphic>
                     </Button>

@@ -3,36 +3,47 @@ package com.interviewai.controller;
 import com.interviewai.dao.ProgressDAO;
 import com.interviewai.model.User;
 import com.interviewai.util.SessionContext;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 /**
- * Controller for the Quests & Challenges view
+ * Controller for the Simplified Quests System
  */
 public class QuestsController {
 
-    @FXML private Label monthlyChallengeTitle;
-    @FXML private Label monthlyChallengeProgressLabel;
-    @FXML private ProgressBar monthlyChallengeProgressBar;
-    @FXML private VBox dailyQuestsContainer;
+    @FXML private Label dailyQuestProgressLabel;
+    @FXML private ProgressBar dailyQuestProgressBar;
+    @FXML private Button dailyClaimButton;
+    @FXML private Label dailyTimerLabel;
+
+    @FXML private Label monthlyQuestProgressLabel;
+    @FXML private ProgressBar monthlyQuestProgressBar;
+    @FXML private Button monthlyClaimButton;
+    @FXML private Label monthlyTimerLabel;
+
     @FXML private Label streakLabel;
     @FXML private Label totalXpLabel;
 
     private final ProgressDAO progressDAO = new ProgressDAO();
+    private static final int DAILY_TARGET = 20;
+    private static final int MONTHLY_TARGET = 12;
+    private static final int DAILY_REWARD = 900;
+    private static final int MONTHLY_REWARD = 30000;
 
     @FXML
     public void initialize() {
         loadUserData();
+        startTimers();
     }
 
     private void loadUserData() {
@@ -49,41 +60,17 @@ public class QuestsController {
             totalXpLabel.setText(String.format("%,d Total XP", totalXP));
             streakLabel.setText(streak + " Day Streak");
 
-            // 2. Load Monthly Challenge (Real Data)
-            // Challenge: Answer 100 questions correctly this month
-            int correctThisMonth = progressDAO.getQuestionsAnsweredCorrectlyThisMonth(userId);
-            int targetQuestions = 100;
+            // 2. Load Daily Quest
+            int questionsToday = progressDAO.getQuestionsAnsweredToday(userId);
+            boolean dailyClaimed = progressDAO.hasClaimedDailyQuest(userId);
             
-            double monthlyProgress = Math.min(1.0, (double) correctThisMonth / targetQuestions);
-            
-            monthlyChallengeProgressLabel.setText(Math.min(correctThisMonth, targetQuestions) + " / " + targetQuestions);
-            monthlyChallengeProgressBar.setProgress(monthlyProgress);
+            updateDailyQuestUI(questionsToday, dailyClaimed);
 
-            // 3. Load Daily Quests
-            List<Map<String, Object>> quests = progressDAO.getDailyQuests(userId);
-            dailyQuestsContainer.getChildren().clear();
-            
-            for (Map<String, Object> quest : quests) {
-                String title = (String) quest.get("quest_name");
-                int required = (int) quest.get("required_count");
-                int current = (int) quest.get("current_count");
-                
-                // Determine type for icon/color based on title keywords
-                String type = "xp";
-                String emoji = "⚡";
-                if (title.toLowerCase().contains("streak")) {
-                    type = "streak";
-                    emoji = "🔥";
-                } else if (title.toLowerCase().contains("accuracy") || title.toLowerCase().contains("score")) {
-                    type = "accuracy";
-                    emoji = "🎯";
-                } else if (title.toLowerCase().contains("lesson") || title.toLowerCase().contains("course")) {
-                    type = "lesson";
-                    emoji = "📚";
-                }
+            // 3. Load Monthly Quest
+            int chaptersThisMonth = progressDAO.getChaptersCompletedThisMonth(userId);
+            boolean monthlyClaimed = progressDAO.hasClaimedMonthlyQuest(userId);
 
-                dailyQuestsContainer.getChildren().add(createQuestCard(title, current, required, type, emoji));
-            }
+            updateMonthlyQuestUI(chaptersThisMonth, monthlyClaimed);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -91,53 +78,100 @@ public class QuestsController {
         }
     }
 
-    private HBox createQuestCard(String title, int current, int required, String type, String emoji) {
-        HBox card = new HBox();
-        card.getStyleClass().add("quest-card");
-        card.setAlignment(Pos.CENTER_LEFT);
-        card.setSpacing(20);
+    private void updateDailyQuestUI(int current, boolean claimed) {
+        double progress = Math.min(1.0, (double) current / DAILY_TARGET);
+        dailyQuestProgressBar.setProgress(progress);
+        dailyQuestProgressLabel.setText(current + " / " + DAILY_TARGET);
 
-        // Icon Container
-        StackPane iconContainer = new StackPane();
-        iconContainer.getStyleClass().addAll("quest-icon-container", "icon-" + type);
-        Label emojiLabel = new Label(emoji);
-        emojiLabel.getStyleClass().add("quest-emoji");
-        iconContainer.getChildren().add(emojiLabel);
-
-        // Content
-        VBox content = new VBox();
-        content.setSpacing(8);
-        HBox.setHgrow(content, Priority.ALWAYS);
-        
-        Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("quest-title");
-        
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.setMaxWidth(Double.MAX_VALUE);
-        progressBar.getStyleClass().addAll("quest-progress-bar", "bar-" + type);
-        double progress = (double) current / required;
-        progressBar.setProgress(Math.min(1.0, progress));
-        
-        content.getChildren().addAll(titleLabel, progressBar);
-
-        // Reward Box
-        VBox rewardBox = new VBox();
-        rewardBox.getStyleClass().add("reward-box");
-        
-        Label rewardIcon = new Label();
-        rewardIcon.getStyleClass().add("reward-icon");
-        
-        if (current >= required) {
-            rewardBox.setStyle("-fx-background-color: #FACC15;");
-            rewardIcon.setText("✅");
-            rewardIcon.setStyle("-fx-text-fill: black;");
+        if (claimed) {
+            dailyClaimButton.setText("Claimed");
+            dailyClaimButton.setDisable(true);
+            if (!dailyClaimButton.getStyleClass().contains("claimed-button")) {
+                dailyClaimButton.getStyleClass().add("claimed-button");
+            }
+        } else if (current >= DAILY_TARGET) {
+            dailyClaimButton.setText("Claim Reward");
+            dailyClaimButton.setDisable(false);
+            dailyClaimButton.getStyleClass().remove("claimed-button");
         } else {
-            rewardIcon.setText("🎁");
+            dailyClaimButton.setText("In Progress");
+            dailyClaimButton.setDisable(true);
+            dailyClaimButton.getStyleClass().remove("claimed-button");
         }
-        
-        rewardBox.getChildren().add(rewardIcon);
+    }
 
-        card.getChildren().addAll(iconContainer, content, rewardBox);
-        return card;
+    private void updateMonthlyQuestUI(int current, boolean claimed) {
+        double progress = Math.min(1.0, (double) current / MONTHLY_TARGET);
+        monthlyQuestProgressBar.setProgress(progress);
+        monthlyQuestProgressLabel.setText(current + " / " + MONTHLY_TARGET);
+
+        if (claimed) {
+            monthlyClaimButton.setText("Claimed");
+            monthlyClaimButton.setDisable(true);
+            if (!monthlyClaimButton.getStyleClass().contains("claimed-button")) {
+                monthlyClaimButton.getStyleClass().add("claimed-button");
+            }
+        } else if (current >= MONTHLY_TARGET) {
+            monthlyClaimButton.setText("Claim Reward");
+            monthlyClaimButton.setDisable(false);
+            monthlyClaimButton.getStyleClass().remove("claimed-button");
+        } else {
+            monthlyClaimButton.setText("In Progress");
+            monthlyClaimButton.setDisable(true);
+            monthlyClaimButton.getStyleClass().remove("claimed-button");
+        }
+    }
+
+    @FXML
+    private void handleClaimDaily() {
+        User currentUser = SessionContext.getCurrentUser();
+        if (currentUser == null) return;
+
+        try {
+            progressDAO.claimDailyQuest(currentUser.getId(), DAILY_REWARD);
+            // Play animation (simple visual feedback for now)
+            dailyClaimButton.setText("Claimed!");
+            loadUserData(); // Refresh UI
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleClaimMonthly() {
+        User currentUser = SessionContext.getCurrentUser();
+        if (currentUser == null) return;
+
+        try {
+            progressDAO.claimMonthlyQuest(currentUser.getId(), MONTHLY_REWARD);
+            // Play animation
+            monthlyClaimButton.setText("Claimed!");
+            loadUserData(); // Refresh UI
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startTimers() {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateTimers()));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+        updateTimers(); // Initial call
+    }
+
+    private void updateTimers() {
+        LocalDateTime now = LocalDateTime.now();
+        
+        // Daily Timer (Midnight)
+        LocalDateTime midnight = LocalDate.now().plusDays(1).atStartOfDay();
+        long secondsUntilMidnight = ChronoUnit.SECONDS.between(now, midnight);
+        long hours = secondsUntilMidnight / 3600;
+        long minutes = (secondsUntilMidnight % 3600) / 60;
+        dailyTimerLabel.setText(String.format("Ends in %dh %dm", hours, minutes));
+
+        // Monthly Timer (1st of next month)
+        LocalDateTime nextMonth = LocalDate.now().withDayOfMonth(1).plusMonths(1).atStartOfDay();
+        long daysUntilNextMonth = ChronoUnit.DAYS.between(now, nextMonth);
+        monthlyTimerLabel.setText(String.format("Ends in %dd", daysUntilNextMonth));
     }
 }

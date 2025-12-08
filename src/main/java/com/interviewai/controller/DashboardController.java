@@ -30,6 +30,10 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import java.io.IOException;
 
 public class DashboardController {
     
@@ -757,7 +761,38 @@ public class DashboardController {
     @FXML private void onOpenProgress() { System.out.println("Progress clicked"); }
     @FXML private void onOpenQuests() { System.out.println("Quests clicked"); }
     @FXML private void onOpenProfile() { System.out.println("Profile clicked"); }
-    @FXML private void onOpenSettings() { System.out.println("Settings clicked"); }
+    @FXML
+    private void onLogout() {
+        try {
+            // Clear session
+            SessionContext.clear();
+            
+            // Load login view
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/LoginView.fxml"));
+            Parent root = loader.load();
+            
+            // Get current stage
+            Stage stage = (Stage) welcomeTitleLabel.getScene().getWindow();
+            
+            // Set new scene
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/theme.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+            
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            stage.show();
+            
+            System.out.println("Logged out successfully");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Logout Failed");
+            alert.setContentText("Could not load login view: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
     
     // ===== COURSE SELECTOR EVENT HANDLERS =====
     

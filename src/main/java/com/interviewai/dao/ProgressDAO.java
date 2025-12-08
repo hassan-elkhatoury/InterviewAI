@@ -376,4 +376,126 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
         }
         return topLearners;
     }
+
+    /**
+     * Check if user has claimed the daily quest reward today
+     */
+    public boolean hasClaimedDailyQuest(int userId) throws SQLException {
+        String query = "SELECT last_daily_quest_claim FROM users WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Date lastClaim = rs.getDate("last_daily_quest_claim");
+                if (lastClaim != null) {
+                    return lastClaim.toLocalDate().equals(LocalDate.now());
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if user has claimed the monthly quest reward this month
+     */
+    public boolean hasClaimedMonthlyQuest(int userId) throws SQLException {
+        String query = "SELECT last_monthly_quest_claim FROM users WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Date lastClaim = rs.getDate("last_monthly_quest_claim");
+                if (lastClaim != null) {
+                    LocalDate claimDate = lastClaim.toLocalDate();
+                    LocalDate now = LocalDate.now();
+                    return claimDate.getMonth() == now.getMonth() && claimDate.getYear() == now.getYear();
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Claim daily quest reward
+     */
+    public void claimDailyQuest(int userId, int xpReward) throws SQLException {
+        String query = "UPDATE users SET last_daily_quest_claim = CURDATE() WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+        addXpToLatestCourse(userId, xpReward);
+    }
+
+    /**
+     * Claim monthly quest reward
+     */
+    public void claimMonthlyQuest(int userId, int xpReward) throws SQLException {
+        String query = "UPDATE users SET last_monthly_quest_claim = CURDATE() WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+        addXpToLatestCourse(userId, xpReward);
+    }
+
+    /**
+     * Add XP to the user's latest active course
+     */
+    private void addXpToLatestCourse(int userId, int xp) throws SQLException {
+        String findCourse = "SELECT id FROM generated_courses WHERE user_id = ? AND status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1";
+        int courseId = -1;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(findCourse)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                courseId = rs.getInt("id");
+            }
+        }
+        
+        if (courseId == -1) {
+             // Fallback: try to find ANY course
+             String findAnyCourse = "SELECT id FROM generated_courses WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+             try (Connection conn = DBConnection.getConnection();
+                  PreparedStatement stmt = conn.prepareStatement(findAnyCourse)) {
+                stmt.setInt(1, userId);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    courseId = rs.getInt("id");
+                }
+            }
+        }
+
+        if (courseId != -1) {
+            saveProgress(userId, courseId, xp);
+        }
+    }
+
+    /**
+     * Get number of chapters completed by user this month
+     */
+    public int getChaptersCompletedThisMonth(int userId) throws SQLException {
+        // Note: This requires the 'completed_at' column in chapters table
+        String query = "SELECT COUNT(*) as count FROM chapters c " +
+                       "JOIN generated_courses gc ON c.course_id = gc.id " +
+                       "WHERE gc.user_id = ? " +
+                       "AND c.status = 'COMPLETED' " +
+                       "AND MONTH(c.completed_at) = MONTH(CURDATE()) " +
+                       "AND YEAR(c.completed_at) = YEAR(CURDATE())";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        }
+        return 0;
+    }
 }

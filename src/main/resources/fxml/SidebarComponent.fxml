@@ -85,11 +85,11 @@
                     </HBox>
                 </graphic>
             </Button>
-            <Button fx:id="settingsButton" onAction="#onOpenSettings" prefWidth="220.0" styleClass="nav-button">
+            <Button fx:id="logoutButton" onAction="#onLogout" prefWidth="220.0" styleClass="nav-button">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="14">
-                        <Label styleClass="nav-icon" text="⚙" />
-                        <Label prefHeight="18.0" prefWidth="92.0" styleClass="nav-label" text="Settings" />
+                        <Label styleClass="nav-icon" text="🚪" />
+                        <Label prefHeight="18.0" prefWidth="92.0" styleClass="nav-label" text="Logout" />
                     </HBox>
                 </graphic>
             </Button>

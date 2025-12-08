@@ -3,8 +3,13 @@ package com.interviewai.controller;
 import com.interviewai.util.SessionContext;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.stage.Stage;
+import java.io.IOException;
 
 /**
  * Controller for the reusable sidebar component
@@ -17,7 +22,7 @@ public class SidebarController {
     @FXML private Button reviewButton;
     @FXML private Button questsButton;
     @FXML private Button profileButton;
-    @FXML private Button settingsButton;
+    @FXML private Button logoutButton;
 
     @FXML
     public void initialize() {
@@ -57,7 +62,9 @@ public class SidebarController {
         }
         questsButton.getStyleClass().remove("nav-active");
         profileButton.getStyleClass().remove("nav-active");
-        settingsButton.getStyleClass().remove("nav-active");
+        if (logoutButton != null) {
+            logoutButton.getStyleClass().remove("nav-active");
+        }
 
         // Add active class to the specified button
         switch (buttonName.toLowerCase()) {
@@ -96,12 +103,6 @@ public class SidebarController {
                 if (!profileButton.getStyleClass().contains("nav-active")) {
                     profileButton.getStyleClass().add("nav-active");
                     System.out.println("✓ Profile button activated");
-                }
-                break;
-            case "settings":
-                if (!settingsButton.getStyleClass().contains("nav-active")) {
-                    settingsButton.getStyleClass().add("nav-active");
-                    System.out.println("✓ Settings button activated");
                 }
                 break;
         }
@@ -171,8 +172,35 @@ public class SidebarController {
     }
 
     @FXML
-    private void onOpenSettings() {
-        System.out.println("Settings view - Coming soon!");
-        // MainLayoutController.getInstance().loadContent("/fxml/SettingsView.fxml", "settings");
+    private void onLogout() {
+        try {
+            // Clear session
+            SessionContext.clear();
+            
+            // Load login view
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/LoginView.fxml"));
+            Parent root = loader.load();
+            
+            // Get current stage
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            
+            // Set new scene
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/theme.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+            
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            stage.show();
+            
+            System.out.println("Logged out successfully");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Logout Failed");
+            alert.setContentText("Could not load login view: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 }

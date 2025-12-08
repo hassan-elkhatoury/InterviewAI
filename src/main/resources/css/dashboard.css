@@ -260,14 +260,22 @@
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 14px;
     -fx-font-weight: 600;
+    -fx-background-insets: 0;
+}
+
+.course-menu-button .menu-item .label {
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 0;
 }
 
 .course-menu-button .menu-item:focused {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, rgba(59, 130, 246, 0.25) 0%, rgba(34, 197, 94, 0.15) 100%);
+    -fx-background-insets: 0;
 }
 
 .course-menu-button .menu-item:hover {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, rgba(59, 130, 246, 0.25) 0%, rgba(34, 197, 94, 0.15) 100%);
+    -fx-background-insets: 0;
 }
 
 .course-menu-button .separator {

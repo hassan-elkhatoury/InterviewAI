@@ -49,7 +49,7 @@ public class CourseProgressDAO {
             "SELECT choice_text FROM choices WHERE question_id = ? ORDER BY id ASC";
 
     private static final String UPDATE_CHAPTER_STATUS_SQL =
-            "UPDATE chapters SET status = ? WHERE id = ?";
+            "UPDATE chapters SET status = ?, completed_at = CASE WHEN ? = 'COMPLETED' THEN NOW() ELSE completed_at END WHERE id = ?";
 
     private static final String UPDATE_QUESTION_STATUS_SQL =
             "UPDATE questions SET status = ? WHERE id = ?";
@@ -175,7 +175,8 @@ public class CourseProgressDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(UPDATE_CHAPTER_STATUS_SQL)) {
             stmt.setString(1, status.name());
-            stmt.setInt(2, chapterId);
+            stmt.setString(2, status.name());
+            stmt.setInt(3, chapterId);
             stmt.executeUpdate();
         }
     }

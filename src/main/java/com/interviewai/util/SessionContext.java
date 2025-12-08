@@ -56,4 +56,12 @@ public final class SessionContext {
     public static boolean isOnboardingFromDashboard() {
         return onboardingFromDashboard;
     }
+
+    public static void clear() {
+        currentUser = null;
+        onboardingData = null;
+        activeCourseId = null;
+        activeChapterId = null;
+        onboardingFromDashboard = false;
+    }
 }
