@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
@@ -33,58 +34,104 @@
         </VBox>
     </top>
 
-    <!-- CENTER: Scrollable Content -->
+    <!-- CENTER: Scrollable Content with AI Panel -->
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="lesson-scroll" vbarPolicy="AS_NEEDED">
-            <VBox spacing="20" styleClass="lesson-wrapper">
+            <HBox spacing="20" styleClass="lesson-wrapper-horizontal">
                 <padding>
                     <Insets bottom="20" left="24" right="24" top="20" />
                 </padding>
-                <!-- Main Question Card -->
-                <VBox styleClass="question-card">
-                    <!-- Question Number Badge -->
-                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="question-header">
-                        <Label fx:id="questionNumberBadge" style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(34, 197, 94, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%);" styleClass="question-badge" text="Q1" />
-                        <Label fx:id="questionTypeLabel" prefHeight="43.0" prefWidth="107.0" styleClass="question-type-label" text="Multiple Choice" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Label fx:id="questionStatusLabel" styleClass="status-indicator" text="●" />
-                    </HBox>
+                
+                <!-- Left: Main Question Content (65%) -->
+                <VBox spacing="20" styleClass="lesson-wrapper" HBox.hgrow="ALWAYS">
+                    <!-- Main Question Card -->
+                    <VBox styleClass="question-card">
+                        <!-- Question Number Badge -->
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="question-header">
+                            <Label fx:id="questionNumberBadge" style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(34, 197, 94, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%);" styleClass="question-badge" text="Q1" />
+                            <Label fx:id="questionTypeLabel" prefHeight="43.0" prefWidth="107.0" styleClass="question-type-label" text="Multiple Choice" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label fx:id="questionStatusLabel" styleClass="status-indicator" text="●" />
+                        </HBox>
 
-                    <!-- Question Text -->
-                    <Label fx:id="questionTextLabel" styleClass="question-text" text="Question placeholder" wrapText="true" />
+                        <!-- Question Text -->
+                        <Label fx:id="questionTextLabel" styleClass="question-text" text="Question placeholder" wrapText="true" />
 
-                    <!-- Short Answer Field (hidden by default) -->
-                    <VBox fx:id="shortAnswerBox" managed="false" spacing="12" styleClass="short-answer-box" visible="false">
-                        <Label styleClass="short-answer-label" text="Your Answer" />
-                        <TextArea fx:id="shortAnswerField" prefRowCount="4" promptText="Type your answer here..." styleClass="short-answer-area" wrapText="true" />
-                    </VBox>
-
-                    <!-- Choices Container -->
-                    <VBox fx:id="choicesContainer" spacing="10" styleClass="choices-container" />
-
-                    <!-- Answer Feedback Banner (Hidden by default) -->
-                    <HBox fx:id="feedbackBanner" alignment="CENTER_LEFT" managed="false" spacing="10" styleClass="feedback-banner" visible="false">
-                        <Label fx:id="feedbackIcon" styleClass="feedback-icon" text="✓" />
-                        <VBox spacing="4">
-                            <Label fx:id="feedbackTitle" styleClass="feedback-title" text="Correct!" />
-                            <Label fx:id="feedbackMessage" styleClass="feedback-message" text="Great job! You got it right." />
+                        <!-- Short Answer Field (hidden by default) -->
+                        <VBox fx:id="shortAnswerBox" managed="false" spacing="12" styleClass="short-answer-box" visible="false">
+                            <Label styleClass="short-answer-label" text="Your Answer" />
+                            <TextArea fx:id="shortAnswerField" prefRowCount="4" promptText="Type your answer here..." styleClass="short-answer-area" wrapText="true" />
                         </VBox>
-                    </HBox>
 
-                    <!-- Explanation Panel (Hidden by default) -->
-                    <VBox fx:id="explanationPanel" managed="false" styleClass="explanation-panel" visible="false">
-                        <HBox alignment="CENTER_LEFT" spacing="10">
-                            <Label styleClass="explanation-icon" text="💡" />
-                            <Label styleClass="explanation-title" text="Explanation" />
+                        <!-- Choices Container -->
+                        <VBox fx:id="choicesContainer" spacing="10" styleClass="choices-container" />
+
+                        <!-- Answer Feedback Banner (Hidden by default) -->
+                        <HBox fx:id="feedbackBanner" alignment="CENTER_LEFT" managed="false" spacing="10" styleClass="feedback-banner" visible="false">
+                            <Label fx:id="feedbackIcon" styleClass="feedback-icon" text="✓" />
+                            <VBox spacing="4">
+                                <Label fx:id="feedbackTitle" styleClass="feedback-title" text="Correct!" />
+                                <Label fx:id="feedbackMessage" styleClass="feedback-message" text="Great job! You got it right." />
+                            </VBox>
                         </HBox>
-                        <Label fx:id="explanationTextLabel" styleClass="explanation-text" text="" wrapText="true" />
-                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="correct-answer-box">
-                            <Label styleClass="correct-label" text="Correct Answer:" />
-                            <Label fx:id="correctAnswerLabel" styleClass="correct-answer" text="" />
-                        </HBox>
+
+                        <!-- Explanation Panel (Hidden by default) -->
+                        <VBox fx:id="explanationPanel" managed="false" styleClass="explanation-panel" visible="false">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label styleClass="explanation-icon" text="💡" />
+                                <Label styleClass="explanation-title" text="Explanation" />
+                            </HBox>
+                            <Label fx:id="explanationTextLabel" styleClass="explanation-text" text="" wrapText="true" />
+                            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="correct-answer-box">
+                                <Label styleClass="correct-label" text="Correct Answer:" />
+                                <Label fx:id="correctAnswerLabel" styleClass="correct-answer" text="" />
+                            </HBox>
+                        </VBox>
                     </VBox>
                 </VBox>
-            </VBox>
+                
+                <!-- Right: AI Validation Panel (35%) - Only for Short Answer -->
+                <VBox fx:id="aiValidationPanel" managed="false" prefWidth="350" spacing="16" styleClass="ai-panel" visible="false">
+                    <Label styleClass="ai-panel-title" text="🤖 AI VALIDATION" />
+                    
+                    <!-- Tips Section (shown before submission) -->
+                    <VBox fx:id="aiTipsBox" managed="true" spacing="12" styleClass="ai-tips-box" visible="true">
+                        <Label styleClass="ai-tips-title" text="💡 Interview Tips" />
+                        <VBox spacing="8">
+                            <Label styleClass="ai-tips-text" text="• Answer as if you're in a real interview" wrapText="true" />
+                            <Label styleClass="ai-tips-text" text="• Be clear and concise" wrapText="true" />
+                            <Label styleClass="ai-tips-text" text="• Explain your reasoning" wrapText="true" />
+                            <Label styleClass="ai-tips-text" text="• Use technical terms correctly" wrapText="true" />
+                        </VBox>
+                        <Label styleClass="ai-tips-footer" text="Our AI will evaluate your answer like an interviewer would!" wrapText="true" />
+                    </VBox>
+                    
+                    <!-- Loading Indicator with Spinner -->
+                    <VBox fx:id="aiLoadingBox" managed="false" alignment="CENTER" spacing="12" styleClass="ai-loading-box" visible="false">
+                        <ProgressIndicator fx:id="aiLoadingSpinner" prefWidth="50" prefHeight="50" styleClass="ai-spinner" />
+                        <Label styleClass="ai-loading-text" text="Analyzing your answer..." />
+                    </VBox>
+                    
+                    <!-- Score Display -->
+                    <VBox fx:id="aiScoreBox" managed="false" spacing="12" styleClass="ai-score-box" visible="false">
+                        <Label fx:id="aiScoreLabel" styleClass="ai-score" text="85/100" />
+                        <ProgressBar fx:id="aiScoreBar" prefWidth="300" progress="0.85" styleClass="ai-score-bar" />
+                        <Label styleClass="ai-score-label" text="Your Score" />
+                    </VBox>
+                    
+                    <!-- Strengths Section -->
+                    <VBox fx:id="aiStrengthsBox" managed="false" spacing="8" styleClass="ai-section ai-strengths" visible="false">
+                        <Label styleClass="ai-section-title" text="✓ What You Did Well" />
+                        <Label fx:id="aiStrengthsLabel" styleClass="ai-section-text" text="" wrapText="true" />
+                    </VBox>
+                    
+                    <!-- Improvements Section -->
+                    <VBox fx:id="aiImprovementsBox" managed="false" spacing="8" styleClass="ai-section ai-improvements" visible="false">
+                        <Label styleClass="ai-section-title" text="💡 How to Improve" />
+                        <Label fx:id="aiImprovementsLabel" styleClass="ai-section-text" text="" wrapText="true" />
+                    </VBox>
+                </VBox>
+            </HBox>
         </ScrollPane>
     </center>
     

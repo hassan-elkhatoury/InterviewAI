@@ -3,7 +3,9 @@ package com.interviewai.controller;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 import com.interviewai.dao.CourseProgressDAO;
@@ -12,6 +14,7 @@ import com.interviewai.dao.QuestionDAO;
 import com.interviewai.model.Chapter;
 import com.interviewai.model.Question;
 import com.interviewai.model.User;
+import com.interviewai.service.OpenRouterAIService;
 import com.interviewai.util.SessionContext;
 
 import javafx.animation.PauseTransition;
@@ -58,6 +61,19 @@ public class LessonController implements Initializable {
     @FXML private Label feedbackTitle;
     @FXML private Label feedbackMessage;
     @FXML private javafx.scene.layout.StackPane toastOverlay;
+    
+    // AI Validation Panel Components
+    @FXML private VBox aiValidationPanel;
+    @FXML private VBox aiTipsBox;
+    @FXML private VBox aiLoadingBox;
+    @FXML private javafx.scene.control.ProgressIndicator aiLoadingSpinner;
+    @FXML private VBox aiScoreBox;
+    @FXML private Label aiScoreLabel;
+    @FXML private ProgressBar aiScoreBar;
+    @FXML private VBox aiStrengthsBox;
+    @FXML private Label aiStrengthsLabel;
+    @FXML private VBox aiImprovementsBox;
+    @FXML private Label aiImprovementsLabel;
 
     // Alert notification components (will be created dynamically)
     private VBox alertNotification;
@@ -67,6 +83,7 @@ public class LessonController implements Initializable {
     private QuestionDAO questionDAO;
     private CourseProgressDAO courseProgressDAO;
     private ProgressDAO progressDAO;
+    private OpenRouterAIService aiService;
     private List<Question> questions;
     private int currentQuestionIndex = 0;
     private Question currentQuestion;
@@ -80,6 +97,15 @@ public class LessonController implements Initializable {
         questionDAO = new QuestionDAO();
         courseProgressDAO = new CourseProgressDAO();
         progressDAO = new ProgressDAO();
+        
+        // Initialize AI service
+        try {
+            aiService = new OpenRouterAIService();
+        } catch (Exception e) {
+            System.err.println("Warning: AI service not available: " + e.getMessage());
+            aiService = null;
+        }
+        
         questions = new ArrayList<>();
         choiceControls = new ArrayList<>();
 
@@ -146,6 +172,14 @@ public class LessonController implements Initializable {
             questions = questionDAO.getQuestionsByChapterId(chapterId);
             System.out.println("SUCCESS: Loaded " + questions.size() + " questions for chapter " + chapterId);
             
+            // Shuffle questions to mix multiple-choice and short-answer types
+            // Use chapter ID as seed for consistent shuffle order
+            if (!questions.isEmpty()) {
+                Random random = new Random(chapterId);
+                Collections.shuffle(questions, random);
+                System.out.println("✓ Shuffled " + questions.size() + " questions for chapter " + chapterId);
+            }
+            
             if (questions.isEmpty()) {
                 System.out.println("WARNING: No questions found in database for chapter " + chapterId);
                 showAlert("No Questions Available", 
@@ -172,17 +206,27 @@ public class LessonController implements Initializable {
         currentQuestion = questions.get(index);
         userAnswer = null;
 
+        // Calculate progress-based question number (how many completed + 1)
+        int completedCount = 0;
+        for (Question q : questions) {
+            if (q.getStatus() == Question.QuestionStatus.COMPLETED || 
+                q.getStatus() == Question.QuestionStatus.INCORRECT) {
+                completedCount++;
+            }
+        }
+        int progressBasedNumber = completedCount + 1;
+
         // Update header
         chapterTitleLabel.setText("Chapter Questions");
-        questionProgressLabel.setText("Question " + (index + 1) + " of " + questions.size());
+        questionProgressLabel.setText("Question " + progressBasedNumber + " of " + questions.size());
         
-        // Update progress
-        double progress = (double) index / questions.size();
+        // Update progress bar based on completed count
+        double progress = (double) completedCount / questions.size();
         progressBar.setProgress(progress);
         progressPercentLabel.setText(String.format("%.0f%% Complete", progress * 100));
 
         // Update question card
-        questionNumberBadge.setText("Q" + (index + 1));
+        questionNumberBadge.setText("Q" + progressBasedNumber);
         questionTypeLabel.setText(getQuestionTypeDisplay(currentQuestion.getQuestionType()));
         questionStatusLabel.setText("●");
         questionStatusLabel.setStyle("-fx-text-fill: #94a3b8;");
@@ -190,6 +234,18 @@ public class LessonController implements Initializable {
 
     // Build answer UI
     buildAnswerUI();
+    
+        // Show/hide AI validation panel based on question type
+        if (aiValidationPanel != null) {
+            if (currentQuestion.getQuestionType() == Question.QuestionType.SHORT_ANSWER) {
+                aiValidationPanel.setVisible(true);
+                aiValidationPanel.setManaged(true);
+                clearAIPanel();
+            } else {
+                aiValidationPanel.setVisible(false);
+                aiValidationPanel.setManaged(false);
+            }
+        }
 
         // Hide explanation and feedback
         explanationPanel.setVisible(false);
@@ -366,6 +422,11 @@ public class LessonController implements Initializable {
             // Award XP for correct answers
             if (isCorrect) {
                 awardXP();
+            }
+            
+            // Trigger AI validation for short-answer questions
+            if (currentQuestion.getQuestionType() == Question.QuestionType.SHORT_ANSWER && aiService != null) {
+                validateWithAI();
             }
             
             // Check if chapter is complete and mark it
@@ -783,6 +844,132 @@ public class LessonController implements Initializable {
      */
     private void showAlert(String title, String message) {
         showCustomAlert(title, message, "error");
+    }
+    
+    /**
+     * Clear AI validation panel (show tips)
+     */
+    private void clearAIPanel() {
+        // Show tips
+        if (aiTipsBox != null) {
+            aiTipsBox.setVisible(true);
+            aiTipsBox.setManaged(true);
+        }
+        // Hide everything else
+        if (aiLoadingBox != null) {
+            aiLoadingBox.setVisible(false);
+            aiLoadingBox.setManaged(false);
+        }
+        if (aiScoreBox != null) {
+            aiScoreBox.setVisible(false);
+            aiScoreBox.setManaged(false);
+        }
+        if (aiStrengthsBox != null) {
+            aiStrengthsBox.setVisible(false);
+            aiStrengthsBox.setManaged(false);
+        }
+        if (aiImprovementsBox != null) {
+            aiImprovementsBox.setVisible(false);
+            aiImprovementsBox.setManaged(false);
+        }
+    }
+    
+    /**
+     * Validate answer with AI (async)
+     */
+    private void validateWithAI() {
+        if (aiLoadingBox == null || aiService == null) return;
+        
+        // Hide tips, show loading spinner
+        javafx.application.Platform.runLater(() -> {
+            if (aiTipsBox != null) {
+                aiTipsBox.setVisible(false);
+                aiTipsBox.setManaged(false);
+            }
+            aiLoadingBox.setVisible(true);
+            aiLoadingBox.setManaged(true);
+        });
+        
+        // Run validation in background thread
+        new Thread(() -> {
+            try {
+                OpenRouterAIService.ValidationResult result = aiService.validateAnswer(
+                    currentQuestion.getQuestion(),
+                    currentQuestion.getCorrectAnswer(),
+                    userAnswer
+                );
+                
+                // Update UI on JavaFX thread
+                javafx.application.Platform.runLater(() -> {
+                    displayAIValidation(result);
+                });
+            } catch (Exception e) {
+                System.err.println("AI validation error: " + e.getMessage());
+                javafx.application.Platform.runLater(() -> {
+                    aiLoadingBox.setVisible(false);
+                    aiLoadingBox.setManaged(false);
+                });
+            }
+        }).start();
+    }
+    
+    /**
+     * Display AI validation results
+     */
+    private void displayAIValidation(OpenRouterAIService.ValidationResult result) {
+        // Hide loading
+        aiLoadingBox.setVisible(false);
+        aiLoadingBox.setManaged(false);
+        
+        // Show score with color-coded progress bar
+        if (aiScoreBox != null && aiScoreLabel != null && aiScoreBar != null) {
+            int score = result.getScore();
+            aiScoreLabel.setText(score + "/100");
+            aiScoreBar.setProgress(score / 100.0);
+            
+            // Color-code based on score
+            String scoreColor;
+            String barStyle;
+            if (score >= 80) {
+                // Green for excellent (80-100)
+                scoreColor = "#22c55e";
+                barStyle = "-fx-accent: #22c55e;";
+            } else if (score >= 60) {
+                // Yellow/Orange for good (60-79)
+                scoreColor = "#f59e0b";
+                barStyle = "-fx-accent: #f59e0b;";
+            } else if (score >= 40) {
+                // Orange for fair (40-59)
+                scoreColor = "#fb923c";
+                barStyle = "-fx-accent: #fb923c;";
+            } else {
+                // Red for poor (0-39)
+                scoreColor = "#ef4444";
+                barStyle = "-fx-accent: #ef4444;";
+            }
+            
+            aiScoreLabel.setStyle("-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: " + scoreColor + ";");
+            aiScoreBar.setStyle(barStyle);
+            
+            aiScoreBox.setVisible(true);
+            aiScoreBox.setManaged(true);
+        }
+        
+        // Show strengths
+        if (aiStrengthsBox != null && aiStrengthsLabel != null) {
+            aiStrengthsLabel.setText(result.getStrengths());
+            aiStrengthsBox.setVisible(true);
+            aiStrengthsBox.setManaged(true);
+        }
+        
+        // Show improvements
+        if (aiImprovementsBox != null && aiImprovementsLabel != null) {
+            aiImprovementsLabel.setText(result.getImprovements());
+            aiImprovementsBox.setVisible(true);
+            aiImprovementsBox.setManaged(true);
+        }
+        
+        System.out.println("✓ AI Validation: " + result.getScore() + "/100");
     }
 }
 
