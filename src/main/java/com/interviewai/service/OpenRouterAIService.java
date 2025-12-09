@@ -45,14 +45,18 @@ public class OpenRouterAIService {
      */
     public ValidationResult validateAnswer(String question, String correctAnswer, String userAnswer) {
         try {
-            // Build the prompt for AI - Optimized for Mistral 7B
-            String systemPrompt = "You are an interview coach. Evaluate answers and respond ONLY with valid JSON. " +
-                "No markdown, no code blocks, just pure JSON. " +
-                "Use this exact format: {\"score\": 85, \"strengths\": \"text here\", \"improvements\": \"text here\"}";
+            // Build the prompt for AI - Direct and personal
+            String systemPrompt = "You are an interview coach. Speak DIRECTLY to the candidate using 'you' and 'your'. " +
+                "Never use 'the candidate' or 'they'. Respond ONLY with valid JSON (no markdown). " +
+                "Format: {\"score\": 85, \"strengths\": \"You did...\", \"improvements\": \"You should...\"}. " +
+                "Be helpful and encouraging. Use 'you/your' in ALL feedback!";
             
             String userPrompt = String.format(
-                "Question: %s\nCorrect: %s\nCandidate: %s\n\n" +
-                "Respond with JSON only. Score 0-100. Keep feedback brief (1-2 sentences each).",
+                "Question: %s\nExpected: %s\nAnswer: %s\n\n" +
+                "Evaluate and respond in JSON. Score 0-100.\n" +
+                "Strengths: What YOU did well (use 'you/your')\n" +
+                "Improvements: What YOU should improve (use 'you/your')\n" +
+                "Remember: Use 'you' and 'your', NOT 'the candidate'!",
                 question, correctAnswer, userAnswer
             );
             
