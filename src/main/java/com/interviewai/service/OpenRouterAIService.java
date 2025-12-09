@@ -45,15 +45,14 @@ public class OpenRouterAIService {
      */
     public ValidationResult validateAnswer(String question, String correctAnswer, String userAnswer) {
         try {
-            // Build the prompt for AI - Direct and concise
-            String systemPrompt = "You are a helpful interview coach. Evaluate the candidate's answer and provide brief, direct feedback. " +
-                "Speak directly to the candidate using 'you' and 'your'. Be encouraging but honest. " +
-                "Keep feedback concise (max 2-3 sentences per section). " +
-                "Format response as JSON: {\"score\": <0-100>, \"strengths\": \"<what you did well>\", \"improvements\": \"<what you should improve>\"}";
+            // Build the prompt for AI - Optimized for Mistral 7B
+            String systemPrompt = "You are an interview coach. Evaluate answers and respond ONLY with valid JSON. " +
+                "No markdown, no code blocks, just pure JSON. " +
+                "Use this exact format: {\"score\": 85, \"strengths\": \"text here\", \"improvements\": \"text here\"}";
             
             String userPrompt = String.format(
-                "Question: %s\n\nCorrect Answer: %s\n\nCandidate's Answer: %s\n\n" +
-                "Evaluate this answer. Give a score (0-100) and brief, direct feedback.",
+                "Question: %s\nCorrect: %s\nCandidate: %s\n\n" +
+                "Respond with JSON only. Score 0-100. Keep feedback brief (1-2 sentences each).",
                 question, correctAnswer, userAnswer
             );
             
@@ -70,8 +69,8 @@ public class OpenRouterAIService {
                 .put("content", userPrompt));
             
             requestBody.put("messages", messages);
-            requestBody.put("temperature", 0.3); // Lower temperature for more consistent scoring
-            requestBody.put("max_tokens", 500);
+            requestBody.put("temperature", 0.3);
+            requestBody.put("max_tokens", 300); // Reduced for faster response
             
             System.out.println("Sending request to: " + apiUrl);
             System.out.println("Request body: " + requestBody.toString());
