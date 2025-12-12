@@ -45,11 +45,17 @@ public class OpenRouterAIService {
      */
     public ValidationResult validateAnswer(String question, String correctAnswer, String userAnswer) {
         try {
-            // Build the prompt for AI - Direct and personal
+            // Build the prompt for AI - Direct and personal with strict scoring
             String systemPrompt = "You are an interview coach. Speak DIRECTLY to the candidate using 'you' and 'your'. " +
                 "Never use 'the candidate' or 'they'. Respond ONLY with valid JSON (no markdown). " +
                 "Format: {\"score\": 85, \"strengths\": \"You did...\", \"improvements\": \"You should...\"}. " +
-                "Be helpful and encouraging. Use 'you/your' in ALL feedback!";
+                "SCORING RULES: " +
+                "- Gibberish/random words/irrelevant = 0-10 " +
+                "- Wrong concept = 10-30 " +
+                "- Partially correct = 40-60 " +
+                "- Mostly correct = 70-85 " +
+                "- Perfect = 90-100. " +
+                "Be STRICT. Use 'you/your' in ALL feedback!";
             
             String userPrompt = String.format(
                 "Question: %s\nExpected: %s\nAnswer: %s\n\n" +
@@ -111,6 +117,85 @@ public class OpenRouterAIService {
                 "AI validation temporarily unavailable",
                 "Error: " + e.getClass().getSimpleName() + " - Please try again"
             );
+        }
+    }
+    
+    /**
+     * Get a detailed technical explanation of the question and correct answer.
+     * Returns plain text explanation personalized based on user's answer.
+     */
+    public String explainQuestion(String question, String correctAnswer, String userAnswer) {
+        try {
+            // Build prompt for technical explanation - ultra-concise and personalized
+            String systemPrompt = "You are a technical expert. Give SHORT, direct explanations. " +
+                "Start by telling if their answer was correct or incorrect. " +
+                "No fluff. Just key points and examples. Plain text only.";
+            
+            String userPrompt = String.format(
+                "Question: %s\n" +
+                "Correct Answer: %s\n" +
+                "User's Answer: %s\n\n" +
+                "First, tell them if their answer was CORRECT or INCORRECT.\n" +
+                "Then explain in 3-4 SHORT sentences:\n" +
+                "1. What the concept means\n" +
+                "2. Quick example\n" +
+                "3. Why it matters\n\n" +
+                "Max 100 words. Be brief and direct!",
+                question, correctAnswer, userAnswer
+            );
+            
+            // Build request body
+            JSONObject requestBody = new JSONObject();
+            requestBody.put("model", model);
+            
+            JSONArray messages = new JSONArray();
+            messages.put(new JSONObject()
+                .put("role", "system")
+                .put("content", systemPrompt));
+            messages.put(new JSONObject()
+                .put("role", "user")
+                .put("content", userPrompt));
+            
+            requestBody.put("messages", messages);
+            requestBody.put("temperature", 0.5);
+            requestBody.put("max_tokens", 300); // Increased for better explanations
+            
+            // Send request
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(apiUrl))
+                    .timeout(Duration.ofSeconds(30))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .header("HTTP-Referer", "http://localhost:8080")
+                    .header("X-Title", "InterviewAI")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                    .build();
+            
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                JSONObject root = new JSONObject(response.body());
+                
+                // Extract content
+                if (root.has("choices")) {
+                    JSONArray choices = root.getJSONArray("choices");
+                    if (choices.length() > 0) {
+                        JSONObject firstChoice = choices.getJSONObject(0);
+                        JSONObject message = firstChoice.getJSONObject("message");
+                        return message.getString("content").trim();
+                    }
+                }
+                
+                return "Unable to generate explanation (No content). Response: " + response.body();
+            } else {
+                System.err.println("API Error: " + response.statusCode() + " " + response.body());
+                return "AI Error: " + response.statusCode() + " - " + response.body();
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error getting explanation: " + e.getMessage());
+            e.printStackTrace();
+            return "Unable to generate explanation. Error: " + e.getMessage();
         }
     }
     

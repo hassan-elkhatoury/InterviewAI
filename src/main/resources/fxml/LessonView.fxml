@@ -97,7 +97,7 @@
                     <!-- Tips Section (shown before submission) -->
                     <VBox fx:id="aiTipsBox" managed="true" spacing="12" styleClass="ai-tips-box" visible="true">
                         <Label styleClass="ai-tips-title" text="💡 Interview Tips" />
-                        <VBox spacing="8">
+                        <VBox fx:id="aiTipsContent" spacing="8">
                             <Label styleClass="ai-tips-text" text="• Answer as if you're in a real interview" wrapText="true" />
                             <Label styleClass="ai-tips-text" text="• Be clear and concise" wrapText="true" />
                             <Label styleClass="ai-tips-text" text="• Explain your reasoning" wrapText="true" />
@@ -129,6 +129,18 @@
                     <VBox fx:id="aiImprovementsBox" managed="false" spacing="8" styleClass="ai-section ai-improvements" visible="false">
                         <Label styleClass="ai-section-title" text="💡 How to Improve" />
                         <Label fx:id="aiImprovementsLabel" styleClass="ai-section-text" text="" wrapText="true" />
+                    </VBox>
+                    
+                    <!-- Toggle Buttons Container -->
+                    <HBox fx:id="aiToggleButtonsBox" managed="false" spacing="8" visible="false">
+                        <Button fx:id="showExplanationButton" onAction="#onShowExplanation" styleClass="toggle-button" text="📚 Show Explanation" />
+                        <Button fx:id="showFeedbackButton" managed="false" onAction="#onShowFeedback" styleClass="toggle-button-secondary" text="← Back to Feedback" visible="false" />
+                    </HBox>
+                    
+                    <!-- Explanation Section -->
+                    <VBox fx:id="aiExplanationBox" managed="false" spacing="8" styleClass="ai-section ai-explanation" visible="false">
+                        <Label styleClass="ai-section-title" text="📖 Technical Explanation" />
+                        <Label fx:id="aiExplanationLabel" styleClass="ai-section-text" text="" wrapText="true" />
                     </VBox>
                 </VBox>
             </HBox>
