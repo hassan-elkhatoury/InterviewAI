@@ -138,18 +138,57 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
      * Simplified: counts days with at least one progress entry
      */
     public int calculateUserStreak(int userId) throws SQLException {
-        String query = "SELECT COUNT(DISTINCT DATE(last_updated)) as streak_days FROM progress " +
-                       "WHERE user_id = ? AND last_updated >= DATE_SUB(NOW(), INTERVAL 365 DAY) " +
-                       "ORDER BY DATE(last_updated) DESC";
+        // Get all unique days where user had activity (gained > 0 XP)
+        // Ordered by date DESC (newest first)
+        String query = "SELECT DISTINCT DATE(last_updated) as activity_date " +
+                       "FROM progress " +
+                       "WHERE user_id = ? AND xp > 0 " +
+                       "ORDER BY activity_date DESC";
+                       
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("streak_days");
+            
+            List<LocalDate> activityDates = new ArrayList<>();
+            while (rs.next()) {
+                Date sqlDate = rs.getDate("activity_date");
+                if (sqlDate != null) {
+                    activityDates.add(sqlDate.toLocalDate());
+                }
             }
+            
+            if (activityDates.isEmpty()) {
+                return 0;
+            }
+            
+            LocalDate today = LocalDate.now();
+            LocalDate yesterday = today.minusDays(1);
+            
+            // Check if streak is active (activity today OR yesterday)
+            // If the most recent activity was older than yesterday, streak is broken -> 0
+            LocalDate mostRecent = activityDates.get(0);
+            if (!mostRecent.equals(today) && !mostRecent.equals(yesterday)) {
+                return 0;
+            }
+            
+            int streak = 0;
+            LocalDate expectedDate = mostRecent.equals(today) ? today : yesterday;
+            
+            for (LocalDate date : activityDates) {
+                if (date.equals(expectedDate)) {
+                    streak++;
+                    expectedDate = expectedDate.minusDays(1); // Set expected next date to previous day
+                } else if (date.isBefore(expectedDate)) {
+                    // Gap found, stop counting
+                    break;
+                }
+                // If date is after expectedDate, it shouldn't happen with sorted DESC logic if we start correctly,
+                // but checking isBefore handles gaps.
+            }
+            
+            return streak;
         }
-        return 0;
     }
     
     /**
