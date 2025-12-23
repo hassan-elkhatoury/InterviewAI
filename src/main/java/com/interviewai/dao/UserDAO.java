@@ -82,6 +82,10 @@ public class UserDAO {
      * Validates username/email and password. Supports BCrypt (new) and SHA-256 (legacy) hashes.
      */
     public boolean validateCredentials(String identifier, String rawPassword) throws SQLException {
+        // DEBUG LOGGING
+        System.out.println("DEBUG: Attempting login for: " + identifier);
+        System.out.println("DEBUG: Generated Hash for '" + rawPassword + "': " + BCrypt.hashpw(rawPassword, BCrypt.gensalt(10)));
+        
         String sql = "SELECT password_hash, is_active FROM users WHERE username = ? OR email = ?";
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -91,20 +95,33 @@ public class UserDAO {
                 if (rs.next()) {
                     try {
                         boolean isActive = rs.getBoolean("is_active");
-                        if (!isActive) return false; // Account disabled
+                        System.out.println("DEBUG: User found. Active: " + isActive);
+                        if (!isActive) {
+                            System.out.println("DEBUG: Login failed - User inactive");
+                            return false; 
+                        }
                     } catch (SQLException e) {
                         // Ignore if column missing
                     }
 
                     String stored = rs.getString("password_hash");
+                    System.out.println("DEBUG: Stored hash length: " + (stored != null ? stored.length() : "null"));
+                    
                     if (stored == null) return false;
+                    
                     // If it's a BCrypt hash
                     if (stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$")) {
-                        return BCrypt.checkpw(rawPassword, stored);
+                        boolean match = BCrypt.checkpw(rawPassword, stored);
+                        System.out.println("DEBUG: BCrypt match result: " + match);
+                        return match;
                     }
+                    
                     // Legacy SHA-256 fallback
+                    System.out.println("DEBUG: Checking legacy SHA-256");
                     String legacy = sha256(rawPassword);
                     return stored.equals(legacy);
+                } else {
+                    System.out.println("DEBUG: User NOT found in database");
                 }
             }
         }
@@ -260,23 +277,24 @@ public class UserDAO {
     }
 
     public void updateUser(User user) throws SQLException {
-        String sql = "UPDATE users SET email = ?, is_active = ?, two_factor_enabled = ? WHERE id = ?";
+        String sql = "UPDATE users SET username = ?, email = ?, is_active = ?, two_factor_enabled = ? WHERE id = ?";
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, user.getEmail());
-            ps.setBoolean(2, user.isActive());
-            ps.setBoolean(3, user.isTwoFactorEnabled());
-            ps.setInt(4, user.getId());
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getEmail());
+            ps.setBoolean(3, user.isActive());
+            ps.setBoolean(4, user.isTwoFactorEnabled());
+            ps.setInt(5, user.getId());
             ps.executeUpdate();
         }
     }
     
-    public boolean updatePassword(int userId, String newPassword) throws SQLException {
-        String hash = BCrypt.hashpw(newPassword, BCrypt.gensalt(10));
+    public boolean updatePassword(int userId, String passwordHash) throws SQLException {
+        // Password should already be hashed by the caller/controller
         String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, hash);
+            ps.setString(1, passwordHash);
             ps.setInt(2, userId);
             return ps.executeUpdate() == 1;
         }

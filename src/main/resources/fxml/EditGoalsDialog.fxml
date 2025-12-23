@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.interviewai.controller.EditGoalsDialogController"
+      styleClass="dialog-root" stylesheets="@../css/main.css"
+      prefWidth="500" prefHeight="650">
+    
+    <!-- Header -->
+    <HBox fx:id="dialogHeader" styleClass="dialog-header" alignment="CENTER_LEFT" spacing="15">
+        <StackPane style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 50%; -fx-padding: 8;">
+            <Text text="🎯" style="-fx-font-size: 24px; -fx-fill: white;"/>
+        </StackPane>
+        <VBox>
+            <Label text="Manage Your Goals" styleClass="dialog-title"/>
+            <Label text="Track your progress and achieve mastery" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12px;"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="headerCloseButton" text="✕" style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 14px; -fx-cursor: hand;" />
+    </HBox>
+    
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent" VBox.vgrow="ALWAYS">
+        <VBox styleClass="dialog-content" spacing="24">
+            
+            <!-- Existing Goals List -->
+            <VBox spacing="12">
+                <Label text="Current Goals" styleClass="section-label"/>
+                <VBox fx:id="goalsListContainer" spacing="10"/>
+            </VBox>
+            
+            <Separator style="-fx-background-color: #2d3748;"/>
+            
+            <!-- Add New Goal Section -->
+            <VBox spacing="16">
+                <Label text="Add New Goal" styleClass="section-label"/>
+                
+                <VBox spacing="8">
+                    <Label text="Goal Name" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                    <TextField fx:id="goalNameField" promptText="e.g., Master Java Basics" styleClass="input-dark"/>
+                </VBox>
+                
+                <GridPane hgap="16" vgap="16">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="60"/>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="40"/>
+                    </columnConstraints>
+                    
+                    <VBox spacing="8" GridPane.columnIndex="0">
+                        <Label text="Goal Type" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                        <ComboBox fx:id="goalTypeCombo" promptText="Select type" styleClass="combo-box-dark" maxWidth="Infinity"/>
+                    </VBox>
+                    
+                    <VBox spacing="8" GridPane.columnIndex="1">
+                        <Label text="Target" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <TextField fx:id="targetValueField" promptText="100" styleClass="input-dark" HBox.hgrow="ALWAYS"/>
+                        </HBox>
+                    </VBox>
+                </GridPane>
+                <Label fx:id="targetUnitLabel" text="questions" style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-padding: -10 0 0 0;" alignment="CENTER_RIGHT" maxWidth="Infinity"/>
+                
+                <Button fx:id="addGoalButton" text="Add Goal" styleClass="button-primary" maxWidth="Infinity">
+                    <graphic>
+                        <Text text="➕" style="-fx-fill: white; -fx-font-size: 12px;"/>
+                    </graphic>
+                </Button>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+    
+    <VBox style="-fx-padding: 20 30; -fx-border-color: #2d3748; -fx-border-width: 1 0 0 0;">
+        <HBox spacing="12" alignment="CENTER_RIGHT">
+            <Button fx:id="cancelButton" text="Close" styleClass="button-secondary"/>
+        </HBox>
+    </VBox>
+
+</VBox>

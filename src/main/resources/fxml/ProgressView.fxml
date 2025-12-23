@@ -411,45 +411,12 @@
                             <Button fx:id="editGoalsBtn" styleClass="btn-edit-goals" text="Edit Goals" />
                         </HBox>
                         
-                        <VBox spacing="14">
-                            <!-- Goal 1 -->
-                            <VBox spacing="8" styleClass="goal-item">
-                                <HBox alignment="CENTER_LEFT" spacing="10">
-                                    <Label styleClass="goal-icon" text="📚" />
-                                    <VBox spacing="4" HBox.hgrow="ALWAYS">
-                                        <Label styleClass="goal-title" text="Complete Java Fundamentals" />
-                                        <Label styleClass="goal-description" text="Finish all chapters" />
-                                    </VBox>
-                                    <Label fx:id="goal1ProgressLabel" styleClass="goal-percentage" text="75%" />
-                                </HBox>
-                                <ProgressBar fx:id="goal1ProgressBar" prefHeight="6" progress="0.75" styleClass="goal-progress-bar" />
-                            </VBox>
-                            
-                            <!-- Goal 2 -->
-                            <VBox spacing="8" styleClass="goal-item">
-                                <HBox alignment="CENTER_LEFT" spacing="10">
-                                    <Label styleClass="goal-icon" text="💯" />
-                                    <VBox spacing="4" HBox.hgrow="ALWAYS">
-                                        <Label styleClass="goal-title" text="Achieve 90% Accuracy" />
-                                        <Label styleClass="goal-description" text="On all attempts" />
-                                    </VBox>
-                                    <Label fx:id="goal2ProgressLabel" styleClass="goal-percentage" text="87%" />
-                                </HBox>
-                                <ProgressBar fx:id="goal2ProgressBar" prefHeight="6" progress="0.87" styleClass="goal-progress-bar" />
-                            </VBox>
-                            
-                            <!-- Goal 3 -->
-                            <VBox spacing="8" styleClass="goal-item">
-                                <HBox alignment="CENTER_LEFT" spacing="10">
-                                    <Label styleClass="goal-icon" text="🔥" />
-                                    <VBox spacing="4" HBox.hgrow="ALWAYS">
-                                        <Label styleClass="goal-title" text="30-Day Learning Streak" />
-                                        <Label styleClass="goal-description" text="Study daily" />
-                                    </VBox>
-                                    <Label fx:id="goal3ProgressLabel" styleClass="goal-percentage" text="40%" />
-                                </HBox>
-                                <ProgressBar fx:id="goal3ProgressBar" prefHeight="6" progress="0.40" styleClass="goal-progress-bar" />
-                            </VBox>
+                        <VBox spacing="14" VBox.vgrow="ALWAYS">
+                            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="220" styleClass="goals-scroll-pane" vbarPolicy="AS_NEEDED">
+                                <content>
+                                    <VBox fx:id="goalsListContainer" spacing="14" styleClass="goals-list-container" />
+                                </content>
+                            </ScrollPane>
                         </VBox>
                     </VBox>
                 </GridPane>

@@ -6,13 +6,16 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.interviewai.dao.CourseProgressDAO;
+import com.interviewai.dao.GoalDAO;
 import com.interviewai.dao.ProgressDAO;
 import com.interviewai.model.Chapter;
 import com.interviewai.model.GeneratedCourse;
 import com.interviewai.model.User;
+import com.interviewai.model.UserGoal;
 import com.interviewai.util.SessionContext;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.chart.BarChart;
@@ -27,6 +30,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.scene.paint.Color;
+
+import java.util.List;
 
 /**
  * Controller for the Progress Overview page
@@ -55,13 +66,9 @@ public class ProgressController implements Initializable {
     @FXML private ProgressBar coursesProgressBar;
 
     // FXML Components - Goals
+    // FXML Components - Goals
     @FXML private Button editGoalsBtn;
-    @FXML private Label goal1ProgressLabel;
-    @FXML private ProgressBar goal1ProgressBar;
-    @FXML private Label goal2ProgressLabel;
-    @FXML private ProgressBar goal2ProgressBar;
-    @FXML private Label goal3ProgressLabel;
-    @FXML private ProgressBar goal3ProgressBar;
+    @FXML private VBox goalsListContainer;
 
     // FXML Components - Courses
     @FXML private VBox courseProgressContainer;
@@ -85,11 +92,13 @@ public class ProgressController implements Initializable {
 
     ProgressDAO progressDAO;
     CourseProgressDAO courseProgressDAO;
+    GoalDAO goalDAO;
         
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         progressDAO = new ProgressDAO();
         courseProgressDAO = new CourseProgressDAO();
+        goalDAO = new GoalDAO();
         user = SessionContext.getCurrentUser();
 
         try {
@@ -557,25 +566,8 @@ public class ProgressController implements Initializable {
                 }
             }
 
-            // Goals - Placeholder Data (can be updated when goals feature is implemented)
-            if (goal1ProgressLabel != null) {
-                goal1ProgressLabel.setText("75%");
-            }
-            if (goal1ProgressBar != null) {
-                goal1ProgressBar.setProgress(0.75);
-            }
-            if (goal2ProgressLabel != null) {
-                goal2ProgressLabel.setText("87%");
-            }
-            if (goal2ProgressBar != null) {
-                goal2ProgressBar.setProgress(0.87);
-            }
-            if (goal3ProgressLabel != null) {
-                goal3ProgressLabel.setText("40%");
-            }
-            if (goal3ProgressBar != null) {
-                goal3ProgressBar.setProgress(0.40);
-            }
+            // Goals - Load Real User Goals
+            loadUserGoals();
 
             // Courses - Not used anymore (dynamic course cards replace these)
             if (course1ProgressLabel != null) {
@@ -624,18 +616,195 @@ public class ProgressController implements Initializable {
     }
 
     /**
+     * Load and display user goals
+     */
+    /**
+     * Load and display user goals
+     */
+    private void loadUserGoals() {
+        if (goalsListContainer == null) return;
+        
+        goalsListContainer.getChildren().clear();
+
+        try {
+            System.out.println("Loading user goals for user " + user.getId());
+            List<UserGoal> goals = goalDAO.getUserGoalsWithProgress(user.getId());
+            
+            if (goals == null || goals.isEmpty()) {
+                // Show placeholder
+                goalsListContainer.getChildren().add(createNoGoalsPlaceholder());
+                return;
+            }
+
+            // Sort: Incomplete first, then Completed
+            goals.sort((g1, g2) -> {
+                boolean c1 = g1.isCompleted();
+                boolean c2 = g2.isCompleted();
+                if (c1 && !c2) return 1; // Completed goes to bottom
+                if (!c1 && c2) return -1; // Incomplete goes to top
+                return 0;
+            });
+            
+            // Create dynamic UI items
+            for (UserGoal goal : goals) {
+                goalsListContainer.getChildren().add(createGoalItem(goal));
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("ERROR loading user goals: " + e.getMessage());
+            e.printStackTrace();
+            goalsListContainer.getChildren().add(createErrorPlaceholder(e.getMessage()));
+        }
+    }
+
+    private VBox createGoalItem(UserGoal goal) {
+        // Main Container
+        VBox goalItem = new VBox();
+        goalItem.setSpacing(8);
+        goalItem.getStyleClass().add("goal-item");
+
+        // Header (Icon + Title/Desc + %)
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setSpacing(10);
+
+        // Icon
+        String iconStr = goal.isCompleted() ? "🏆" : getGoalIcon(goal.getGoalType());
+        Label iconLabel = new Label(iconStr);
+        iconLabel.getStyleClass().add("goal-icon");
+        if (goal.isCompleted()) {
+             // Green/Success color
+             iconLabel.setStyle("-fx-text-fill: #27b159;");
+        }
+
+        // Text Content
+        VBox textContainer = new VBox();
+        textContainer.setSpacing(4);
+        HBox.setHgrow(textContainer, javafx.scene.layout.Priority.ALWAYS);
+
+        Label titleLabel = new Label(goal.getGoalName());
+        titleLabel.getStyleClass().add("goal-title");
+        if (goal.isCompleted()) {
+            titleLabel.setText(goal.getGoalName() + " (Done!)");
+            titleLabel.setStyle("-fx-text-fill: #27b159;");
+        }
+
+        Label descLabel = new Label();
+        descLabel.getStyleClass().add("goal-description");
+        String status = goal.getCurrentValue() + " / " + goal.getTargetValue();
+        descLabel.setText(status + " " + getGoalUnit(goal.getGoalType()));
+
+        textContainer.getChildren().addAll(titleLabel, descLabel);
+
+        // Percentage Label
+        Label progressLabel = new Label(String.format("%.0f%%", goal.getProgressPercentage()));
+        progressLabel.getStyleClass().add("goal-percentage");
+        if (goal.isCompleted()) {
+            progressLabel.setStyle("-fx-text-fill: #27b159;");
+        }
+
+        header.getChildren().addAll(iconLabel, textContainer, progressLabel);
+
+        // Progress Bar
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setPrefHeight(6);
+        progressBar.setMaxWidth(Double.MAX_VALUE); // Fill width
+        progressBar.setProgress(goal.getProgressPercentage() / 100.0);
+        progressBar.getStyleClass().add("goal-progress-bar");
+        if (goal.isCompleted()) {
+             progressBar.setStyle("-fx-accent: #27b159;");
+        }
+
+        goalItem.getChildren().addAll(header, progressBar);
+        return goalItem;
+    }
+    
+    private VBox createNoGoalsPlaceholder() {
+        VBox placeholder = new VBox();
+        placeholder.setAlignment(Pos.CENTER);
+        placeholder.setSpacing(10);
+        placeholder.setPrefHeight(100);
+        
+        Label icon = new Label("✨");
+        icon.setStyle("-fx-font-size: 24px;");
+        Label text = new Label("No Goals Set");
+        text.getStyleClass().add("goal-title");
+        Label sub = new Label("Click 'Edit Goals' to start!");
+        sub.getStyleClass().add("goal-description");
+        
+        placeholder.getChildren().addAll(icon, text, sub);
+        return placeholder;
+    }
+
+    private VBox createErrorPlaceholder(String error) {
+        VBox placeholder = new VBox();
+        placeholder.setAlignment(Pos.CENTER);
+        placeholder.setSpacing(10);
+        
+        Label icon = new Label("⚠️");
+        Label text = new Label("Error Loading Goals");
+        text.setStyle("-fx-text-fill: #ff4d4d; -fx-font-weight: bold;");
+        Label sub = new Label(error);
+        sub.getStyleClass().add("goal-description");
+        sub.setWrapText(true);
+        
+        placeholder.getChildren().addAll(icon, text, sub);
+        return placeholder;
+    }
+    
+    private String getGoalUnit(String type) {
+        switch (type) {
+            case "QUESTIONS": return "questions";
+            case "XP": return "XP";
+            case "CHAPTERS": return "chapters";
+            case "TIME": return "mins";
+            case "COURSES": return "courses";
+            case "STREAK": return "days";
+            default: return "";
+        }
+    }
+    
+    private String getGoalIcon(String type) {
+        switch (type) {
+            case "QUESTIONS": return "❓";
+            case "XP": return "⚡";
+            case "CHAPTERS": return "📚";
+            case "TIME": return "⏱️";
+            case "COURSES": return "🎓";
+            case "STREAK": return "🔥";
+            default: return "🎯";
+        }
+    }
+
+    /**
      * Handle Edit Goals button click
      */
     private void onEditGoals() {
-        System.out.println("Edit Goals clicked - Feature not yet implemented");
-        
-        // TODO: Open goals editor dialog or navigate to goals page
-        // For now, just log the action
-        
-        // In production, this would:
-        // 1. Open a dialog to edit user goals
-        // 2. Update goals in database
-        // 3. Refresh the progress view
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditGoalsDialog.fxml"));
+            Parent root = loader.load();
+            EditGoalsDialogController controller = loader.getController();
+            
+            Stage dialogStage = new Stage();
+            dialogStage.initStyle(StageStyle.TRANSPARENT);
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            dialogStage.setScene(scene);
+            // dialogStage.setResizable(false);
+            
+            dialogStage.showAndWait();
+            
+            // Refresh goals display if changes were made
+            if (controller.hasChangesMade()) {
+                loadUserGoals();
+            }
+            
+        } catch (Exception e) {
+            System.err.println("ERROR opening edit goals dialog: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**

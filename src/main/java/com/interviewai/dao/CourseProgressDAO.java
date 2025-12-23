@@ -52,7 +52,7 @@ public class CourseProgressDAO {
             "UPDATE chapters SET status = ?, completed_at = CASE WHEN ? = 'COMPLETED' THEN NOW() ELSE completed_at END WHERE id = ?";
 
     private static final String UPDATE_QUESTION_STATUS_SQL =
-            "UPDATE questions SET status = ? WHERE id = ?";
+            "UPDATE questions SET status = ?, updated_at = NOW() WHERE id = ?";
 
     private static final String REMAINING_QUESTIONS_SQL =
             "SELECT COUNT(*) AS remaining FROM questions WHERE chapter_id = ? AND (status = 'NOT_STARTED' OR status = 'IN_PROGRESS')";
@@ -172,12 +172,14 @@ public class CourseProgressDAO {
     }
 
     public void updateChapterStatus(int chapterId, Chapter.ChapterStatus status) throws SQLException {
+        System.out.println("DEBUG CourseProgressDAO: Updating chapter " + chapterId + " to status " + status);
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(UPDATE_CHAPTER_STATUS_SQL)) {
             stmt.setString(1, status.name());
             stmt.setString(2, status.name());
             stmt.setInt(3, chapterId);
-            stmt.executeUpdate();
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("DEBUG CourseProgressDAO: Updated " + rowsAffected + " rows for chapter " + chapterId);
         }
     }
 

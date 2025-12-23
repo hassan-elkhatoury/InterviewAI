@@ -97,10 +97,10 @@ public class QuestionDAO {
     }
 
     /**
-     * Update question status
+     * Update question status and timestamp
      */
     public void updateQuestionStatus(int questionId, Question.QuestionStatus status) throws SQLException {
-        String sql = "UPDATE questions SET status = ? WHERE id = ?";
+        String sql = "UPDATE questions SET status = ?, updated_at = NOW() WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

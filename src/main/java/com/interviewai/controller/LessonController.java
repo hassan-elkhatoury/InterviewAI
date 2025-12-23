@@ -759,10 +759,10 @@ public class LessonController implements Initializable {
     private void onNext() {
         if (currentQuestionIndex < questions.size() - 1) {
 
-            if(currentQuestion.getStatus()==Question.QuestionStatus.IN_PROGRESS){
+            // Check if the current question is not completed (e.g., incorrect or skipped)
+            if(currentQuestion.getStatus() != Question.QuestionStatus.COMPLETED){
 
                 try {
-                    
                     Question.QuestionStatus newStatus = Question.QuestionStatus.INCORRECT;
                     
                     questionDAO.updateQuestionStatus(currentQuestion.getId(), newStatus);
@@ -775,8 +775,6 @@ public class LessonController implements Initializable {
                 }
 
             }
-
-
 
             displayQuestion(currentQuestionIndex + 1);
         }

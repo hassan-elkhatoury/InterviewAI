@@ -39,6 +39,8 @@ public class QuestsController {
     private static final int MONTHLY_TARGET = 12;
     private static final int DAILY_REWARD = 900;
     private static final int MONTHLY_REWARD = 30000;
+    
+    private LocalDate currentDay = LocalDate.now(); // Track current day for reset detection
 
     @FXML
     public void initialize() {
@@ -60,11 +62,11 @@ public class QuestsController {
             totalXpLabel.setText(String.format("%,d Total XP", totalXP));
             streakLabel.setText(streak + " Day Streak");
 
-            // 2. Load Daily Quest
+            // 2. Load Daily Quest (counts questions since last claim/reset)
             int questionsToday = progressDAO.getQuestionsAnsweredToday(userId);
-            boolean dailyClaimed = progressDAO.hasClaimedDailyQuest(userId);
             
-            updateDailyQuestUI(questionsToday, dailyClaimed);
+            // Simple logic: if >= 20, can claim. After claim, count resets to 0.
+            updateDailyQuestUI(questionsToday, false);
 
             // 3. Load Monthly Quest
             int chaptersThisMonth = progressDAO.getChaptersCompletedThisMonth(userId);
@@ -161,16 +163,35 @@ public class QuestsController {
 
     private void updateTimers() {
         LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now();
+        
+        // Check if day has changed (midnight passed)
+        if (!today.equals(currentDay)) {
+            System.out.println("Day changed! Resetting daily quest progress...");
+            currentDay = today;
+            
+            // Reset daily quest progress for all users by updating their reset timestamp
+            User currentUser = SessionContext.getCurrentUser();
+            if (currentUser != null) {
+                try {
+                    // Update the reset timestamp to now, which will make the count query return 0
+                    progressDAO.resetDailyQuestProgress(currentUser.getId());
+                    loadUserData(); // Reload UI to show 0/20
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         
         // Daily Timer (Midnight)
-        LocalDateTime midnight = LocalDate.now().plusDays(1).atStartOfDay();
+        LocalDateTime midnight = today.plusDays(1).atStartOfDay();
         long secondsUntilMidnight = ChronoUnit.SECONDS.between(now, midnight);
         long hours = secondsUntilMidnight / 3600;
         long minutes = (secondsUntilMidnight % 3600) / 60;
         dailyTimerLabel.setText(String.format("Ends in %dh %dm", hours, minutes));
 
         // Monthly Timer (1st of next month)
-        LocalDateTime nextMonth = LocalDate.now().withDayOfMonth(1).plusMonths(1).atStartOfDay();
+        LocalDateTime nextMonth = today.withDayOfMonth(1).plusMonths(1).atStartOfDay();
         long daysUntilNextMonth = ChronoUnit.DAYS.between(now, nextMonth);
         monthlyTimerLabel.setText(String.format("Ends in %dd", daysUntilNextMonth));
     }

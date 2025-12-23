@@ -191,22 +191,34 @@ public class ProfileController implements Initializable {
             return;
         }
         
-        // Update the name locally
-        currentUser.setUsername(newName);
-        SessionContext.setCurrentUser(currentUser);
-        bannerNameLabel.setText("Welcome, " + newName + "");
-        originalName = newName;
-        
-        showAlert(Alert.AlertType.INFORMATION, "Success", "Name Updated", "Your display name has been updated!");
-        
-        // Disable name field and hide save/cancel buttons
-        nameField.setDisable(true);
-        editNameButton.setVisible(true);
-        editNameButton.setManaged(true);
-        saveNameButton.setVisible(false);
-        saveNameButton.setManaged(false);
-        cancelNameButton.setVisible(false);
-        cancelNameButton.setManaged(false);
+        try {
+            // Persist to DB
+            String previousName = currentUser.getUsername();
+            currentUser.setUsername(newName);
+            userDAO.updateUser(currentUser);
+            
+            // Update session and UI only if DB update succeeds
+            SessionContext.setCurrentUser(currentUser);
+            bannerNameLabel.setText("Welcome, " + newName + "");
+            originalName = newName;
+            
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Name Updated", "Your display name has been updated!");
+            
+            // Disable name field and hide save/cancel buttons
+            nameField.setDisable(true);
+            editNameButton.setVisible(true);
+            editNameButton.setManaged(true);
+            saveNameButton.setVisible(false);
+            saveNameButton.setManaged(false);
+            cancelNameButton.setVisible(false);
+            cancelNameButton.setManaged(false);
+            
+        } catch (SQLException e) {
+            // Revert local change on error
+            currentUser.setUsername(originalName);
+            System.err.println("Error updating name: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to Update Name", e.getMessage());
+        }
     }
 
     /**

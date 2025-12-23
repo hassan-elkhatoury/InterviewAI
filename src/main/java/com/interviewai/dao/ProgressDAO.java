@@ -226,19 +226,23 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
      * Get number of questions answered by user today
      */
     public int getQuestionsAnsweredToday(int userId) throws SQLException {
+        // Count questions answered since last quest reset (claim)
         String query = "SELECT COUNT(*) as count FROM questions q " +
                        "JOIN chapters c ON q.chapter_id = c.id " +
                        "JOIN generated_courses gc ON c.course_id = gc.id " +
+                       "JOIN users u ON gc.user_id = u.id " +
                        "WHERE gc.user_id = ? " +
-                       "AND (q.status = 'COMPLETED' OR q.status = 'INCORRECT') " +
-                       "AND DATE(q.updated_at) = CURDATE()";
+                       "AND (q.status = 'COMPLETED' OR q.status = 'INCORRECT' OR q.status = 'IN_PROGRESS') " +
+                       "AND q.updated_at > COALESCE(u.daily_quest_last_reset, DATE_SUB(NOW(), INTERVAL 1 DAY))";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt("count");
+                int count = rs.getInt("count");
+                System.out.println("DEBUG PROGRESDAO: Questions since last reset for User " + userId + " is " + count);
+                return count;
             }
         }
         return 0;
@@ -433,13 +437,46 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
      * Claim daily quest reward
      */
     public void claimDailyQuest(int userId, int xpReward) throws SQLException {
-        String query = "UPDATE users SET last_daily_quest_claim = CURDATE() WHERE id = ?";
+        // Reset the quest progress by updating the last reset timestamp
+        String query = "UPDATE users SET " + 
+                       "daily_quest_last_reset = NOW(), " +
+                       "last_daily_quest_claim = CURDATE() " +
+                       "WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, userId);
             stmt.executeUpdate();
         }
         addXpToLatestCourse(userId, xpReward);
+    }
+
+    public int getDailyQuestClaimsCount(int userId) throws SQLException {
+         String query = "SELECT daily_quest_claims_count, last_daily_quest_claim FROM users WHERE id = ?";
+         try (Connection conn = DBConnection.getConnection();
+              PreparedStatement stmt = conn.prepareStatement(query)) {
+             stmt.setInt(1, userId);
+             ResultSet rs = stmt.executeQuery();
+             if (rs.next()) {
+                 Date lastClaim = rs.getDate("last_daily_quest_claim");
+                 if (lastClaim != null && lastClaim.toLocalDate().equals(LocalDate.now())) {
+                     return rs.getInt("daily_quest_claims_count");
+                 }
+             }
+         }
+         return 0;
+    }
+
+    /**
+     * Reset daily quest progress by updating the reset timestamp
+     * This makes the question count query return 0
+     */
+    public void resetDailyQuestProgress(int userId) throws SQLException {
+        String query = "UPDATE users SET daily_quest_last_reset = NOW() WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
     }
 
     /**
@@ -505,7 +542,9 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt("count");
+                int count = rs.getInt("count");
+                System.out.println("DEBUG PROGRESSDAO: Chapters completed this month for User " + userId + " is " + count);
+                return count;
             }
         }
         return 0;
@@ -516,7 +555,7 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
      */
     public double calculateAccuracy(int userId) throws SQLException {
         String query = "SELECT " +
-                       "COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as correct_count, " +
+                       "COUNT(CASE WHEN q.status = 'COMPLETED' THEN 1 END) as correct_count, " +
                        "COUNT(*) as total_count " +
                        "FROM questions q " +
                        "JOIN chapters c ON q.chapter_id = c.id " +
