@@ -257,8 +257,8 @@ public class AdminProfileController implements Initializable {
 
         try {
             // Update user in database
-            currentUser.setName(newName);
-            userDAO.update(currentUser);
+            currentUser.setUsername(newName);
+            userDAO.updateUser(currentUser);
 
             // Update session
             SessionContext.setCurrentUser(currentUser);
@@ -322,8 +322,8 @@ public class AdminProfileController implements Initializable {
 
         try {
             // Verify current password
-            User verified = userDAO.findByUsernameAndPassword(currentUser.getUsername(), currentPassword);
-            if (verified == null) {
+            boolean isValid = userDAO.validateCredentials(currentUser.getUsername(), currentPassword);
+            if (!isValid) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Current password is incorrect.");
                 return;
             }

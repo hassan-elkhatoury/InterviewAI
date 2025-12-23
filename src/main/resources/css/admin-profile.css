@@ -262,13 +262,13 @@
 .action-btn {
     -fx-background-color: rgba(255, 255, 255, 0.05);
     -fx-text-fill: #FFFFFF;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-font-weight: 600;
-    -fx-padding: 8 16;
-    -fx-background-radius: 8px;
+    -fx-padding: 12 24;
+    -fx-background-radius: 10px;
     -fx-border-color: rgba(255, 255, 255, 0.1);
     -fx-border-width: 1;
-    -fx-border-radius: 8px;
+    -fx-border-radius: 10px;
     -fx-cursor: hand;
 }
 
@@ -277,66 +277,124 @@
     -fx-border-color: rgba(255, 255, 255, 0.2);
 }
 
+/* ===== PRIMARY BUTTON - Change Password ===== */
+.action-btn.action-btn-primary,
 .action-btn-primary {
-    -fx-background-color: rgba(34, 197, 94, 0.15);
-    -fx-border-color: rgba(34, 197, 94, 0.3);
-    -fx-text-fill: #22C55E;
+    -fx-background-color: #22C55E;
+    -fx-border-color: #16A34A;
+    -fx-border-width: 0 0 3 0;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-padding: 14 32;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-cursor: hand;
 }
 
+.action-btn.action-btn-primary:hover,
 .action-btn-primary:hover {
-    -fx-background-color: rgba(34, 197, 94, 0.25);
-    -fx-border-color: rgba(34, 197, 94, 0.5);
+    -fx-background-color: #16A34A;
+    -fx-border-color: #15803D;
+}
+
+.action-btn.action-btn-primary:pressed,
+.action-btn-primary:pressed {
+    -fx-background-color: #15803D;
+    -fx-border-color: #166534;
+    -fx-border-width: 3 0 0 0;
 }
 
 .action-btn-secondary {
-    -fx-background-color: rgba(59, 130, 246, 0.15);
-    -fx-border-color: rgba(59, 130, 246, 0.3);
-    -fx-text-fill: #3B82F6;
+    -fx-background-color: #3B82F6;
+    -fx-border-color: #2563EB;
+    -fx-border-width: 0 0 3 0;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 700;
+    -fx-padding: 14 32;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-cursor: hand;
 }
 
 .action-btn-secondary:hover {
-    -fx-background-color: rgba(59, 130, 246, 0.25);
-    -fx-border-color: rgba(59, 130, 246, 0.5);
+    -fx-background-color: #2563EB;
+    -fx-border-color: #1D4ED8;
 }
 
+/* ===== DANGER OUTLINE BUTTON - Logout ===== */
+.action-btn.action-btn-danger-outline,
 .action-btn-danger-outline {
-    -fx-background-color: rgba(239, 68, 68, 0.1);
-    -fx-border-color: rgba(239, 68, 68, 0.3);
+    -fx-background-color: rgba(239, 68, 68, 0.12);
+    -fx-border-color: #EF4444;
+    -fx-border-width: 2;
     -fx-text-fill: #EF4444;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-padding: 12 28;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-cursor: hand;
 }
 
+.action-btn.action-btn-danger-outline:hover,
 .action-btn-danger-outline:hover {
-    -fx-background-color: rgba(239, 68, 68, 0.2);
-    -fx-border-color: rgba(239, 68, 68, 0.5);
+    -fx-background-color: #EF4444;
+    -fx-border-color: #DC2626;
+    -fx-text-fill: #FFFFFF;
+}
+
+.action-btn.action-btn-danger-outline:pressed,
+.action-btn-danger-outline:pressed {
+    -fx-background-color: #DC2626;
+    -fx-border-color: #B91C1C;
+    -fx-text-fill: #FFFFFF;
 }
 
 .action-btn-icon {
-    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-color: rgba(255, 255, 255, 0.06);
     -fx-text-fill: #9CA3AF;
-    -fx-font-size: 12px;
-    -fx-padding: 8 10;
-    -fx-background-radius: 6px;
-    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-font-size: 13px;
+    -fx-padding: 10 12;
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
     -fx-border-width: 1;
-    -fx-border-radius: 6px;
+    -fx-border-radius: 8px;
     -fx-cursor: hand;
-    -fx-min-width: 34px;
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
 }
 
 .action-btn-icon:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
-    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-text-fill: #FFFFFF;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
 }
 
 .action-btn-icon.action-btn-success {
     -fx-background-color: rgba(34, 197, 94, 0.15);
-    -fx-border-color: rgba(34, 197, 94, 0.3);
+    -fx-border-color: rgba(34, 197, 94, 0.4);
     -fx-text-fill: #22C55E;
 }
 
 .action-btn-icon.action-btn-success:hover {
-    -fx-background-color: rgba(34, 197, 94, 0.25);
-    -fx-border-color: rgba(34, 197, 94, 0.5);
+    -fx-background-color: rgba(34, 197, 94, 0.3);
+    -fx-border-color: rgba(34, 197, 94, 0.6);
+    -fx-effect: dropshadow(gaussian, rgba(34, 197, 94, 0.4), 10, 0, 0, 0);
+}
+
+.action-btn-icon.action-btn-danger {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+    -fx-border-color: rgba(239, 68, 68, 0.4);
+    -fx-text-fill: #EF4444;
+}
+
+.action-btn-icon.action-btn-danger:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.3);
+    -fx-border-color: rgba(239, 68, 68, 0.6);
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.4), 10, 0, 0, 0);
 }
 
 .action-btn-icon.action-btn-danger {
