@@ -3,7 +3,9 @@ package com.interviewai.controller;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 import com.interviewai.dao.CourseProgressDAO;
@@ -12,6 +14,7 @@ import com.interviewai.dao.QuestionDAO;
 import com.interviewai.model.Chapter;
 import com.interviewai.model.Question;
 import com.interviewai.model.User;
+import com.interviewai.service.OpenRouterAIService;
 import com.interviewai.util.SessionContext;
 
 import javafx.animation.PauseTransition;
@@ -58,6 +61,27 @@ public class LessonController implements Initializable {
     @FXML private Label feedbackTitle;
     @FXML private Label feedbackMessage;
     @FXML private javafx.scene.layout.StackPane toastOverlay;
+    
+    // AI Validation Panel Components
+    @FXML private VBox aiValidationPanel;
+    @FXML private VBox aiTipsBox;
+    @FXML private VBox aiLoadingBox;
+    @FXML private javafx.scene.control.ProgressIndicator aiLoadingSpinner;
+    @FXML private VBox aiScoreBox;
+    @FXML private Label aiScoreLabel;
+    @FXML private ProgressBar aiScoreBar;
+    @FXML private VBox aiStrengthsBox;
+    @FXML private Label aiStrengthsLabel;
+    @FXML private VBox aiImprovementsBox;
+    @FXML private Label aiImprovementsLabel;
+    @FXML private HBox aiToggleButtonsBox;
+    @FXML private Button showExplanationButton;
+    @FXML private Button showFeedbackButton;
+    @FXML private VBox aiExplanationBox;
+    @FXML private Label aiExplanationLabel;
+    
+    // Cache for explanation to avoid regeneration
+    private String cachedExplanation = null;
 
     // Alert notification components (will be created dynamically)
     private VBox alertNotification;
@@ -67,6 +91,7 @@ public class LessonController implements Initializable {
     private QuestionDAO questionDAO;
     private CourseProgressDAO courseProgressDAO;
     private ProgressDAO progressDAO;
+    private OpenRouterAIService aiService;
     private List<Question> questions;
     private int currentQuestionIndex = 0;
     private Question currentQuestion;
@@ -80,6 +105,15 @@ public class LessonController implements Initializable {
         questionDAO = new QuestionDAO();
         courseProgressDAO = new CourseProgressDAO();
         progressDAO = new ProgressDAO();
+        
+        // Initialize AI service
+        try {
+            aiService = new OpenRouterAIService();
+        } catch (Exception e) {
+            System.err.println("Warning: AI service not available: " + e.getMessage());
+            aiService = null;
+        }
+        
         questions = new ArrayList<>();
         choiceControls = new ArrayList<>();
 
@@ -149,6 +183,14 @@ public class LessonController implements Initializable {
             questions = questionDAO.getQuestionsByChapterId(chapterId);
             System.out.println("SUCCESS: Loaded " + questions.size() + " questions for chapter " + chapterId);
             
+            // Shuffle questions to mix multiple-choice and short-answer types
+            // Use chapter ID as seed for consistent shuffle order
+            if (!questions.isEmpty()) {
+                Random random = new Random(chapterId);
+                Collections.shuffle(questions, random);
+                System.out.println("✓ Shuffled " + questions.size() + " questions for chapter " + chapterId);
+            }
+            
             if (questions.isEmpty()) {
                 System.out.println("WARNING: No questions found in database for chapter " + chapterId);
                 showAlert("No Questions Available", 
@@ -170,22 +212,42 @@ public class LessonController implements Initializable {
         if (index < 0 || index >= questions.size()) {
             return;
         }
+        
+        // Hide old explanation/feedback immediately
+        if (explanationPanel != null) {
+            explanationPanel.setVisible(false);
+            explanationPanel.setManaged(false);
+        }
+        if (feedbackBanner != null) {
+            feedbackBanner.setVisible(false);
+            feedbackBanner.setManaged(false);
+        }
 
         currentQuestionIndex = index;
         currentQuestion = questions.get(index);
         userAnswer = null;
 
+        // Calculate progress-based question number (how many completed + 1)
+        int completedCount = 0;
+        for (Question q : questions) {
+            if (q.getStatus() == Question.QuestionStatus.COMPLETED || 
+                q.getStatus() == Question.QuestionStatus.INCORRECT) {
+                completedCount++;
+            }
+        }
+        int progressBasedNumber = completedCount + 1;
+
         // Update header
         chapterTitleLabel.setText("Chapter Questions");
-        questionProgressLabel.setText("Question " + (index + 1) + " of " + questions.size());
+        questionProgressLabel.setText("Question " + progressBasedNumber + " of " + questions.size());
         
-        // Update progress
-        double progress = (double) index / questions.size();
+        // Update progress bar based on completed count
+        double progress = (double) completedCount / questions.size();
         progressBar.setProgress(progress);
         progressPercentLabel.setText(String.format("%.0f%% Complete", progress * 100));
 
         // Update question card
-        questionNumberBadge.setText("Q" + (index + 1));
+        questionNumberBadge.setText("Q" + progressBasedNumber);
         questionTypeLabel.setText(getQuestionTypeDisplay(currentQuestion.getQuestionType()));
         questionStatusLabel.setText("●");
         questionStatusLabel.setStyle("-fx-text-fill: #94a3b8;");
@@ -193,12 +255,26 @@ public class LessonController implements Initializable {
 
     // Build answer UI (this will handle submit button visibility)
     buildAnswerUI();
+    
+        // Show/hide AI validation panel based on question type
+        if (aiValidationPanel != null) {
+            if (currentQuestion.getQuestionType() == Question.QuestionType.SHORT_ANSWER ||
+                currentQuestion.getQuestionType() == Question.QuestionType.MULTIPLE_CHOICE) {
+                aiValidationPanel.setVisible(true);
+                aiValidationPanel.setManaged(true);
+                clearAIPanel();
+                updateTipsText(currentQuestion.getQuestionType());
+            } else {
+                aiValidationPanel.setVisible(false);
+                aiValidationPanel.setManaged(false);
+            }
+        }
 
         // Hide explanation and feedback
-        explanationPanel.setVisible(false);
-        explanationPanel.setManaged(false);
-        feedbackBanner.setVisible(false);
-        feedbackBanner.setManaged(false);
+    explanationPanel.setVisible(false);
+    explanationPanel.setManaged(false);
+    feedbackBanner.setVisible(false);
+    feedbackBanner.setManaged(false);
 
     // Hide next and finish buttons
     nextButton.setVisible(false);
@@ -236,6 +312,8 @@ public class LessonController implements Initializable {
                 // Initially hide submit button for short answer
                 submitButton.setVisible(false);
                 submitButton.setManaged(false);
+            shortAnswerField.setEditable(true); // Re-enable editing
+            shortAnswerField.setStyle("");      // Clear any validation styles
             }
             // Hide choices
             choicesContainer.setVisible(false);
@@ -341,7 +419,28 @@ public class LessonController implements Initializable {
             return;
         }
 
-        // Check if answer is correct
+        // --- NEW LOGIC FOR SHORT ANSWER (AI Grading) ---
+        if (currentQuestion.getQuestionType() == Question.QuestionType.SHORT_ANSWER) {
+            if (aiService == null) {
+                showAlert("AI Service Error", "AI service is not available. Cannot grade short answer.");
+                return;
+            }
+            
+            // Disable inputs/submit immediately
+            submitButton.setVisible(false);
+            submitButton.setManaged(false);
+            if (shortAnswerField != null) {
+                shortAnswerField.setEditable(false);
+            }
+            
+            // Trigger AI Validation (Grading happens in callback)
+            validateWithAI();
+            return;
+        }
+
+        // --- ORIGINAL LOGIC FOR MULTIPLE CHOICE ---
+
+        // Check if answer is correct (Exact match)
         boolean isCorrect = checkAnswer(userAnswer);
 
         // Show feedback
@@ -386,14 +485,17 @@ public class LessonController implements Initializable {
                 awardXP();
             }
             
+            // For multiple choice, show explanation immediately (auto-load)
+            if (currentQuestion.getQuestionType() == Question.QuestionType.MULTIPLE_CHOICE) {
+                requestExplanation();
+            }
+            
             // Check if chapter is complete and mark it
             checkAndUpdateChapterCompletion();
             
         } catch (SQLException e) {
             System.err.println("Error updating question status: " + e.getMessage());
         }
-        
-        // Do not auto-advance; user will click Next manually
     }
 
     /**
@@ -801,23 +903,6 @@ public class LessonController implements Initializable {
      */
     private void showAlert(String title, String message) {
         showCustomAlert(title, message, "error");
-    }
-
-    /**
-     * Record user activity to update streak
-     */
-    private void recordActivity() {
-        User currentUser = SessionContext.getCurrentUser();
-        Integer courseId = SessionContext.getActiveCourseId();
-        if (currentUser == null || courseId == null) return;
-
-        try {
-            // Record activity with 0 XP to update last_updated timestamp
-            progressDAO.saveProgress(currentUser.getId(), courseId, 0);
-            System.out.println("Recorded user activity for streak calculation");
-        } catch (SQLException e) {
-            System.err.println("Error recording activity: " + e.getMessage());
-        }
     }
 }
 

@@ -139,52 +139,53 @@ public Map<String, Boolean> getLast7DaysProgress(int userId) throws SQLException
      * Streak resets to 0 if user skips a day.
      */
     public int calculateUserStreak(int userId) throws SQLException {
-        // Get all distinct activity dates in descending order (most recent first)
+        // Get all unique days where user had activity (gained > 0 XP)
+        // Ordered by date DESC (newest first)
         String query = "SELECT DISTINCT DATE(last_updated) as activity_date " +
                        "FROM progress " +
-                       "WHERE user_id = ? " +
+                       "WHERE user_id = ? AND xp > 0 " +
                        "ORDER BY activity_date DESC";
-        
+                       
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
             
-            // If no activity, streak is 0
-            if (!rs.next()) {
-                return 0;
-            }
-            
-            // Get today's date (date only, no time)
-            java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
-            java.sql.Date yesterday = new java.sql.Date(today.getTime() - 24 * 60 * 60 * 1000);
-            
-            // Get the most recent activity date
-            java.sql.Date mostRecentDate = rs.getDate("activity_date");
-            
-            // Check if the streak is still active (today or yesterday)
-            // If not, streak is 0
-            if (!mostRecentDate.equals(today) && !mostRecentDate.equals(yesterday)) {
-                return 0;
-            }
-            
-            // Start counting consecutive days
-            int streak = 1;
-            java.sql.Date expectedDate = new java.sql.Date(mostRecentDate.getTime() - 24 * 60 * 60 * 1000);
-            
-            // Iterate through remaining dates
+            List<LocalDate> activityDates = new ArrayList<>();
             while (rs.next()) {
-                java.sql.Date currentDate = rs.getDate("activity_date");
-                
-                // Check if current date is consecutive (one day before expected)
-                if (currentDate.equals(expectedDate)) {
+                Date sqlDate = rs.getDate("activity_date");
+                if (sqlDate != null) {
+                    activityDates.add(sqlDate.toLocalDate());
+                }
+            }
+            
+            if (activityDates.isEmpty()) {
+                return 0;
+            }
+            
+            LocalDate today = LocalDate.now();
+            LocalDate yesterday = today.minusDays(1);
+            
+            // Check if streak is active (activity today OR yesterday)
+            // If the most recent activity was older than yesterday, streak is broken -> 0
+            LocalDate mostRecent = activityDates.get(0);
+            if (!mostRecent.equals(today) && !mostRecent.equals(yesterday)) {
+                return 0;
+            }
+            
+            int streak = 0;
+            LocalDate expectedDate = mostRecent.equals(today) ? today : yesterday;
+            
+            for (LocalDate date : activityDates) {
+                if (date.equals(expectedDate)) {
                     streak++;
-                    // Update expected date to one day before current
-                    expectedDate = new java.sql.Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
-                } else {
+                    expectedDate = expectedDate.minusDays(1); // Set expected next date to previous day
+                } else if (date.isBefore(expectedDate)) {
                     // Gap found, stop counting
                     break;
                 }
+                // If date is after expectedDate, it shouldn't happen with sorted DESC logic if we start correctly,
+                // but checking isBefore handles gaps.
             }
             
             return streak;

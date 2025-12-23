@@ -125,8 +125,9 @@ public class ProfileController implements Initializable {
         int level = Math.max(1, totalXP / 1000 + 1);
         bannerLevelLabel.setText(String.valueOf(level));
 
-        // Streak (would need to implement in DAO - using placeholder for now)
-        bannerStreakLabel.setText("5");
+        // Streak (real calculation)
+        int streak = progressDAO.calculateUserStreak(currentUser.getId());
+        bannerStreakLabel.setText(String.valueOf(streak));
 
         // Courses count (placeholder)
         bannerCoursesLabel.setText("3");
