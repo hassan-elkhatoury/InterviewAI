@@ -904,5 +904,270 @@ public class LessonController implements Initializable {
     private void showAlert(String title, String message) {
         showCustomAlert(title, message, "error");
     }
+
+    /**
+     * Record user activity
+     */
+    private void recordActivity() {
+        // Placeholder for recording user activity
+        System.out.println("Activity recorded for user.");
+    }
+
+    /**
+     * Clear AI validation panel
+     */
+    private void clearAIPanel() {
+        if (aiScoreLabel != null) aiScoreLabel.setText("--");
+        if (aiScoreBar != null) aiScoreBar.setProgress(0);
+        if (aiStrengthsLabel != null) aiStrengthsLabel.setText("");
+        if (aiImprovementsLabel != null) aiImprovementsLabel.setText("");
+        if (aiExplanationLabel != null) aiExplanationLabel.setText("");
+        if (aiLoadingBox != null) {
+            aiLoadingBox.setVisible(false);
+            aiLoadingBox.setManaged(false);
+        }
+        if (aiScoreBox != null) {
+            aiScoreBox.setVisible(false);
+            aiScoreBox.setManaged(false);
+        }
+        if (aiStrengthsBox != null) {
+            aiStrengthsBox.setVisible(false);
+            aiStrengthsBox.setManaged(false);
+        }
+        if (aiImprovementsBox != null) {
+            aiImprovementsBox.setVisible(false);
+            aiImprovementsBox.setManaged(false);
+        }
+        if (aiExplanationBox != null) {
+            aiExplanationBox.setVisible(false);
+            aiExplanationBox.setManaged(false);
+        }
+        cachedExplanation = null;
+    }
+
+    /**
+     * Update tips text based on question type
+     */
+    private void updateTipsText(Question.QuestionType type) {
+        if (aiTipsBox != null) {
+            aiTipsBox.getChildren().clear();
+            Label tipLabel = new Label();
+            tipLabel.setWrapText(true);
+            tipLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px;");
+            
+            if (type == Question.QuestionType.SHORT_ANSWER) {
+                tipLabel.setText("Tip: Be concise and specific. AI will grade your answer based on key concepts.");
+            } else {
+                tipLabel.setText("Tip: Select the best answer. AI can explain why it's correct.");
+            }
+            aiTipsBox.getChildren().add(tipLabel);
+        }
+    }
+
+    /**
+     * Validate answer with AI
+     */
+    private void validateWithAI() {
+        if (aiService == null) return;
+        
+        String answer = getUserSelectedAnswer();
+        if (answer == null || answer.isEmpty()) return;
+        
+        // Show loading
+        if (aiLoadingBox != null) {
+            aiLoadingBox.setVisible(true);
+            aiLoadingBox.setManaged(true);
+        }
+        
+        // Run in background
+        new Thread(() -> {
+            try {
+                OpenRouterAIService.ValidationResult result = aiService.validateAnswer(
+                    currentQuestion.getQuestion(),
+                    currentQuestion.getCorrectAnswer(),
+                    answer
+                );
+                
+                javafx.application.Platform.runLater(() -> {
+                    // Hide loading
+                    if (aiLoadingBox != null) {
+                        aiLoadingBox.setVisible(false);
+                        aiLoadingBox.setManaged(false);
+                    }
+                    
+                    // Show results
+                    if (aiScoreBox != null) {
+                        aiScoreBox.setVisible(true);
+                        aiScoreBox.setManaged(true);
+                        aiScoreLabel.setText(result.getScore() + "/100");
+                        aiScoreBar.setProgress(result.getScore() / 100.0);
+                    }
+                    
+                    if (aiStrengthsBox != null) {
+                        aiStrengthsBox.setVisible(true);
+                        aiStrengthsBox.setManaged(true);
+                        aiStrengthsLabel.setText(result.getStrengths());
+                    }
+                    
+                    if (aiImprovementsBox != null) {
+                        aiImprovementsBox.setVisible(true);
+                        aiImprovementsBox.setManaged(true);
+                        aiImprovementsLabel.setText(result.getImprovements());
+                    }
+                    
+                    // Show toggle buttons
+                    if (aiToggleButtonsBox != null) {
+                        aiToggleButtonsBox.setVisible(true);
+                        aiToggleButtonsBox.setManaged(true);
+                        if (showExplanationButton != null) {
+                            showExplanationButton.setVisible(true);
+                            showExplanationButton.setManaged(true);
+                        }
+                        if (showFeedbackButton != null) {
+                            showFeedbackButton.setVisible(false);
+                            showFeedbackButton.setManaged(false);
+                        }
+                    }
+                    
+                    // Handle completion based on score
+                    boolean isPass = result.getScore() >= 70;
+                    showFeedback(isPass);
+                    
+                    if (isPass) {
+                        awardXP();
+                        try {
+                            questionDAO.updateQuestionStatus(currentQuestion.getId(), Question.QuestionStatus.COMPLETED);
+                            currentQuestion.setStatus(Question.QuestionStatus.COMPLETED);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    
+                    // Enable next button
+                    if (currentQuestionIndex < questions.size() - 1) {
+                        nextButton.setVisible(true);
+                        nextButton.setManaged(true);
+                        nextButton.setDisable(false);
+                    } else {
+                        finishButton.setVisible(true);
+                        finishButton.setManaged(true);
+                    }
+                });
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                javafx.application.Platform.runLater(() -> {
+                    if (aiLoadingBox != null) {
+                        aiLoadingBox.setVisible(false);
+                        aiLoadingBox.setManaged(false);
+                    }
+                    showAlert("AI Error", "Failed to validate answer: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * Show explanation view
+     */
+    @FXML
+    private void onShowExplanation() {
+        if (aiScoreBox != null) {
+            aiScoreBox.setVisible(false);
+            aiScoreBox.setManaged(false);
+        }
+        if (aiStrengthsBox != null) {
+            aiStrengthsBox.setVisible(false);
+            aiStrengthsBox.setManaged(false);
+        }
+        if (aiImprovementsBox != null) {
+            aiImprovementsBox.setVisible(false);
+            aiImprovementsBox.setManaged(false);
+        }
+        
+        if (showExplanationButton != null) {
+            showExplanationButton.setVisible(false);
+            showExplanationButton.setManaged(false);
+        }
+        if (showFeedbackButton != null) {
+            showFeedbackButton.setVisible(true);
+            showFeedbackButton.setManaged(true);
+        }
+        
+        requestExplanation();
+    }
+
+    /**
+     * Show feedback view
+     */
+    @FXML
+    private void onShowFeedback() {
+        if (aiExplanationBox != null) {
+            aiExplanationBox.setVisible(false);
+            aiExplanationBox.setManaged(false);
+        }
+        
+        if (aiScoreBox != null) {
+            aiScoreBox.setVisible(true);
+            aiScoreBox.setManaged(true);
+        }
+        if (aiStrengthsBox != null) {
+            aiStrengthsBox.setVisible(true);
+            aiStrengthsBox.setManaged(true);
+        }
+        if (aiImprovementsBox != null) {
+            aiImprovementsBox.setVisible(true);
+            aiImprovementsBox.setManaged(true);
+        }
+        
+        if (showExplanationButton != null) {
+            showExplanationButton.setVisible(true);
+            showExplanationButton.setManaged(true);
+        }
+        if (showFeedbackButton != null) {
+            showFeedbackButton.setVisible(false);
+            showFeedbackButton.setManaged(false);
+        }
+    }
+
+    /**
+     * Request explanation from AI
+     */
+    private void requestExplanation() {
+        if (aiService == null) return;
+        
+        // If we already have a cached explanation, show it
+        if (cachedExplanation != null) {
+            if (aiExplanationBox != null) {
+                aiExplanationBox.setVisible(true);
+                aiExplanationBox.setManaged(true);
+                aiExplanationLabel.setText(cachedExplanation);
+            }
+            return;
+        }
+        
+        // Show loading state in explanation box
+        if (aiExplanationBox != null) {
+            aiExplanationBox.setVisible(true);
+            aiExplanationBox.setManaged(true);
+            aiExplanationLabel.setText("Generating explanation...");
+        }
+        
+        new Thread(() -> {
+            String explanation = aiService.explainQuestion(
+                currentQuestion.getQuestion(),
+                currentQuestion.getCorrectAnswer(),
+                userAnswer != null ? userAnswer : ""
+            );
+            
+            cachedExplanation = explanation;
+            
+            javafx.application.Platform.runLater(() -> {
+                if (aiExplanationLabel != null) {
+                    aiExplanationLabel.setText(explanation);
+                }
+            });
+        }).start();
+    }
 }
 

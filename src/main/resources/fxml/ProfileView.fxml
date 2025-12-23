@@ -8,46 +8,45 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox spacing="0" stylesheets="@../css/dashboard.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.ProfileController">
     
     <!-- Top Banner with Username and Stats -->
-    <VBox styleClass="profile-banner" spacing="16">
+    <VBox spacing="16" styleClass="profile-banner">
         <padding>
             <Insets bottom="24" left="40" right="40" top="24" />
         </padding>
         
         <!-- Username Header and quick actions -->
-        <HBox spacing="16" alignment="CENTER_LEFT">
+        <HBox alignment="CENTER_LEFT" spacing="16">
             <VBox spacing="6">
                 <Label fx:id="bannerNameLabel" styleClass="banner-username" text="Welcome, User" />
                 <Label styleClass="banner-subtext" text="Keep your details current to stay secure." />
             </VBox>
             <Region HBox.hgrow="ALWAYS" />
-            <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button text="Edit name" onAction="#onEditName" styleClass="profile-btn-secondary banner-action" />
-                <Button text="Change password" onAction="#onFocusPasswordSection" styleClass="profile-btn-primary banner-action" />
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button onAction="#onEditName" styleClass="profile-btn-secondary banner-action" text="Edit name" />
+                <Button onAction="#onFocusPasswordSection" styleClass="profile-btn-primary banner-action" text="Change password" />
             </HBox>
         </HBox>
         
         <!-- Stats Grid -->
         <HBox spacing="16" styleClass="banner-stat-row">
-            <VBox spacing="4" alignment="CENTER" styleClass="banner-stat">
+            <VBox alignment="CENTER" spacing="4" styleClass="banner-stat">
                 <Label fx:id="bannerXPLabel" styleClass="banner-stat-value" text="2,450" />
                 <Label styleClass="banner-stat-label" text="Total XP" />
             </VBox>
-            <VBox spacing="4" alignment="CENTER" styleClass="banner-stat">
+            <VBox alignment="CENTER" spacing="4" styleClass="banner-stat">
                 <Label fx:id="bannerLevelLabel" styleClass="banner-stat-value" text="2" />
                 <Label styleClass="banner-stat-label" text="Level" />
             </VBox>
-            <VBox spacing="4" alignment="CENTER" styleClass="banner-stat">
+            <VBox alignment="CENTER" spacing="4" styleClass="banner-stat">
                 <Label fx:id="bannerStreakLabel" styleClass="banner-stat-value" text="5" />
                 <Label styleClass="banner-stat-label" text="Day Streak" />
             </VBox>
-            <VBox spacing="4" alignment="CENTER" styleClass="banner-stat">
+            <VBox alignment="CENTER" spacing="4" styleClass="banner-stat">
                 <Label fx:id="bannerCoursesLabel" styleClass="banner-stat-value" text="3" />
                 <Label styleClass="banner-stat-label" text="Courses" />
             </VBox>
@@ -73,10 +72,10 @@
                 <VBox spacing="12">
                     <Label styleClass="profile-label" text="Display Name" />
                     <HBox spacing="12">
-                        <TextField fx:id="nameField" styleClass="profile-input" promptText="Enter your display name" HBox.hgrow="ALWAYS" disable="true" />
-                        <Button fx:id="editNameButton" styleClass="profile-btn-edit" text="✏️ Edit" />
-                        <Button fx:id="saveNameButton" styleClass="profile-btn-primary" text="✓ Save" managed="false" visible="false" />
-                        <Button fx:id="cancelNameButton" styleClass="profile-btn-secondary" text="✗ Cancel" managed="false" visible="false" />
+                        <TextField fx:id="nameField" disable="true" promptText="Enter your display name" styleClass="profile-input" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="editNameButton" styleClass="profile-btn-edit" text="✏ Edit" />
+                        <Button fx:id="saveNameButton" managed="false" styleClass="profile-btn-primary" text="✓ Save" visible="false" />
+                        <Button fx:id="cancelNameButton" managed="false" styleClass="profile-btn-secondary" text="✗ Cancel" visible="false" />
                     </HBox>
                     <Label styleClass="section-hint" text="Use something recognizable—others will see this name." />
                 </VBox>
@@ -92,20 +91,20 @@
                 
                 <VBox spacing="12">
                     <Label styleClass="profile-label" text="Current Password" />
-                    <PasswordField fx:id="currentPasswordField" styleClass="profile-input" promptText="Enter current password" />
+                    <PasswordField fx:id="currentPasswordField" promptText="Enter current password" styleClass="profile-input" />
                 </VBox>
                 
                 <VBox spacing="12">
                     <Label styleClass="profile-label" text="New Password" />
-                    <PasswordField fx:id="newPasswordField" styleClass="profile-input" promptText="Leave empty to keep current" />
+                    <PasswordField fx:id="newPasswordField" promptText="Leave empty to keep current" styleClass="profile-input" />
                 </VBox>
                 
                 <VBox spacing="12">
                     <Label styleClass="profile-label" text="Confirm New Password" />
-                    <PasswordField fx:id="confirmPasswordField" styleClass="profile-input" promptText="Confirm new password" />
+                    <PasswordField fx:id="confirmPasswordField" promptText="Confirm new password" styleClass="profile-input" />
                 </VBox>
                 
-                <HBox spacing="12" alignment="CENTER_RIGHT">
+                <HBox alignment="CENTER_RIGHT" spacing="12">
                     <Label styleClass="section-hint" text="We never store plaintext passwords." />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button fx:id="savePasswordButton" styleClass="profile-btn-primary" text="Save Password" />
@@ -123,7 +122,7 @@
                 <VBox spacing="12" styleClass="danger-card">
                     <Label styleClass="profile-label" text="Delete Account" />
                     <Label style="-fx-text-fill: #FDA29B; -fx-font-size: 12px;" text="Permanently delete your account and all associated data. This action cannot be undone." />
-                    <Button fx:id="deleteAccountButton" styleClass="profile-btn-danger" text="🗑️ Delete My Account" />
+                    <Button fx:id="deleteAccountButton" styleClass="profile-btn-danger" text="🗑 Delete My Account" />
                 </VBox>
             </VBox>
 
