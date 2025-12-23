@@ -211,17 +211,20 @@
     -fx-border-color: rgba(59, 130, 246, 0.4);
     -fx-border-radius: 6px;
     -fx-border-width: 1px;
-    -fx-padding: 4 10;
+    -fx-padding: 6 12;
+    -fx-min-width: 80px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.15), 4, 0, 0, 1);
+    -fx-text-alignment: center;
 }
 
 .table-view-btn .view-btn-icon {
-    -fx-font-size: 10px;
+    -fx-font-size: 12px;
+    -fx-padding: 0 4 0 0;
 }
 
 .table-view-btn .view-btn-text {
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
     -fx-font-weight: 600;
     -fx-text-fill: #60A5FA;
 }
@@ -368,6 +371,26 @@
 }
 
 .users-table .virtual-flow .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(34, 197, 94, 0.4);
+}
+
+/* Horizontal Scrollbar */
+.users-table .virtual-flow .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.users-table .virtual-flow .scroll-bar:horizontal .track {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-background-radius: 4px;
+}
+
+.users-table .virtual-flow .scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 4px;
+}
+
+.users-table .virtual-flow .scroll-bar:horizontal .thumb:hover {
     -fx-background-color: rgba(34, 197, 94, 0.4);
 }
 

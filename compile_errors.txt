@@ -1,0 +1,36 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.interviewai:InterviewAI >---------------------
+[INFO] Building InterviewAI 0.1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] 6 problems were encountered while building the effective model for org.openjfx:javafx-controls:jar:20 during dependency collection step for project (use -X to see details)
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ InterviewAI ---
+[INFO] Copying 48 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ InterviewAI ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 84 source files with javac [debug target 17] to target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/coding/javaProjects/InterviewAI/src/main/java/com/interviewai/controller/reviewQuestionsController.java:[966,6] reached end of file while parsing
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.606 s
+[INFO] Finished at: 2025-12-23T22:55:13+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project InterviewAI: Compilation failure
+[ERROR] /C:/coding/javaProjects/InterviewAI/src/main/java/com/interviewai/controller/reviewQuestionsController.java:[966,6] reached end of file while parsing
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

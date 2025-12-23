@@ -575,7 +575,7 @@
             <padding>
                 <Insets bottom="16" left="24" right="24" top="16" />
             </padding>
-            <Button fx:id="backToDashboardBtn" styleClass="btn-nav btn-secondary" text="← Back to Dashboard" />
+            <Button fx:id="backToDashboardBtn" style="-fx-background-color: #10b981;" styleClass="btn-nav btn-secondary" text="← Back to Dashboard" />
             <Region HBox.hgrow="ALWAYS" />
             <Label fx:id="motivationLabel" styleClass="motivation-text" text="Keep up the great work! 🚀" />
         </HBox>

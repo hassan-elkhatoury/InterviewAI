@@ -139,7 +139,7 @@
                                     </VBox>
                                     
                                     <HBox alignment="CENTER_RIGHT">
-                                        <Button fx:id="changePasswordBtn" onAction="#onChangePassword" styleClass="action-btn action-btn-primary" text="Change Password" />
+                                        <Button fx:id="changePasswordBtn" onAction="#onChangePassword" style="-fx-background-color: #10b981;" styleClass="action-btn action-btn-primary" text="Change Password" />
                                     </HBox>
                                 </VBox>
                             </VBox>
@@ -199,7 +199,7 @@
                                     </HBox>
                                 </VBox>
                                 
-                                <Button onAction="#onLogout" styleClass="action-btn action-btn-danger-outline" text="🚪 End Session &amp; Logout" HBox.hgrow="ALWAYS" />
+                                <Button onAction="#onLogout" style="-fx-background-color: #10b981;" styleClass="action-btn action-btn-danger-outline" text="🚪 End Session &amp; Logout" HBox.hgrow="ALWAYS" />
                             </VBox>
                             
                         </VBox>

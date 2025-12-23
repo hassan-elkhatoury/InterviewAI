@@ -23,20 +23,48 @@ public class OpenRouterAIService {
             .build();
     
     private final String apiUrl;
-    private final String apiKey;
+    private final String[] apiKeys;  // Support multiple API keys
+    private int currentKeyIndex = 0;  // Track which key we're using
     private final String model;
     
     public OpenRouterAIService() {
         // Load from config
         this.apiUrl = ConfigLoader.get("openrouter.api.url");
-        this.apiKey = ConfigLoader.get("openrouter.api.key");
+        String primaryKey = ConfigLoader.get("openrouter.api.key");
+        String backupKey = ConfigLoader.get("openrouter.api.key.backup");
         this.model = ConfigLoader.get("openrouter.model");
         
-        if (apiUrl == null || apiKey == null || model == null) {
+        if (apiUrl == null || primaryKey == null || model == null) {
             throw new RuntimeException("OpenRouter API not configured in config.properties");
         }
         
-        System.out.println("✓ OpenRouter AI Service initialized with model: " + model);
+        // Setup API keys array (primary + optional backup)
+        if (backupKey != null && !backupKey.isEmpty()) {
+            this.apiKeys = new String[]{primaryKey, backupKey};
+            System.out.println("✓ OpenRouter AI Service initialized with model: " + model + " (2 API keys configured)");
+        } else {
+            this.apiKeys = new String[]{primaryKey};
+            System.out.println("✓ OpenRouter AI Service initialized with model: " + model + " (1 API key configured)");
+        }
+    }
+    
+    /**
+     * Get the current API key
+     */
+    private String getCurrentApiKey() {
+        return apiKeys[currentKeyIndex];
+    }
+    
+    /**
+     * Rotate to the next API key (if available)
+     */
+    private boolean rotateApiKey() {
+        if (apiKeys.length > 1 && currentKeyIndex < apiKeys.length - 1) {
+            currentKeyIndex++;
+            System.out.println("⚠ Rate limit hit. Rotating to backup API key #" + (currentKeyIndex + 1));
+            return true;
+        }
+        return false;
     }
     
     /**
@@ -45,10 +73,10 @@ public class OpenRouterAIService {
      */
     public ValidationResult validateAnswer(String question, String correctAnswer, String userAnswer) {
         try {
-            // Build the prompt for AI - Direct and personal with strict scoring
+            // Build the prompt for AI - Direct and personal with strict scoring + explanation
             String systemPrompt = "You are an interview coach. Speak DIRECTLY to the candidate using 'you' and 'your'. " +
                 "Never use 'the candidate' or 'they'. Respond ONLY with valid JSON (no markdown). " +
-                "Format: {\"score\": 85, \"strengths\": \"You did...\", \"improvements\": \"You should...\"}. " +
+                "Format: {\"score\": 85, \"strengths\": \"You did...\", \"improvements\": \"You should...\", \"explanation\": \"Brief technical explanation...\"}. " +
                 "SCORING RULES: " +
                 "- Gibberish/random words/irrelevant = 0-10 " +
                 "- Wrong concept = 10-30 " +
@@ -62,6 +90,7 @@ public class OpenRouterAIService {
                 "Evaluate and respond in JSON. Score 0-100.\n" +
                 "Strengths: What YOU did well (use 'you/your')\n" +
                 "Improvements: What YOU should improve (use 'you/your')\n" +
+                "Explanation: Brief technical explanation (3-4 sentences, tell them if CORRECT or INCORRECT first)\n" +
                 "Remember: Use 'you' and 'your', NOT 'the candidate'!",
                 question, correctAnswer, userAnswer
             );
@@ -85,20 +114,35 @@ public class OpenRouterAIService {
             System.out.println("Sending request to: " + apiUrl);
             System.out.println("Request body: " + requestBody.toString());
             
-            // Send request
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiUrl))
-                    .timeout(Duration.ofSeconds(30))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + apiKey)
-                    .header("HTTP-Referer", "http://localhost:8080") // Required by OpenRouter
-                    .header("X-Title", "InterviewAI") // Optional but recommended
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
-                    .build();
+            // Try with current API key, retry with rotation if rate limited
+            int maxRetries = apiKeys.length;  // Retry once per available key
+            HttpResponse<String> response = null;
             
-            System.out.println("Sending HTTP request...");
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Response status: " + response.statusCode());
+            for (int attempt = 0; attempt < maxRetries; attempt++) {
+                // Send request with current API key
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiUrl))
+                        .timeout(Duration.ofSeconds(30))
+                        .header("Content-Type", "application/json")
+                        .header("Authorization", "Bearer " + getCurrentApiKey())
+                        .header("HTTP-Referer", "http://localhost:8080") // Required by OpenRouter
+                        .header("X-Title", "InterviewAI") // Optional but recommended
+                        .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                        .build();
+                
+                System.out.println("Sending HTTP request (attempt " + (attempt + 1) + "/" + maxRetries + ")...");
+                response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                System.out.println("Response status: " + response.statusCode());
+                
+                // If rate limited (429) and we have more keys, rotate and retry
+                if (response.statusCode() == 429 && rotateApiKey()) {
+                    System.out.println("Retrying with backup API key...");
+                    continue;  // Retry with new key
+                }
+                
+                // For any other response (success or non-429 error), break
+                break;
+            }
             
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 return parseResponse(response.body());
@@ -165,7 +209,7 @@ public class OpenRouterAIService {
                     .uri(URI.create(apiUrl))
                     .timeout(Duration.ofSeconds(30))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + apiKey)
+                    .header("Authorization", "Bearer " + getCurrentApiKey())
                     .header("HTTP-Referer", "http://localhost:8080")
                     .header("X-Title", "InterviewAI")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
@@ -246,8 +290,14 @@ public class OpenRouterAIService {
                     int score = aiResponse.getInt("score");
                     String strengths = aiResponse.optString("strengths", "Good effort!");
                     String improvements = aiResponse.optString("improvements", "Keep practicing!");
+                    String explanation = aiResponse.optString("explanation", null);
                     
-                    return new ValidationResult(score, strengths, improvements);
+                    ValidationResult result = new ValidationResult(score, strengths, improvements);
+                    if (explanation != null && !explanation.isEmpty()) {
+                        result.setExplanation(explanation);
+                    }
+                    
+                    return result;
                     
                 } catch (Exception e) {
                     // If JSON parsing fails, try to extract info from text
@@ -312,16 +362,24 @@ public class OpenRouterAIService {
         private final int score;
         private final String strengths;
         private final String improvements;
+        private String explanation; // Optional explanation field
         
         public ValidationResult(int score, String strengths, String improvements) {
             this.score = Math.max(0, Math.min(100, score)); // Clamp to 0-100
             this.strengths = strengths;
             this.improvements = improvements;
+            this.explanation = null;
         }
         
         public int getScore() { return score; }
         public String getStrengths() { return strengths; }
         public String getImprovements() { return improvements; }
+        public String getWeaknesses() { return improvements; } // Alias for improvements
+        public String getExplanation() { return explanation; }
+        
+        public void setExplanation(String explanation) {
+            this.explanation = explanation;
+        }
         
         @Override
         public String toString() {

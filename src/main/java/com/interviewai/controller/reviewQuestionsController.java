@@ -10,7 +10,9 @@ import com.interviewai.dao.CourseProgressDAO;
 import com.interviewai.dao.ProgressDAO;
 import com.interviewai.dao.QuestionDAO;
 import com.interviewai.model.Question;
+import com.interviewai.service.OpenRouterAIService;
 import com.interviewai.util.SessionContext;
+import javafx.scene.control.ProgressIndicator;
 
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
@@ -57,6 +59,28 @@ public class reviewQuestionsController implements Initializable {
     @FXML private Label feedbackMessage;
     @FXML private javafx.scene.layout.StackPane toastOverlay;
 
+    // AI Validation Panel Components
+    @FXML private VBox aiValidationPanel;
+    @FXML private VBox aiTipsBox;
+    @FXML private VBox aiLoadingBox;
+    @FXML private ProgressIndicator aiLoadingSpinner;
+    @FXML private VBox aiScoreBox;
+    @FXML private Label aiScoreLabel;
+    @FXML private ProgressBar aiScoreBar;
+    @FXML private VBox aiStrengthsBox;
+    @FXML private Label aiStrengthsLabel;
+    @FXML private VBox aiImprovementsBox;
+    @FXML private Label aiImprovementsLabel;
+    @FXML private HBox aiToggleButtonsBox;
+    @FXML private Button showExplanationButton;
+    @FXML private Button showFeedbackButton;
+    @FXML private VBox aiExplanationBox;
+    @FXML private Label aiExplanationLabel;
+    
+    // Cache for explanation to avoid regeneration
+    private String cachedExplanation = null;
+    private OpenRouterAIService aiService;
+
     // Alert notification components (will be created dynamically)
     private VBox alertNotification;
     private VBox toastNotification;
@@ -80,6 +104,14 @@ public class reviewQuestionsController implements Initializable {
         progressDAO = new ProgressDAO();
         questions = new ArrayList<>();
         choiceControls = new ArrayList<>();
+
+        // Initialize AI service
+        try {
+            aiService = new OpenRouterAIService();
+        } catch (Exception e) {
+            System.err.println("Warning: AI service not available: " + e.getMessage());
+            aiService = null;
+        }
 
         // Load questions for the active chapter
         loadIncorrectQuestions();
@@ -175,6 +207,19 @@ public class reviewQuestionsController implements Initializable {
 
     // Build answer UI
     buildAnswerUI();
+    
+        // Show/hide AI validation panel based on question type
+        if (aiValidationPanel != null) {
+            if (currentQuestion.getQuestionType() == Question.QuestionType.SHORT_ANSWER) {
+                aiValidationPanel.setVisible(true);
+                aiValidationPanel.setManaged(true);
+                clearAIPanel();
+                updateTipsText(currentQuestion.getQuestionType());
+            } else {
+                aiValidationPanel.setVisible(false);
+                aiValidationPanel.setManaged(false);
+            }
+        }
 
         // Hide explanation and feedback
         explanationPanel.setVisible(false);
@@ -308,6 +353,27 @@ public class reviewQuestionsController implements Initializable {
             return;
         }
 
+        // --- AI LOGIC FOR SHORT ANSWER ---
+        if (currentQuestion.getQuestionType() == Question.QuestionType.SHORT_ANSWER) {
+            if (aiService == null) {
+                showAlert("AI Service Error", "AI service is not available. Cannot grade short answer.");
+                return;
+            }
+            
+            // Disable inputs/submit immediately
+            submitButton.setVisible(false);
+            submitButton.setManaged(false);
+            if (shortAnswerField != null) {
+                shortAnswerField.setEditable(false);
+            }
+            
+            // Trigger AI Validation
+            validateWithAI();
+            return;
+        }
+
+        // --- ORIGINAL LOGIC FOR MULTIPLE CHOICE ---
+
         // Check if answer is correct
         boolean isCorrect = checkAnswer(userAnswer);
 
@@ -352,8 +418,6 @@ public class reviewQuestionsController implements Initializable {
         } catch (SQLException e) {
             System.err.println("Error updating question status: " + e.getMessage());
         }
-        
-        // Do not auto-advance; user will click Next manually
     }
 
 
@@ -671,5 +735,271 @@ public class reviewQuestionsController implements Initializable {
     private void showAlert(String title, String message) {
         showCustomAlert(title, message, "error");
     }
-}
+    // --- AI VALIDATION METHODS ---
 
+    private void clearAIPanel() {
+        if (aiScoreLabel != null) aiScoreLabel.setText("--");
+        if (aiScoreBar != null) aiScoreBar.setProgress(0);
+        if (aiStrengthsLabel != null) aiStrengthsLabel.setText("");
+        if (aiImprovementsLabel != null) aiImprovementsLabel.setText("");
+        if (aiExplanationLabel != null) aiExplanationLabel.setText("");
+        if (aiLoadingBox != null) {
+            aiLoadingBox.setVisible(false);
+            aiLoadingBox.setManaged(false);
+        }
+        if (aiScoreBox != null) {
+            aiScoreBox.setVisible(false);
+            aiScoreBox.setManaged(false);
+        }
+        if (aiStrengthsBox != null) {
+            aiStrengthsBox.setVisible(false);
+            aiStrengthsBox.setManaged(false);
+        }
+        if (aiImprovementsBox != null) {
+            aiImprovementsBox.setVisible(false);
+            aiImprovementsBox.setManaged(false);
+        }
+        if (aiExplanationBox != null) {
+            aiExplanationBox.setVisible(false);
+            aiExplanationBox.setManaged(false);
+        }
+        if (aiToggleButtonsBox != null) {
+            aiToggleButtonsBox.setVisible(false);
+            aiToggleButtonsBox.setManaged(false);
+        }
+        cachedExplanation = null;
+    }
+
+    private void updateTipsText(Question.QuestionType type) {
+        if (aiTipsBox != null) {
+            aiTipsBox.getChildren().clear();
+            Label tipLabel = new Label();
+            tipLabel.setWrapText(true);
+            tipLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px;");
+            
+            if (type == Question.QuestionType.SHORT_ANSWER) {
+                tipLabel.setText("Tip: Be concise and specific. AI will grade your answer based on key concepts.");
+            } else {
+                tipLabel.setText("Tip: Select the best answer. AI can explain why it's correct.");
+            }
+            aiTipsBox.getChildren().add(tipLabel);
+        }
+    }
+
+    private void validateWithAI() {
+        if (aiService == null) return;
+        
+        String answer = getUserSelectedAnswer();
+        if (answer == null || answer.isEmpty()) return;
+        
+        // Show loading
+        if (aiLoadingBox != null) {
+            aiLoadingBox.setVisible(true);
+            aiLoadingBox.setManaged(true);
+        }
+        if (aiTipsBox != null) {
+            aiTipsBox.setVisible(false);
+            aiTipsBox.setManaged(false);
+        }
+        
+        // Run in background
+        new Thread(() -> {
+            try {
+                OpenRouterAIService.ValidationResult result = aiService.validateAnswer(
+                    currentQuestion.getQuestion(),
+                    currentQuestion.getCorrectAnswer(),
+                    answer
+                );
+                
+                javafx.application.Platform.runLater(() -> {
+                    // Hide loading
+                    if (aiLoadingBox != null) {
+                        aiLoadingBox.setVisible(false);
+                        aiLoadingBox.setManaged(false);
+                    }
+                    
+                    // Show results
+                    if (aiScoreBox != null) {
+                        aiScoreBox.setVisible(true);
+                        aiScoreBox.setManaged(true);
+                        aiScoreLabel.setText(result.getScore() + "/100");
+                        aiScoreBar.setProgress(result.getScore() / 100.0);
+                        
+                        // Color code the score bar
+                        if (result.getScore() >= 70) {
+                            aiScoreBar.setStyle("-fx-accent: #10b981;"); 
+                        } else if (result.getScore() >= 40) {
+                            aiScoreBar.setStyle("-fx-accent: #f59e0b;"); 
+                        } else {
+                            aiScoreBar.setStyle("-fx-accent: #ef4444;"); 
+                        }
+                    }
+                    
+                    // Show strengths
+                    if (aiStrengthsBox != null && result.getStrengths() != null && !result.getStrengths().isEmpty()) {
+                        aiStrengthsBox.setVisible(true);
+                        aiStrengthsBox.setManaged(true);
+                        aiStrengthsLabel.setText(result.getStrengths());
+                    }
+                    
+                    // Show improvements
+                    if (aiImprovementsBox != null && result.getWeaknesses() != null && !result.getWeaknesses().isEmpty()) {
+                        aiImprovementsBox.setVisible(true);
+                        aiImprovementsBox.setManaged(true);
+                        aiImprovementsLabel.setText(result.getWeaknesses());
+                    }
+                    
+                    // Show toggle buttons
+                    if (aiToggleButtonsBox != null) {
+                        aiToggleButtonsBox.setVisible(true);
+                        aiToggleButtonsBox.setManaged(true);
+                        if (showExplanationButton != null) showExplanationButton.setVisible(true);
+                        if (showFeedbackButton != null) {
+                            showFeedbackButton.setVisible(false); 
+                            showFeedbackButton.setManaged(false);
+                        }
+                    }
+                    
+                    cachedExplanation = result.getExplanation();
+                    
+                    // Determine correctness based on Score (>= 70 is passing)
+                    boolean isCorrect = result.getScore() >= 70;
+                    
+                    // Update main UI status
+                    questionStatusLabel.setText(isCorrect ? "✓" : "✗");
+                    questionStatusLabel.setStyle(isCorrect ? "-fx-text-fill: #10b981;" : "-fx-text-fill: #ef4444;");
+                    showToastNotification(isCorrect);
+                    
+                    // Save result
+                     try {
+                        Question.QuestionStatus newStatus = isCorrect ? 
+                            Question.QuestionStatus.COMPLETED : Question.QuestionStatus.INCORRECT;
+                        questionDAO.updateQuestionStatus(currentQuestion.getId(), newStatus);
+                        currentQuestion.setStatus(newStatus);
+                    } catch (SQLException e) {
+                        System.err.println("Error saving AI result: " + e.getMessage());
+                    }
+                    
+                    // Show Next/Finish
+                    if (currentQuestionIndex < questions.size() - 1) {
+                        nextButton.setVisible(true);
+                        nextButton.setManaged(true);
+                        nextButton.setDisable(false);
+                    } else {
+                        finishButton.setVisible(true);
+                        finishButton.setManaged(true);
+                    }
+                });
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                javafx.application.Platform.runLater(() -> {
+                    if (aiLoadingBox != null) aiLoadingBox.setVisible(false);
+                    showAlert("AI Error", "Failed to validate answer: " + e.getMessage());
+                    // Re-enable submit
+                    submitButton.setVisible(true);
+                    submitButton.setManaged(true);
+                    if (shortAnswerField != null) shortAnswerField.setEditable(true);
+                });
+            }
+        }).start();
+    }
+    
+    @FXML
+    private void onShowExplanation() {
+        // Hide score and feedback sections
+        if (aiScoreBox != null) {
+            aiScoreBox.setVisible(false);
+            aiScoreBox.setManaged(false);
+        }
+        if (aiStrengthsBox != null) {
+            aiStrengthsBox.setVisible(false);
+            aiStrengthsBox.setManaged(false);
+        }
+        if (aiImprovementsBox != null) {
+            aiImprovementsBox.setVisible(false);
+            aiImprovementsBox.setManaged(false);
+        }
+        
+        // Toggle buttons
+        if (showExplanationButton != null) {
+            showExplanationButton.setVisible(false);
+            showExplanationButton.setManaged(false);
+        }
+        if (showFeedbackButton != null) {
+            showFeedbackButton.setVisible(true);
+            showFeedbackButton.setManaged(true);
+        }
+        
+        // Request explanation (will use cache if available)
+        requestExplanation();
+    }
+    
+    @FXML
+    private void onShowFeedback() {
+        if (aiExplanationBox != null) {
+            aiExplanationBox.setVisible(false);
+            aiExplanationBox.setManaged(false);
+            
+            // Show strengths/weaknesses again
+            if (aiStrengthsBox != null) {
+                aiStrengthsBox.setVisible(true);
+                aiStrengthsBox.setManaged(true);
+            }
+            if (aiImprovementsBox != null) {
+                aiImprovementsBox.setVisible(true);
+                aiImprovementsBox.setManaged(true);
+            }
+             
+             // Toggle buttons
+            if (showExplanationButton != null) {
+                showExplanationButton.setVisible(true);
+                showExplanationButton.setManaged(true);
+            }
+            if (showFeedbackButton != null) {
+                showFeedbackButton.setVisible(false);
+                showFeedbackButton.setManaged(false);
+            }
+        }
+    }
+    
+    /**
+     * Request explanation from AI
+     */
+    private void requestExplanation() {
+        if (aiService == null) return;
+        
+        // If we already have a cached explanation, show it
+        if (cachedExplanation != null) {
+            if (aiExplanationBox != null) {
+                aiExplanationBox.setVisible(true);
+                aiExplanationBox.setManaged(true);
+                aiExplanationLabel.setText(cachedExplanation);
+            }
+            return;
+        }
+        
+        // Show loading state in explanation box
+        if (aiExplanationBox != null) {
+            aiExplanationBox.setVisible(true);
+            aiExplanationBox.setManaged(true);
+            aiExplanationLabel.setText("Generating explanation...");
+        }
+        
+        new Thread(() -> {
+            String explanation = aiService.explainQuestion(
+                currentQuestion.getQuestion(),
+                currentQuestion.getCorrectAnswer(),
+                userAnswer != null ? userAnswer : ""
+            );
+            
+            cachedExplanation = explanation;
+            
+            javafx.application.Platform.runLater(() -> {
+                if (aiExplanationLabel != null) {
+                    aiExplanationLabel.setText(explanation);
+                }
+            });
+        }).start();
+    }
+}

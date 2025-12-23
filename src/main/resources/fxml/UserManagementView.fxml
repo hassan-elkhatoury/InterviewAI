@@ -15,11 +15,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 
-<BorderPane styleClass="user-management-root" stylesheets="@../css/user-management.css" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.UserManagementController">
+<BorderPane styleClass="user-management-root" stylesheets="@../css/user-management.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.UserManagementController">
 
     <!-- LEFT: Shared Admin Sidebar -->
     <left>
-        <fx:include fx:id="adminSidebar" source="components/AdminSidebar.fxml"/>
+        <fx:include fx:id="adminSidebar" source="components/AdminSidebar.fxml" />
     </left>
 
     <!-- CENTER: Main Content Area -->
@@ -91,16 +91,16 @@
                         <!-- The Data Table -->
                         <TableView fx:id="userTable" styleClass="users-table" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="colId" prefWidth="45" styleClass="table-column" text="ID" />
-                                <TableColumn fx:id="colUsername" prefWidth="110" styleClass="table-column" text="User" />
-                                <TableColumn fx:id="colEmail" prefWidth="150" styleClass="table-column" text="Email" />
-                                <TableColumn fx:id="colRole" prefWidth="70" styleClass="table-column" text="Role" />
-                                <TableColumn fx:id="colStatus" prefWidth="70" styleClass="table-column" text="Status" />
-                                <TableColumn fx:id="colInterviewType" prefWidth="80" styleClass="table-column" text="Type" />
-                                <TableColumn fx:id="colLanguage" prefWidth="55" styleClass="table-column" text="Lang" />
-                                <TableColumn fx:id="colXP" prefWidth="50" styleClass="table-column" text="XP" />
-                                <TableColumn fx:id="colLastActive" prefWidth="80" styleClass="table-column" text="Active" />
-                                <TableColumn fx:id="colActions" prefWidth="70" styleClass="table-column" text="" />
+                                <TableColumn fx:id="colId" minWidth="45" prefWidth="50" styleClass="table-column" text="ID" />
+                                <TableColumn fx:id="colUsername" minWidth="100" prefWidth="110" styleClass="table-column" text="User" />
+                                <TableColumn fx:id="colEmail" minWidth="140" prefWidth="160" styleClass="table-column" text="Email" />
+                                <TableColumn fx:id="colRole" minWidth="65" prefWidth="75" styleClass="table-column" text="Role" />
+                                <TableColumn fx:id="colStatus" minWidth="65" prefWidth="75" styleClass="table-column" text="Status" />
+                                <TableColumn fx:id="colInterviewType" minWidth="70" prefWidth="80" styleClass="table-column" text="Type" />
+                                <TableColumn fx:id="colLanguage" minWidth="50" prefWidth="60" styleClass="table-column" text="Lang" />
+                                <TableColumn fx:id="colXP" minWidth="45" prefWidth="55" styleClass="table-column" text="XP" />
+                                <TableColumn fx:id="colLastActive" minWidth="75" prefWidth="90" styleClass="table-column" text="Active" />
+                                <TableColumn fx:id="colActions" minWidth="250" prefWidth="250" styleClass="table-column" text="Actions" />
                             </columns>
                             <placeholder>
                                 <VBox alignment="CENTER" spacing="16" styleClass="empty-placeholder">
@@ -260,7 +260,7 @@
                     </ScrollPane>
 
                     <!-- Action Buttons Panel -->
-                    <VBox spacing="12" styleClass="actions-panel">
+                    <VBox prefHeight="551.0" prefWidth="278.0" spacing="12" styleClass="actions-panel">
                         <Label styleClass="actions-title" text="User Actions" />
                         
                         <VBox spacing="8">
