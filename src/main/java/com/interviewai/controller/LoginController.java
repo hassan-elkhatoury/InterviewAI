@@ -34,6 +34,14 @@ public class LoginController {
         boolean ok = authService.authenticate(userName, pass);
         if (ok) {
             User u = authService.getUser(userName);
+
+            
+            if (u == null) {
+                Alert err = new Alert(Alert.AlertType.ERROR, "Login successful but user profile not found.");
+                err.showAndWait();
+                return;
+            }
+
             try {
                 Stage stage = (Stage) usernameField.getScene().getWindow();
 
@@ -51,7 +59,8 @@ public class LoginController {
                     System.err.println("Could not load last-used course: " + e.getMessage());
                 }
                 
-                if (u != null && "ADMIN".equalsIgnoreCase(u.getRole())) {
+                // Check for SUPER_ADMIN role or manage_users permission
+                if (u != null && (u.hasRole("SUPER_ADMIN") || u.hasPermission("manage_users"))) {
 
                     // Admin route
                     SceneNavigator.switchTo(stage, Routes.ADMIN, stage.getWidth()-15, stage.getHeight()-38);

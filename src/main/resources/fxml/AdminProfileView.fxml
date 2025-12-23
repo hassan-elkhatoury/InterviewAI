@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane styleClass="admin-profile-root" stylesheets="@../css/admin-profile.css, @../css/admin-sidebar.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.AdminProfileController">
+
+    <!-- LEFT: Admin Sidebar -->
+    <left>
+        <fx:include fx:id="adminSidebar" source="components/AdminSidebar.fxml" />
+    </left>
+
+    <!-- CENTER: Main Content -->
+    <center>
+        <VBox spacing="0" styleClass="main-content">
+            
+            <!-- ===== TOP HEADER ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-header">
+                <!-- Page Title -->
+                <VBox alignment="CENTER_LEFT" spacing="2">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label styleClass="page-icon" text="👤" />
+                        <Label styleClass="page-title" text="Admin Profile" />
+                    </HBox>
+                    <Label styleClass="page-subtitle" text="Manage your account settings and security" />
+                </VBox>
+                
+                <Region HBox.hgrow="ALWAYS" />
+                
+                <!-- Header Stats -->
+                <HBox fx:id="headerStats" alignment="CENTER" spacing="20" styleClass="header-stats">
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="roleLabel" styleClass="header-stat-value stat-green" text="Super Admin" />
+                        <Label styleClass="header-stat-label" text="Role" />
+                    </VBox>
+                    <Label styleClass="header-stat-divider" text="|" />
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="lastLoginLabel" styleClass="header-stat-value stat-blue" text="Today" />
+                        <Label styleClass="header-stat-label" text="Last Login" />
+                    </VBox>
+                    <Label styleClass="header-stat-divider" text="|" />
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="statusLabel" styleClass="header-stat-value stat-cyan" text="Active" />
+                        <Label styleClass="header-stat-label" text="Status" />
+                    </VBox>
+                </HBox>
+            </HBox>
+            
+            <!-- ===== MAIN CONTENT SCROLL ===== -->
+            <ScrollPane fitToWidth="true" styleClass="content-scroll" VBox.vgrow="ALWAYS">
+                <VBox spacing="20" styleClass="profile-content">
+                    <padding><Insets bottom="24" left="24" right="24" top="20" /></padding>
+                    
+                    <!-- ===== PROFILE BANNER ===== -->
+                    <HBox alignment="CENTER_LEFT" spacing="20" styleClass="profile-banner">
+                        <StackPane styleClass="profile-avatar-large">
+                            <Circle radius="40" styleClass="avatar-circle-large" />
+                            <Label styleClass="avatar-icon-large" text="👤" />
+                        </StackPane>
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label fx:id="bannerNameLabel" styleClass="banner-name" text="Super Admin" />
+                            <Label fx:id="bannerEmailLabel" styleClass="banner-email" text="admin@interviewai.com" />
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label styleClass="banner-badge" text="SUPER_ADMIN" />
+                                <Circle radius="4" styleClass="status-dot-online" />
+                                <Label styleClass="banner-status" text="Online" />
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                    
+                    <!-- ===== TWO COLUMN LAYOUT ===== -->
+                    <HBox spacing="20">
+                        
+                        <!-- LEFT COLUMN -->
+                        <VBox spacing="20" HBox.hgrow="ALWAYS">
+                            
+                            <!-- Account Information Card -->
+                            <VBox spacing="16" styleClass="profile-card">
+                                <HBox alignment="CENTER_LEFT" styleClass="card-header">
+                                    <Label styleClass="card-icon" text="👤" />
+                                    <Label styleClass="card-title" text="Account Information" />
+                                </HBox>
+                                
+                                <VBox spacing="12">
+                                    <VBox spacing="6">
+                                        <Label styleClass="field-label" text="Display Name" />
+                                        <HBox spacing="10">
+                                            <TextField fx:id="nameField" disable="true" promptText="Enter your display name" styleClass="profile-input" HBox.hgrow="ALWAYS" />
+                                            <Button fx:id="editNameBtn" onAction="#onEditName" styleClass="action-btn-icon" text="✏" />
+                                            <Button fx:id="saveNameBtn" managed="false" onAction="#onSaveName" styleClass="action-btn-icon action-btn-success" text="✓" visible="false" />
+                                            <Button fx:id="cancelNameBtn" managed="false" onAction="#onCancelEditName" styleClass="action-btn-icon action-btn-danger" text="✕" visible="false" />
+                                        </HBox>
+                                    </VBox>
+                                    
+                                    <VBox spacing="6">
+                                        <Label styleClass="field-label" text="Email Address" />
+                                        <TextField fx:id="emailField" disable="true" promptText="Email address" styleClass="profile-input" />
+                                        <Label styleClass="field-hint" text="Email cannot be changed. Contact support if needed." />
+                                    </VBox>
+                                    
+                                    <VBox spacing="6">
+                                        <Label styleClass="field-label" text="Username" />
+                                        <TextField fx:id="usernameField" disable="true" promptText="Username" styleClass="profile-input" />
+                                    </VBox>
+                                </VBox>
+                            </VBox>
+                            
+                            <!-- Security Card -->
+                            <VBox spacing="16" styleClass="profile-card">
+                                <HBox alignment="CENTER_LEFT" styleClass="card-header">
+                                    <Label styleClass="card-icon" text="🔐" />
+                                    <Label styleClass="card-title" text="Security" />
+                                </HBox>
+                                
+                                <VBox spacing="12">
+                                    <VBox spacing="6">
+                                        <Label styleClass="field-label" text="Current Password" />
+                                        <PasswordField fx:id="currentPasswordField" promptText="Enter current password" styleClass="profile-input" />
+                                    </VBox>
+                                    
+                                    <VBox spacing="6">
+                                        <Label styleClass="field-label" text="New Password" />
+                                        <PasswordField fx:id="newPasswordField" promptText="Enter new password" styleClass="profile-input" />
+                                    </VBox>
+                                    
+                                    <VBox spacing="6">
+                                        <Label styleClass="field-label" text="Confirm New Password" />
+                                        <PasswordField fx:id="confirmPasswordField" promptText="Confirm new password" styleClass="profile-input" />
+                                    </VBox>
+                                    
+                                    <HBox alignment="CENTER_RIGHT">
+                                        <Button fx:id="changePasswordBtn" onAction="#onChangePassword" styleClass="action-btn action-btn-primary" text="Change Password" />
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+                        </VBox>
+                        
+                        <!-- RIGHT COLUMN -->
+                        <VBox maxWidth="360" minWidth="320" spacing="20">
+                            
+                            <!-- Account Stats Card -->
+                            <VBox spacing="16" styleClass="profile-card">
+                                <HBox alignment="CENTER_LEFT" styleClass="card-header">
+                                    <Label styleClass="card-icon" text="📊" />
+                                    <Label styleClass="card-title" text="Account Stats" />
+                                </HBox>
+                                
+                                <VBox spacing="10">
+                                    <HBox alignment="CENTER_LEFT" styleClass="stat-row">
+                                        <Label styleClass="stat-label" text="Account Created" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="createdAtLabel" styleClass="stat-value" text="—" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" styleClass="stat-row">
+                                        <Label styleClass="stat-label" text="Last Password Change" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="lastPasswordChangeLabel" styleClass="stat-value" text="—" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" styleClass="stat-row">
+                                        <Label styleClass="stat-label" text="Total Users Managed" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="usersManagedLabel" styleClass="stat-value" text="0" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" styleClass="stat-row">
+                                        <Label styleClass="stat-label" text="Total Courses" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="coursesCountLabel" styleClass="stat-value" text="0" />
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+                            
+                            <!-- Session Info Card -->
+                            <VBox spacing="16" styleClass="profile-card">
+                                <HBox alignment="CENTER_LEFT" styleClass="card-header">
+                                    <Label styleClass="card-icon" text="🔒" />
+                                    <Label styleClass="card-title" text="Current Session" />
+                                </HBox>
+                                
+                                <VBox spacing="10">
+                                    <HBox alignment="CENTER_LEFT" styleClass="stat-row">
+                                        <Label styleClass="stat-label" text="Session Started" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="sessionStartLabel" styleClass="stat-value" text="—" />
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" styleClass="stat-row">
+                                        <Label styleClass="stat-label" text="IP Address" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="ipAddressLabel" styleClass="stat-value" text="127.0.0.1" />
+                                    </HBox>
+                                </VBox>
+                                
+                                <Button onAction="#onLogout" styleClass="action-btn action-btn-danger-outline" text="🚪 End Session &amp; Logout" HBox.hgrow="ALWAYS" />
+                            </VBox>
+                            
+                        </VBox>
+                    </HBox>
+                    
+                </VBox>
+            </ScrollPane>
+            
+        </VBox>
+    </center>
+</BorderPane>

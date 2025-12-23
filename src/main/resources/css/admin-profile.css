@@ -1,0 +1,374 @@
+/* ===== ADMIN PROFILE - DARK GLASS THEME ===== */
+/* Matching User Management & Courses Management Style */
+
+/* ===== ROOT & BASE ===== */
+.root {
+    -fx-font-family: "Inter", "SF Pro Display", "Segoe UI", "Roboto", sans-serif;
+    -fx-font-size: 12px;
+    -fx-background-color: #050708;
+    -fx-text-fill: #FFFFFF;
+}
+
+.admin-profile-root {
+    -fx-background-color: #050708;
+}
+
+.label {
+    -fx-text-fill: #FFFFFF;
+}
+
+.button {
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ===== MAIN CONTENT AREA ===== */
+.main-content {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0A0E14 0%, #0D1218 50%, #0A0E14 100%);
+    -fx-padding: 0;
+    -fx-spacing: 0;
+}
+
+/* ===== TOP HEADER ===== */
+.top-header {
+    -fx-background-color: rgba(13, 17, 23, 0.95);
+    -fx-padding: 12 20;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-width: 0 0 1 0;
+}
+
+.page-icon {
+    -fx-font-size: 22px;
+}
+
+.page-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #FFFFFF;
+}
+
+.page-subtitle {
+    -fx-font-size: 11px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #9CA3AF;
+    -fx-padding: 0 0 0 34;
+}
+
+/* ===== HEADER STATS ===== */
+.header-stats {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-background-radius: 8px;
+    -fx-padding: 8 16;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-width: 1;
+    -fx-border-radius: 8px;
+}
+
+.header-stat {
+    -fx-spacing: 2;
+}
+
+.header-stat-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #FFFFFF;
+}
+
+.header-stat-value.stat-blue {
+    -fx-text-fill: #3B82F6;
+}
+
+.header-stat-value.stat-green {
+    -fx-text-fill: #22C55E;
+}
+
+.header-stat-value.stat-amber {
+    -fx-text-fill: #F59E0B;
+}
+
+.header-stat-value.stat-purple {
+    -fx-text-fill: #8B5CF6;
+}
+
+.header-stat-value.stat-cyan {
+    -fx-text-fill: #06B6D4;
+}
+
+.header-stat-label {
+    -fx-font-size: 9px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #6B7280;
+}
+
+.header-stat-divider {
+    -fx-font-size: 16px;
+    -fx-text-fill: #374151;
+}
+
+/* ===== CONTENT SCROLL ===== */
+.content-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.content-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.content-scroll > .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.content-scroll > .scroll-bar .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 4px;
+}
+
+.content-scroll > .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}
+
+.profile-content {
+    -fx-background-color: transparent;
+}
+
+/* ===== PROFILE BANNER ===== */
+.profile-banner {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-width: 1;
+    -fx-border-radius: 12px;
+    -fx-padding: 20;
+}
+
+.profile-banner:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+}
+
+.profile-avatar-large {
+    -fx-min-width: 80px;
+    -fx-min-height: 80px;
+}
+
+.avatar-circle-large {
+    -fx-fill: linear-gradient(to bottom right, #22C55E, #16A34A);
+}
+
+.avatar-icon-large {
+    -fx-font-size: 32px;
+}
+
+.banner-name {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #FFFFFF;
+}
+
+.banner-email {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #9CA3AF;
+}
+
+.banner-badge {
+    -fx-background-color: rgba(34, 197, 94, 0.15);
+    -fx-text-fill: #22C55E;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-padding: 3 8;
+    -fx-background-radius: 4px;
+}
+
+.status-dot-online {
+    -fx-fill: #22C55E;
+}
+
+.banner-status {
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #22C55E;
+}
+
+/* ===== PROFILE CARDS ===== */
+.profile-card {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-width: 1;
+    -fx-border-radius: 12px;
+    -fx-padding: 20;
+}
+
+.profile-card:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+}
+
+.card-header {
+    -fx-spacing: 8;
+    -fx-padding: 0 0 12 0;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-width: 0 0 1 0;
+}
+
+.card-icon {
+    -fx-font-size: 16px;
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ===== FORM FIELDS ===== */
+.field-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #9CA3AF;
+}
+
+.field-hint {
+    -fx-font-size: 10px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #6B7280;
+}
+
+.profile-input {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #FFFFFF;
+    -fx-prompt-text-fill: #6B7280;
+    -fx-padding: 10 12;
+    -fx-font-size: 12px;
+}
+
+.profile-input:focused {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: #22C55E;
+}
+
+.profile-input:disabled {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #9CA3AF;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+    -fx-border-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.action-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+}
+
+.action-btn-primary {
+    -fx-background-color: rgba(34, 197, 94, 0.15);
+    -fx-border-color: rgba(34, 197, 94, 0.3);
+    -fx-text-fill: #22C55E;
+}
+
+.action-btn-primary:hover {
+    -fx-background-color: rgba(34, 197, 94, 0.25);
+    -fx-border-color: rgba(34, 197, 94, 0.5);
+}
+
+.action-btn-secondary {
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+    -fx-border-color: rgba(59, 130, 246, 0.3);
+    -fx-text-fill: #3B82F6;
+}
+
+.action-btn-secondary:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.25);
+    -fx-border-color: rgba(59, 130, 246, 0.5);
+}
+
+.action-btn-danger-outline {
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+    -fx-border-color: rgba(239, 68, 68, 0.3);
+    -fx-text-fill: #EF4444;
+}
+
+.action-btn-danger-outline:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.2);
+    -fx-border-color: rgba(239, 68, 68, 0.5);
+}
+
+.action-btn-icon {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 12px;
+    -fx-padding: 8 10;
+    -fx-background-radius: 6px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+    -fx-min-width: 34px;
+}
+
+.action-btn-icon:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+}
+
+.action-btn-icon.action-btn-success {
+    -fx-background-color: rgba(34, 197, 94, 0.15);
+    -fx-border-color: rgba(34, 197, 94, 0.3);
+    -fx-text-fill: #22C55E;
+}
+
+.action-btn-icon.action-btn-success:hover {
+    -fx-background-color: rgba(34, 197, 94, 0.25);
+    -fx-border-color: rgba(34, 197, 94, 0.5);
+}
+
+.action-btn-icon.action-btn-danger {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+    -fx-border-color: rgba(239, 68, 68, 0.3);
+    -fx-text-fill: #EF4444;
+}
+
+.action-btn-icon.action-btn-danger:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.25);
+    -fx-border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ===== STAT ROWS ===== */
+.stat-row {
+    -fx-padding: 10 12;
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-background-radius: 8px;
+}
+
+.stat-row:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+}
+
+.stat-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #9CA3AF;
+}
+
+.stat-value {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #22C55E;
+}

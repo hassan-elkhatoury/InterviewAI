@@ -13,7 +13,6 @@ public final class Routes {
     public static final String COURSE_MAP = "/fxml/CourseMapView.fxml";
     public static final String LESSON = "/fxml/LessonView.fxml";
     public static final String SIMULATION = "/fxml/SimulationView.fxml";
-    public static final String FEEDBACK = "/fxml/FeedbackView.fxml"; // placeholder not yet created
     public static final String PROFILE = "/fxml/ProfileView.fxml";
     public static final String ADMIN = "/fxml/AdminView.fxml";
     public static final String PROMPT = "/fxml/PromptView.fxml";
@@ -21,6 +20,7 @@ public final class Routes {
     public static final String ONBOARDINGWAITING = "/fxml/OnboardingWaitingView.fxml";
     public static final String REVIEWPAGE = "/fxml/ReviewView.fxml";
     public static final String REVIEWQUESTIONS = "/fxml/ReviewQuestionsView.fxml";
-
-
+    public static final String USER_MANAGEMENT = "/fxml/UserManagementView.fxml";
+    public static final String COURSES_MANAGEMENT = "/fxml/CoursesManagementView.fxml";
+    public static final String ADMIN_PROFILE = "/fxml/AdminProfileView.fxml";
 }

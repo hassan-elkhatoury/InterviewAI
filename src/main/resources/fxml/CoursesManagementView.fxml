@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="courses-management-root" stylesheets="@../css/courses-management.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.CoursesManagementController">
+
+    <!-- LEFT: Shared Admin Sidebar -->
+    <left>
+        <fx:include fx:id="adminSidebar" source="components/AdminSidebar.fxml" />
+    </left>
+
+    <!-- CENTER: Main Content Area -->
+    <center>
+        <VBox styleClass="main-content">
+            <!-- Top Header Bar -->
+            <HBox alignment="CENTER_LEFT" styleClass="top-header">
+                <VBox spacing="2">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label styleClass="page-icon" text="📚" />
+                        <Label styleClass="page-title" text="Course Management" />
+                    </HBox>
+                    <Label styleClass="page-subtitle" text="Monitor, analyze and manage all generated learning courses" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                
+                <!-- Quick Stats in Header -->
+                <HBox spacing="16" styleClass="header-stats">
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="totalCoursesLabel" styleClass="header-stat-value" text="0" />
+                        <Label styleClass="header-stat-label" text="Total" />
+                    </VBox>
+                    <Label styleClass="header-stat-divider" text="•" />
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="activeCoursesLabel" styleClass="header-stat-value stat-blue" text="0" />
+                        <Label styleClass="header-stat-label" text="Active" />
+                    </VBox>
+                    <Label styleClass="header-stat-divider" text="•" />
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="completedCoursesLabel" styleClass="header-stat-value stat-green" text="0" />
+                        <Label styleClass="header-stat-label" text="Completed" />
+                    </VBox>
+                    <Label styleClass="header-stat-divider" text="•" />
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="inProgressCoursesLabel" styleClass="header-stat-value stat-amber" text="0" />
+                        <Label styleClass="header-stat-label" text="In Progress" />
+                    </VBox>
+                    <Label styleClass="header-stat-divider" text="•" />
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="avgCompletionLabel" styleClass="header-stat-value stat-purple" text="0%" />
+                        <Label styleClass="header-stat-label" text="Avg Completion" />
+                    </VBox>
+                </HBox>
+            </HBox>
+
+            <!-- Search and Filters Bar -->
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="controls-bar">
+                <!-- Search Box -->
+                <HBox alignment="CENTER_LEFT" maxWidth="400" spacing="8" styleClass="search-box" HBox.hgrow="ALWAYS">
+                    <Label styleClass="search-icon" text="🔍" />
+                    <TextField fx:id="searchField" promptText="Search by course title, owner name or email..." styleClass="search-input" HBox.hgrow="ALWAYS" />
+                </HBox>
+                
+                <Region HBox.hgrow="ALWAYS" />
+                
+                <!-- Filters -->
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="filters-container">
+                    <Label styleClass="filter-label" text="Status:" />
+                    <ComboBox fx:id="statusFilter" prefWidth="160" promptText="All Statuses" styleClass="filter-dropdown" />
+                    <Button onAction="#onSearch" styleClass="search-btn" text="Search" />
+                    <Button onAction="#onResetFilters" styleClass="clear-btn" text="✕ Reset" />
+                </HBox>
+            </HBox>
+
+            <!-- Main Table Section -->
+            <VBox styleClass="table-section" VBox.vgrow="ALWAYS">
+                <VBox styleClass="table-card" VBox.vgrow="ALWAYS">
+                    <!-- Table Header -->
+                    <HBox alignment="CENTER_LEFT" styleClass="table-header">
+                        <Label styleClass="table-title" text="All Courses" />
+                        <Label fx:id="tableCountBadge" styleClass="table-count" text="0" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="pageInfoLabel" styleClass="table-info" text="Showing 0 courses" />
+                    </HBox>
+
+                    <!-- The Data Table -->
+                    <TableView fx:id="coursesTable" styleClass="courses-table" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="idColumn" minWidth="50" prefWidth="60" text="ID" />
+                            <TableColumn fx:id="titleColumn" minWidth="200" prefWidth="260" text="Course Title" />
+                            <TableColumn fx:id="userColumn" minWidth="150" prefWidth="180" text="Owner" />
+                            <TableColumn fx:id="statusColumn" minWidth="90" prefWidth="100" text="Status" />
+                            <TableColumn fx:id="progressColumn" minWidth="100" prefWidth="120" text="Progress" />
+                            <TableColumn fx:id="chaptersColumn" minWidth="70" prefWidth="80" text="Chapters" />
+                            <TableColumn fx:id="questionsColumn" minWidth="80" prefWidth="90" text="Questions" />
+                            <TableColumn fx:id="createdColumn" minWidth="90" prefWidth="100" text="Created" />
+                            <TableColumn fx:id="actionsColumn" minWidth="130" prefWidth="140" text="Actions" />
+                        </columns>
+                        <placeholder>
+                            <VBox alignment="CENTER" spacing="12" styleClass="empty-state">
+                                <Label styleClass="empty-icon" text="📚" />
+                                <Label styleClass="empty-title" text="No courses found" />
+                                <Label styleClass="empty-subtitle" text="Courses will appear here once users start generating them" />
+                            </VBox>
+                        </placeholder>
+                    </TableView>
+                </VBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

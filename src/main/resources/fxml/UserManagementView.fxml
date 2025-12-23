@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane styleClass="user-management-root" stylesheets="@../css/user-management.css" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.interviewai.controller.UserManagementController">
+
+    <!-- LEFT: Shared Admin Sidebar -->
+    <left>
+        <fx:include fx:id="adminSidebar" source="components/AdminSidebar.fxml"/>
+    </left>
+
+    <!-- CENTER: Main Content Area -->
+    <center>
+        <VBox styleClass="main-content">
+            <!-- Top Header Bar -->
+            <HBox alignment="CENTER_LEFT" styleClass="top-header">
+                <VBox spacing="2">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label styleClass="page-icon" text="👥" />
+                        <Label styleClass="page-title" text="User Management" />
+                    </HBox>
+                    <Label styleClass="page-subtitle" text="Manage platform users, view profiles, and perform admin actions" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                
+                <!-- Quick Stats Summary -->
+                <HBox spacing="12" styleClass="header-stats">
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="totalUsersLabel" styleClass="header-stat-value" text="0" />
+                        <Label styleClass="header-stat-label" text="Total Users" />
+                    </VBox>
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label styleClass="header-stat-divider" text="•" />
+                    </VBox>
+                    <VBox alignment="CENTER" styleClass="header-stat">
+                        <Label fx:id="activeTodayLabel" styleClass="header-stat-value active" text="0" />
+                        <Label styleClass="header-stat-label" text="Active Today" />
+                    </VBox>
+                </HBox>
+            </HBox>
+
+            <!-- Search and Filters Bar -->
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="controls-bar">
+                <!-- Search Box -->
+                <HBox alignment="CENTER_LEFT" spacing="6" styleClass="search-box">
+                    <Label styleClass="search-icon" text="🔍" />
+                    <TextField fx:id="searchField" promptText="Search by username or email..." styleClass="search-input" />
+                </HBox>
+                
+                <Region HBox.hgrow="ALWAYS" />
+                
+                <!-- Filter Dropdowns -->
+                <HBox alignment="CENTER_LEFT" spacing="8" styleClass="filters-container">
+                    <ComboBox fx:id="filterInterviewType" promptText="Interview Type" styleClass="filter-dropdown" />
+                    <ComboBox fx:id="filterLanguage" promptText="Language" styleClass="filter-dropdown" />
+                    <ComboBox fx:id="filterStatus" promptText="Status" styleClass="filter-dropdown" />
+                    <ComboBox fx:id="filterProgress" promptText="Progress" styleClass="filter-dropdown" />
+                    <Button fx:id="clearFiltersBtn" onAction="#onClearFilters" styleClass="clear-btn" text="✕ Clear" />
+                </HBox>
+            </HBox>
+
+            <!-- Main Split Content -->
+            <HBox styleClass="content-split" VBox.vgrow="ALWAYS">
+                <!-- User Table Section -->
+                <VBox styleClass="table-section" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="table-card" VBox.vgrow="ALWAYS">
+                        <!-- Table Header -->
+                        <HBox alignment="CENTER_LEFT" styleClass="table-header-bar">
+                            <Label styleClass="table-title" text="User Directory" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <HBox alignment="CENTER" spacing="8">
+                                <Button fx:id="prevPageBtn" onAction="#onPrevPage" styleClass="pagination-btn" text="◀" />
+                                <Label fx:id="pageLabel" styleClass="page-indicator" text="Page 1" />
+                                <Button fx:id="nextPageBtn" onAction="#onNextPage" styleClass="pagination-btn" text="▶" />
+                            </HBox>
+                        </HBox>
+                        
+                        <!-- The Data Table -->
+                        <TableView fx:id="userTable" styleClass="users-table" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colId" prefWidth="45" styleClass="table-column" text="ID" />
+                                <TableColumn fx:id="colUsername" prefWidth="110" styleClass="table-column" text="User" />
+                                <TableColumn fx:id="colEmail" prefWidth="150" styleClass="table-column" text="Email" />
+                                <TableColumn fx:id="colRole" prefWidth="70" styleClass="table-column" text="Role" />
+                                <TableColumn fx:id="colStatus" prefWidth="70" styleClass="table-column" text="Status" />
+                                <TableColumn fx:id="colInterviewType" prefWidth="80" styleClass="table-column" text="Type" />
+                                <TableColumn fx:id="colLanguage" prefWidth="55" styleClass="table-column" text="Lang" />
+                                <TableColumn fx:id="colXP" prefWidth="50" styleClass="table-column" text="XP" />
+                                <TableColumn fx:id="colLastActive" prefWidth="80" styleClass="table-column" text="Active" />
+                                <TableColumn fx:id="colActions" prefWidth="70" styleClass="table-column" text="" />
+                            </columns>
+                            <placeholder>
+                                <VBox alignment="CENTER" spacing="16" styleClass="empty-placeholder">
+                                    <Label styleClass="empty-icon" text="👥" />
+                                    <Label styleClass="empty-title" text="No users found" />
+                                    <Label styleClass="empty-subtitle" text="Try adjusting your search or filters" />
+                                </VBox>
+                            </placeholder>
+                        </TableView>
+                    </VBox>
+                </VBox>
+
+                <!-- User Profile Panel -->
+                <VBox fx:id="profilePanel" minWidth="250" prefWidth="280" styleClass="profile-panel">
+                    <ScrollPane fitToWidth="true" styleClass="profile-scroll" VBox.vgrow="ALWAYS">
+                        <VBox spacing="0" styleClass="profile-content">
+                            <!-- Profile Header with Avatar -->
+                            <VBox alignment="CENTER" spacing="6" styleClass="profile-header">
+                                <StackPane styleClass="profile-avatar-container">
+                                    <Circle radius="26" styleClass="profile-avatar-bg" />
+                                    <Label fx:id="avatarInitials" styleClass="profile-avatar-text" text="?" />
+                                </StackPane>
+                                <VBox alignment="CENTER" spacing="4">
+                                    <Label fx:id="profileName" styleClass="profile-user-name" text="Select a User" />
+                                    <Label fx:id="profileEmail" styleClass="profile-user-email" text="Click on a user to view details" />
+                                </VBox>
+                                <HBox alignment="CENTER" spacing="6">
+                                    <Label fx:id="profileStatus" managed="false" styleClass="profile-status-badge" text="" visible="false" />
+                                    <Label fx:id="profileRole" managed="false" styleClass="profile-role-badge" text="" visible="false" />
+                                </HBox>
+                            </VBox>
+
+                            <!-- Quick Stats Grid -->
+                            <HBox spacing="4" styleClass="stats-grid">
+                                <VBox alignment="CENTER" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="stat-icon" text="⚡" />
+                                    <Label fx:id="statXP" styleClass="stat-number" text="0" />
+                                    <Label styleClass="stat-title" text="Total XP" />
+                                </VBox>
+                                <VBox alignment="CENTER" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="stat-icon" text="🔥" />
+                                    <Label fx:id="statStreak" styleClass="stat-number" text="0" />
+                                    <Label styleClass="stat-title" text="Day Streak" />
+                                </VBox>
+                                <VBox alignment="CENTER" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="stat-icon" text="🏆" />
+                                    <Label fx:id="statBadges" styleClass="stat-number" text="0" />
+                                    <Label styleClass="stat-title" text="Badges" />
+                                </VBox>
+                                <VBox alignment="CENTER" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="stat-icon" text="📖" />
+                                    <Label fx:id="statLessons" styleClass="stat-number" text="0" />
+                                    <Label styleClass="stat-title" text="Lessons" />
+                                </VBox>
+                            </HBox>
+
+                            <!-- Interview Details Card -->
+                            <VBox styleClass="detail-card">
+                                <HBox alignment="CENTER_LEFT" styleClass="card-header">
+                                    <Label styleClass="card-header-icon" text="🎯" />
+                                    <Label styleClass="card-header-title" text="Interview Details" />
+                                </HBox>
+                                <VBox spacing="6" styleClass="card-body">
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Interview Type" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="infoInterviewType" styleClass="detail-value" text="-" />
+                                    </HBox>
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Language" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="infoLanguage" styleClass="detail-value" text="-" />
+                                    </HBox>
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Timeline" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="infoTimeline" styleClass="detail-value" text="-" />
+                                    </HBox>
+                                    <VBox spacing="3" styleClass="detail-row-vertical">
+                                        <Label styleClass="detail-label" text="Context" />
+                                        <Label fx:id="infoContext" styleClass="detail-value-multi" text="-" wrapText="true" />
+                                    </VBox>
+                                </VBox>
+                            </VBox>
+
+                            <!-- Account Details Card -->
+                            <VBox styleClass="detail-card">
+                                <HBox alignment="CENTER_LEFT" styleClass="card-header">
+                                    <Label styleClass="card-header-icon" text="👤" />
+                                    <Label styleClass="card-header-title" text="Account Details" />
+                                </HBox>
+                                <VBox spacing="6" styleClass="card-body">
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="User ID" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="infoUserId" styleClass="detail-value-mono" text="-" />
+                                    </HBox>
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Joined" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="infoJoined" styleClass="detail-value" text="-" />
+                                    </HBox>
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Last Active" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="infoLastActive" styleClass="detail-value" text="-" />
+                                    </HBox>
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="2FA Enabled" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="info2FA" styleClass="detail-value" text="-" />
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+
+                            <!-- Learning Progress Card -->
+                            <VBox styleClass="detail-card">
+                                <HBox alignment="CENTER_LEFT" styleClass="card-header">
+                                    <Label styleClass="card-header-icon" text="📊" />
+                                    <Label styleClass="card-header-title" text="Learning Progress" />
+                                </HBox>
+                                <VBox spacing="6" styleClass="card-body">
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Completed Lessons" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="progressLessons" styleClass="detail-value-highlight" text="0" />
+                                    </HBox>
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Quiz Average" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="progressQuizScore" styleClass="detail-value" text="0%" />
+                                    </HBox>
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Simulation Score" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="progressSimScore" styleClass="detail-value" text="0" />
+                                    </HBox>
+                                    <HBox styleClass="detail-row">
+                                        <Label styleClass="detail-label" text="Courses Enrolled" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="progressCourses" styleClass="detail-value" text="0" />
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+
+                            <!-- Badges Card -->
+                            <VBox styleClass="detail-card">
+                                <HBox alignment="CENTER_LEFT" styleClass="card-header">
+                                    <Label styleClass="card-header-icon" text="🏅" />
+                                    <Label styleClass="card-header-title" text="Earned Badges" />
+                                </HBox>
+                                <FlowPane fx:id="badgesPane" hgap="10" styleClass="badges-grid" vgap="10">
+                                    <Label styleClass="no-badges-text" text="No badges earned yet" />
+                                </FlowPane>
+                            </VBox>
+                        </VBox>
+                    </ScrollPane>
+
+                    <!-- Action Buttons Panel -->
+                    <VBox spacing="12" styleClass="actions-panel">
+                        <Label styleClass="actions-title" text="User Actions" />
+                        
+                        <VBox spacing="8">
+                            <!-- Primary Actions -->
+                            <Button fx:id="editProfileBtn" disable="true" maxWidth="Infinity" onAction="#onEditProfile" styleClass="action-btn, action-btn-primary">
+                                <graphic>
+                                    <HBox alignment="CENTER" spacing="8">
+                                        <Label styleClass="action-btn-icon" text="✏" />
+                                        <Label styleClass="action-btn-text" text="Edit Profile Details" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+
+                            <!-- Status Actions -->
+                            <StackPane>
+                                <Button fx:id="suspendBtn" disable="true" maxWidth="Infinity" onAction="#onSuspendUser" styleClass="action-btn, action-btn-danger">
+                                    <graphic>
+                                        <HBox alignment="CENTER" spacing="8">
+                                            <Label styleClass="action-btn-icon" text="⛔" />
+                                            <Label styleClass="action-btn-text" text="Suspend Account" />
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                                <Button fx:id="activateBtn" disable="true" managed="false" maxWidth="Infinity" onAction="#onActivateUser" styleClass="action-btn, action-btn-success" visible="false">
+                                    <graphic>
+                                        <HBox alignment="CENTER" spacing="8">
+                                            <Label styleClass="action-btn-icon" text="✅" />
+                                            <Label styleClass="action-btn-text" text="Activate Account" />
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                            </StackPane>
+
+                            <!-- Reset Actions -->
+                            <HBox spacing="8">
+                                <Button fx:id="resetXPBtn" disable="true" maxWidth="Infinity" onAction="#onResetXP" styleClass="action-btn, action-btn-warning" HBox.hgrow="ALWAYS">
+                                    <graphic>
+                                        <VBox alignment="CENTER" spacing="2">
+                                            <Label styleClass="action-btn-icon-small" text="⚡" />
+                                            <Label styleClass="action-btn-text-small" text="Reset XP" />
+                                        </VBox>
+                                    </graphic>
+                                </Button>
+                                <Button fx:id="resetProgressBtn" disable="true" maxWidth="Infinity" onAction="#onResetProgress" styleClass="action-btn, action-btn-warning" HBox.hgrow="ALWAYS">
+                                    <graphic>
+                                        <VBox alignment="CENTER" spacing="2">
+                                            <Label styleClass="action-btn-icon-small" text="🔄" />
+                                            <Label styleClass="action-btn-text-small" text="Reset Progress" />
+                                        </VBox>
+                                    </graphic>
+                                </Button>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
