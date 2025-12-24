@@ -244,7 +244,7 @@
                         <!-- Distribution Charts -->
                         <VBox styleClass="chart-card-small">
                             <Label styleClass="chart-title-small" text="Interview Types" />
-                            <PieChart fx:id="interviewTypePieChart" labelsVisible="false" legendVisible="true" styleClass="mini-pie-chart" VBox.vgrow="ALWAYS" />
+                            <PieChart fx:id="interviewTypePieChart" labelsVisible="true" legendVisible="true" styleClass="mini-pie-chart" VBox.vgrow="ALWAYS" />
                         </VBox>
                     </VBox>
                 </HBox>
