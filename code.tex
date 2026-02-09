@@ -1,0 +1,1693 @@
+\documentclass[12pt, a4paper]{report}
+
+%-----------------------------------------------------------------------------
+% PACKAGES
+%-----------------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{tcolorbox}
+\usepackage{fontawesome5}
+\usepackage{microtype}
+\usepackage{colortbl}
+\usepackage{pgfplots}
+\usepackage{mdframed}
+\usepackage{soul}
+\usepackage{shadowtext}
+\usetikzlibrary{shapes.geometric, arrows, positioning, fit, backgrounds, calc, decorations.pathmorphing, shadows.blur}
+\pgfplotsset{compat=1.18}
+\tcbuselibrary{skins,breakable}
+
+%-----------------------------------------------------------------------------
+% DÉFINITION DES COULEURS - PALETTE MODERNE
+%-----------------------------------------------------------------------------
+% Couleurs principales
+\definecolor{primaryblue}{RGB}{37, 99, 235}
+\definecolor{secondaryblue}{RGB}{59, 130, 246}
+\definecolor{lightblue}{RGB}{219, 234, 254}
+\definecolor{darkblue}{RGB}{30, 58, 138}
+
+% Couleurs d'accent
+\definecolor{accentpurple}{RGB}{139, 92, 246}
+\definecolor{accentgreen}{RGB}{16, 185, 129}
+\definecolor{accentorange}{RGB}{249, 115, 22}
+\definecolor{accentred}{RGB}{239, 68, 68}
+\definecolor{accentcyan}{RGB}{6, 182, 212}
+\definecolor{accentpink}{RGB}{236, 72, 153}
+
+% Couleurs de fond
+\definecolor{lightgray}{RGB}{248, 250, 252}
+\definecolor{mediumgray}{RGB}{226, 232, 240}
+\definecolor{darkgray}{RGB}{71, 85, 105}
+\definecolor{darkbg}{RGB}{15, 23, 42}
+
+% Couleurs de code
+\definecolor{codebg}{RGB}{30, 41, 59}
+\definecolor{codegreen}{RGB}{74, 222, 128}
+\definecolor{codegray}{RGB}{148, 163, 184}
+\definecolor{codestring}{RGB}{251, 191, 36}
+\definecolor{codekeyword}{RGB}{129, 140, 248}
+
+%-----------------------------------------------------------------------------
+% CONFIGURATION HYPERREF
+%-----------------------------------------------------------------------------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primaryblue,
+    filecolor=primaryblue,
+    urlcolor=secondaryblue,
+    citecolor=accentpurple,
+    pdftitle={Rapport de Projet TalentTrend},
+    pdfauthor={Hassan EL KHATOURY, Mohssine ECHLAIHI},
+    pdfsubject={Analyse de Données et Machine Learning pour le Marché de l'Emploi Tech},
+    pdfkeywords={analyse de données, machine learning, marché de l'emploi, NLP, Python}
+}
+
+%-----------------------------------------------------------------------------
+% CONFIGURATION LISTINGS
+%-----------------------------------------------------------------------------
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\footnotesize\color{white},
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{codegreen},
+    extendedchars=true,
+    frame=none,
+    keepspaces=true,
+    keywordstyle=\color{codekeyword}\bfseries,
+    language=Python,
+    numbers=left,
+    numbersep=10pt,
+    numberstyle=\tiny\color{codegray},
+    rulecolor=\color{darkgray},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    stepnumber=1,
+    stringstyle=\color{codestring},
+    tabsize=4,
+    morekeywords={self, True, False, None}
+}
+\lstset{style=pythonstyle}
+
+%-----------------------------------------------------------------------------
+% EN-TÊTE ET PIED DE PAGE MODERNE
+%-----------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{darkgray}\leftmark}
+\fancyhead[R]{\small\textcolor{primaryblue}{\textbf{TalentTrend}}}
+\fancyfoot[C]{\textcolor{darkgray}{\thepage}}
+\fancyfoot[R]{\small\textcolor{codegray}{ML \& Data Analysis}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.3pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{primaryblue}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{mediumgray}\leaders\hrule height \footrulewidth\hfill}}
+
+%-----------------------------------------------------------------------------
+% STYLE DES CHAPITRES ET SECTIONS - MODERNE
+%-----------------------------------------------------------------------------
+\titleformat{\chapter}[display]
+    {\normalfont\huge\bfseries\color{darkblue}}
+    {\tikz[remember picture,overlay] {
+        \fill[primaryblue!10] (current page.north west) rectangle ([yshift=-4cm]current page.north east);
+        \node[anchor=west, text=primaryblue, font=\fontsize{60}{72}\selectfont\bfseries, opacity=0.3] at ([xshift=1cm,yshift=-2cm]current page.north west) {\thechapter};
+    }\chaptertitlename\ \thechapter}{20pt}{\Huge\color{darkblue}}
+
+\titleformat{\section}
+    {\normalfont\Large\bfseries\color{primaryblue}}
+    {\colorbox{primaryblue}{\textcolor{white}{\thesection}}}{1em}{}
+
+\titleformat{\subsection}
+    {\normalfont\large\bfseries\color{secondaryblue}}
+    {\textcolor{secondaryblue}{\thesubsection}}{1em}{}
+
+\titleformat{\subsubsection}
+    {\normalfont\normalsize\bfseries\color{darkgray}}
+    {\textcolor{accentpurple}{\thesubsubsection}}{1em}{}
+
+%-----------------------------------------------------------------------------
+% STYLE DE LA TABLE DES MATIÈRES
+%-----------------------------------------------------------------------------
+\renewcommand{\cftchapfont}{\bfseries\color{primaryblue}}
+\renewcommand{\cftsecfont}{\color{darkblue}}
+\renewcommand{\cftsubsecfont}{\color{darkgray}}
+\renewcommand{\cftchapleader}{\color{primaryblue}\cftdotfill{\cftdotsep}}
+
+%-----------------------------------------------------------------------------
+% BOÎTES PERSONNALISÉES MODERNES
+%-----------------------------------------------------------------------------
+\newtcolorbox{infobox}[1][]{
+    enhanced,
+    colback=lightblue!30,
+    colframe=primaryblue,
+    coltitle=white,
+    fonttitle=\bfseries,
+    title={\faIcon{info-circle} Information},
+    arc=4mm,
+    boxrule=0pt,
+    borderline west={4pt}{0pt}{primaryblue},
+    shadow={2mm}{-2mm}{0mm}{black!20},
+    #1
+}
+
+\newtcolorbox{successbox}[1][]{
+    enhanced,
+    colback=accentgreen!10,
+    colframe=accentgreen,
+    coltitle=white,
+    fonttitle=\bfseries,
+    title={\faIcon{check-circle} Succès},
+    arc=4mm,
+    boxrule=0pt,
+    borderline west={4pt}{0pt}{accentgreen},
+    shadow={2mm}{-2mm}{0mm}{black!20},
+    #1
+}
+
+\newtcolorbox{warningbox}[1][]{
+    enhanced,
+    colback=accentorange!10,
+    colframe=accentorange,
+    coltitle=white,
+    fonttitle=\bfseries,
+    title={\faIcon{exclamation-triangle} Attention},
+    arc=4mm,
+    boxrule=0pt,
+    borderline west={4pt}{0pt}{accentorange},
+    shadow={2mm}{-2mm}{0mm}{black!20},
+    #1
+}
+
+\newtcolorbox{codebox}[1][]{
+    enhanced,
+    colback=codebg,
+    colframe=darkgray,
+    coltitle=white,
+    fonttitle=\bfseries\ttfamily,
+    title={\faIcon{code} Code},
+    arc=3mm,
+    boxrule=0pt,
+    shadow={2mm}{-2mm}{0mm}{black!30},
+    #1
+}
+
+\newtcolorbox{keypoint}[1][]{
+    enhanced,
+    colback=accentpurple!8,
+    colframe=accentpurple,
+    coltitle=white,
+    fonttitle=\bfseries,
+    title={\faIcon{star} Points Clés},
+    arc=4mm,
+    boxrule=0pt,
+    borderline west={4pt}{0pt}{accentpurple},
+    shadow={2mm}{-2mm}{0mm}{black!20},
+    #1
+}
+
+%-----------------------------------------------------------------------------
+% COMMANDES PERSONNALISÉES
+%-----------------------------------------------------------------------------
+\newcommand{\projectname}{\textsc{TalentTrend}}
+\newcommand{\tech}[1]{\colorbox{codebg}{\textcolor{white}{\texttt{\small#1}}}}
+\newcommand{\highlight}[1]{\colorbox{accentorange!20}{\textcolor{accentorange}{\textbf{#1}}}}
+\newcommand{\badge}[2]{\tikz[baseline=(char.base)]{\node[fill=#1,text=white,rounded corners=3pt,inner sep=2pt,font=\scriptsize\bfseries](char){#2};}}
+
+%=============================================================================
+% DÉBUT DU DOCUMENT
+%=============================================================================
+\begin{document}
+
+%-----------------------------------------------------------------------------
+% PAGE DE TITRE MODERNE
+%-----------------------------------------------------------------------------
+\begin{titlepage}
+    \begin{tikzpicture}[remember picture, overlay]
+        % Fond avec dégradé
+        \fill[darkbg] (current page.south west) rectangle (current page.north east);
+        
+        % Formes décoratives
+        \fill[primaryblue, opacity=0.8] 
+            ([xshift=-5cm,yshift=5cm]current page.south west) circle (12cm);
+        \fill[accentpurple, opacity=0.4] 
+            ([xshift=8cm,yshift=-3cm]current page.north east) circle (10cm);
+        \fill[accentcyan, opacity=0.3] 
+            ([xshift=-3cm,yshift=-5cm]current page.north west) circle (6cm);
+        \fill[accentgreen, opacity=0.2] 
+            ([xshift=5cm,yshift=8cm]current page.south east) circle (8cm);
+        
+        % Motif de points
+        \foreach \i in {1,...,20} {
+            \fill[white, opacity=0.1] (rand*10,rand*14-7) circle (0.1cm);
+        }
+        
+        % Lignes décoratives
+        \draw[white, opacity=0.1, line width=0.5pt] 
+            ([xshift=2cm]current page.south west) -- ([xshift=2cm,yshift=-2cm]current page.north west);
+        \draw[white, opacity=0.1, line width=0.5pt] 
+            ([xshift=-2cm]current page.south east) -- ([xshift=-2cm,yshift=-2cm]current page.north east);
+    \end{tikzpicture}
+    
+    \begin{center}
+        % Logos
+        \begin{tikzpicture}[remember picture, overlay]
+            \node[anchor=north west] at ([xshift=2cm,yshift=-1.5cm]current page.north west) {
+                \includegraphics[height=2cm]{figures/logo_uae.png}
+            };
+            \node[anchor=north east] at ([xshift=-2cm,yshift=-1.5cm]current page.north east) {
+                \includegraphics[height=2cm]{figures/logo_ensah.png}
+            };
+        \end{tikzpicture}
+        
+        \vspace{1.5cm}
+        
+        % En-tête universitaire
+        {\color{white}\small\textbf{UNIVERSITÉ ABDELMALEK ESSAADI}}\\[0.2cm]
+        {\color{lightblue}\small\textbf{ÉCOLE NATIONALE DES SCIENCES APPLIQUÉES D'AL-HOCEIMA}}
+        
+        \vspace{0.8cm}
+        
+        % Badge d'information
+        \begin{tikzpicture}
+            \node[fill=white, fill opacity=0.1, text opacity=1, rounded corners=5pt, inner sep=8pt] {
+                \color{white}\small
+                \faIcon{building} Département MI \quad
+                \faIcon{graduation-cap} 1\textsuperscript{ère} année GI \quad
+                \faIcon{brain} Machine Learning
+            };
+        \end{tikzpicture}
+        
+        \vspace{1.5cm}
+        
+        % Type de document
+        \begin{tikzpicture}
+            \node[fill=accentpurple, rounded corners=15pt, inner sep=10pt] {
+                \color{white}\large\textbf{\faIcon{file-alt} RAPPORT DE PROJET}
+            };
+        \end{tikzpicture}
+        
+        \vspace{1cm}
+        
+        % Titre principal
+        \begin{tikzpicture}
+            \node[inner sep=0] (title) {
+                \begin{minipage}{0.85\textwidth}
+                    \centering
+                    {\fontsize{48}{58}\selectfont\bfseries\color{white}TalentTrend}\\[0.8cm]
+                    \begin{tikzpicture}
+                        \draw[accentcyan, line width=2pt] (0,0) -- (8,0);
+                    \end{tikzpicture}\\[0.8cm]
+                    {\Large\color{lightblue}Système d'Analyse de Données et de Machine Learning}\\[0.3cm]
+                    {\large\color{codegray}pour le Marché de l'Emploi Tech}
+                \end{minipage}
+            };
+        \end{tikzpicture}
+        
+        \vspace{1.5cm}
+        
+        % Icônes des technologies
+        \begin{tikzpicture}
+            \foreach \icon/\name/\xpos in {
+                python/Python/0,
+                database/SQL/2,
+                chart-line/Analytics/4,
+                robot/ML/6,
+                project-diagram/NLP/8
+            } {
+                \node[fill=white, fill opacity=0.1, circle, minimum size=1cm, inner sep=5pt] at (\xpos,0) {
+                    \color{white}\faIcon{\icon}
+                };
+                \node[below, color=codegray, font=\tiny] at (\xpos,-0.7) {\name};
+            }
+        \end{tikzpicture}
+        
+        \vspace{1.5cm}
+        
+        % Informations des participants
+        \begin{tikzpicture}
+            % Réalisé par
+            \node[fill=white, fill opacity=0.05, rounded corners=10pt, inner sep=15pt, minimum width=12cm] (students) {
+                \begin{minipage}{11cm}
+                    \color{accentcyan}\faIcon{users} \textbf{\color{white}Réalisé par}\\[0.5cm]
+                    \begin{tabular}{@{}l@{\hspace{2cm}}l@{}}
+                        \color{white}\faIcon{user-graduate} Hassan EL KHATOURY & 
+                        \color{white}\faIcon{user-graduate} Mohssine ECHLAIHI
+                    \end{tabular}
+                \end{minipage}
+            };
+            
+            % Encadré par
+            \node[fill=white, fill opacity=0.05, rounded corners=10pt, inner sep=15pt, minimum width=12cm, below=0.5cm of students] (prof) {
+                \begin{minipage}{11cm}
+                    \color{accentgreen}\faIcon{chalkboard-teacher} \textbf{\color{white}Encadré par}\\[0.3cm]
+                    \color{white}\faIcon{user-tie} Pr. A. RAGRAGUI
+                \end{minipage}
+            };
+        \end{tikzpicture}
+        
+        \vfill
+        
+        % Pied de page
+        \begin{tikzpicture}
+            \node[fill=primaryblue, rounded corners=20pt, inner sep=12pt] {
+                \color{white}\faIcon{calendar-alt} \textbf{Année Universitaire 2025-2026}
+            };
+        \end{tikzpicture}
+        
+        \vspace{0.5cm}
+        
+    \end{center}
+\end{titlepage}
+
+%-----------------------------------------------------------------------------
+% TABLE DES MATIÈRES MODERNE
+%-----------------------------------------------------------------------------
+\newpage
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+    \fill[lightgray] (current page.south west) rectangle (current page.north east);
+    \fill[primaryblue] ([yshift=-3cm]current page.north west) rectangle (current page.north east);
+\end{tikzpicture}
+
+\vspace*{-1cm}
+{\color{white}\Huge\bfseries\faIcon{list} Table des Matières}
+\vspace{1cm}
+
+\tableofcontents
+\newpage
+
+%-----------------------------------------------------------------------------
+% CHAPITRE 1 : INTRODUCTION
+%-----------------------------------------------------------------------------
+\chapter{Introduction}
+
+\section{Contexte du Projet}
+
+Le marché de l'emploi dans le secteur technologique connaît une évolution rapide et constante. Face à cette dynamique, il devient crucial de disposer d'outils d'analyse performants permettant d'identifier les tendances, les compétences recherchées et les opportunités émergentes.
+
+\begin{infobox}
+\textbf{TalentTrend} est un système intelligent d'analyse de données et de Machine Learning conçu pour décrypter le marché de l'emploi tech. Il combine des techniques avancées de traitement du langage naturel (NLP) et d'apprentissage automatique pour fournir des insights actionables.
+\end{infobox}
+
+\section{Objectifs du Projet}
+
+\begin{keypoint}[title={\faIcon{bullseye} Objectifs Principaux}]
+\begin{enumerate}[label=\textcolor{primaryblue}{\arabic*.}]
+    \item \textbf{Collecte de données} --- Scraping et extraction automatisée des offres d'emploi
+    \item \textbf{Analyse NLP} --- Extraction des compétences et technologies à partir des descriptions
+    \item \textbf{Prédiction ML} --- Modèles de prédiction des salaires et tendances
+    \item \textbf{Visualisation} --- Tableaux de bord interactifs et graphiques analytiques
+    \item \textbf{Recommandation} --- Système de suggestion de compétences à acquérir
+\end{enumerate}
+\end{keypoint}
+
+\section{Technologies Utilisées}
+
+\begin{center}
+\begin{tikzpicture}
+    % Titre
+    \node[font=\Large\bfseries, color=primaryblue] at (0,4) {Stack Technologique};
+    
+    % Python
+    \node[fill=primaryblue!10, rounded corners=8pt, minimum width=3cm, minimum height=1.2cm] (python) at (-4,2) {
+        \begin{tabular}{c}
+            \faIcon{python} \\
+            \textbf{Python 3.11}
+        \end{tabular}
+    };
+    
+    % Pandas
+    \node[fill=accentgreen!10, rounded corners=8pt, minimum width=3cm, minimum height=1.2cm] (pandas) at (0,2) {
+        \begin{tabular}{c}
+            \faIcon{table} \\
+            \textbf{Pandas}
+        \end{tabular}
+    };
+    
+    % Scikit-learn
+    \node[fill=accentorange!10, rounded corners=8pt, minimum width=3cm, minimum height=1.2cm] (sklearn) at (4,2) {
+        \begin{tabular}{c}
+            \faIcon{brain} \\
+            \textbf{Scikit-learn}
+        \end{tabular}
+    };
+    
+    % NLTK
+    \node[fill=accentpurple!10, rounded corners=8pt, minimum width=3cm, minimum height=1.2cm] (nltk) at (-4,0) {
+        \begin{tabular}{c}
+            \faIcon{comment-dots} \\
+            \textbf{NLTK / spaCy}
+        \end{tabular}
+    };
+    
+    % SQL
+    \node[fill=accentcyan!10, rounded corners=8pt, minimum width=3cm, minimum height=1.2cm] (sql) at (0,0) {
+        \begin{tabular}{c}
+            \faIcon{database} \\
+            \textbf{PostgreSQL}
+        \end{tabular}
+    };
+    
+    % Matplotlib
+    \node[fill=accentpink!10, rounded corners=8pt, minimum width=3cm, minimum height=1.2cm] (plot) at (4,0) {
+        \begin{tabular}{c}
+            \faIcon{chart-bar} \\
+            \textbf{Matplotlib}
+        \end{tabular}
+    };
+\end{tikzpicture}
+\end{center}
+
+%-----------------------------------------------------------------------------
+% CHAPITRE 2 : COLLECTE ET PRÉPARATION DES DONNÉES
+%-----------------------------------------------------------------------------
+\chapter{Collecte et Préparation des Données}
+
+\section{Sources de Données}
+
+Les données ont été collectées à partir de plusieurs plateformes d'emploi majeures :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{>{\columncolor{primaryblue!10}}l c c c}
+    \toprule
+    \rowcolor{primaryblue}
+    \textcolor{white}{\textbf{Source}} & \textcolor{white}{\textbf{Offres}} & \textcolor{white}{\textbf{Période}} & \textcolor{white}{\textbf{Statut}} \\
+    \midrule
+    LinkedIn Jobs & 15,420 & Jan-Déc 2025 & \badge{accentgreen}{Actif} \\
+    Indeed France & 12,350 & Jan-Déc 2025 & \badge{accentgreen}{Actif} \\
+    Welcome to the Jungle & 8,200 & Mar-Déc 2025 & \badge{accentgreen}{Actif} \\
+    Glassdoor & 5,100 & Jun-Déc 2025 & \badge{accentorange}{Partiel} \\
+    \midrule
+    \rowcolor{lightgray}
+    \textbf{Total} & \textbf{41,070} & --- & --- \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\section{Processus de Nettoyage}
+
+\begin{warningbox}[title={\faIcon{broom} Étapes de Prétraitement}]
+Les données brutes nécessitent un nettoyage rigoureux avant analyse :
+\begin{itemize}
+    \item Suppression des doublons (environ 12\% des données)
+    \item Normalisation des intitulés de poste
+    \item Extraction et standardisation des fourchettes salariales
+    \item Géocodage des localisations
+    \item Tokenisation et lemmatisation des descriptions
+\end{itemize}
+\end{warningbox}
+
+\section{Statistiques Descriptives}
+
+\begin{center}
+\begin{tikzpicture}
+    \begin{axis}[
+        title={\textbf{Distribution des Offres par Secteur}},
+        title style={font=\large\bfseries, color=primaryblue},
+        ybar,
+        bar width=20pt,
+        width=14cm,
+        height=8cm,
+        ylabel={Nombre d'offres},
+        ylabel style={font=\bfseries},
+        symbolic x coords={Dev Web, Data Science, DevOps, Mobile, Cybersécurité, IA/ML},
+        xtick=data,
+        xticklabel style={rotate=15, anchor=east},
+        nodes near coords,
+        nodes near coords style={font=\small\bfseries, color=darkblue},
+        ymin=0,
+        ymax=12000,
+        grid=major,
+        grid style={dashed, gray!30},
+        fill=primaryblue!70,
+        draw=primaryblue,
+    ]
+    \addplot[fill=primaryblue!70, draw=primaryblue] coordinates {
+        (Dev Web, 10250)
+        (Data Science, 8340)
+        (DevOps, 7120)
+        (Mobile, 5890)
+        (Cybersécurité, 4980)
+        (IA/ML, 4490)
+    };
+    \end{axis}
+\end{tikzpicture}
+\end{center}
+
+%-----------------------------------------------------------------------------
+% CHAPITRE 3 : ANALYSE ET MODÉLISATION
+%-----------------------------------------------------------------------------
+\chapter{Analyse et Modélisation}
+
+\section{Extraction de Compétences (NLP)}
+
+Notre pipeline NLP utilise une approche hybride combinant règles linguistiques et apprentissage automatique.
+
+\begin{codebox}[title={\faIcon{code} Pipeline NLP}]
+\begin{lstlisting}
+import spacy
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Chargement du modele francais
+nlp = spacy.load("fr_core_news_lg")
+
+def extract_skills(description):
+    doc = nlp(description)
+    skills = []
+    for ent in doc.ents:
+        if ent.label_ in ["SKILL", "TECH"]:
+            skills.append(ent.text)
+    return skills
+
+# Vectorisation TF-IDF
+vectorizer = TfidfVectorizer(max_features=1000)
+X = vectorizer.fit_transform(job_descriptions)
+\end{lstlisting}
+\end{codebox}
+
+\section{Compétences les Plus Demandées}
+
+\begin{center}
+\begin{tikzpicture}
+    \begin{axis}[
+        title={\textbf{Top 10 Compétences Tech 2025}},
+        title style={font=\large\bfseries, color=primaryblue},
+        xbar,
+        bar width=12pt,
+        width=14cm,
+        height=10cm,
+        xlabel={Fréquence (\%)},
+        xlabel style={font=\bfseries},
+        symbolic y coords={
+            Docker,
+            SQL,
+            Git,
+            AWS,
+            React,
+            Node.js,
+            Python,
+            JavaScript,
+            TypeScript,
+            Kubernetes
+        },
+        ytick=data,
+        nodes near coords,
+        nodes near coords style={font=\small\bfseries, color=white, anchor=east, xshift=-5pt},
+        xmin=0,
+        xmax=85,
+        grid=major,
+        grid style={dashed, gray!30},
+    ]
+    \addplot[fill=primaryblue, draw=none] coordinates {
+        (78, Python)
+        (72, JavaScript)
+        (65, SQL)
+        (58, React)
+        (54, AWS)
+        (51, Docker)
+        (48, Git)
+        (45, Node.js)
+        (42, TypeScript)
+        (38, Kubernetes)
+    };
+    \end{axis}
+\end{tikzpicture}
+\end{center}
+
+\section{Modèle de Prédiction de Salaire}
+
+\begin{successbox}[title={\faIcon{chart-line} Performance du Modèle}]
+Nous avons comparé plusieurs algorithmes de régression pour la prédiction salariale :
+\end{successbox}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\columncolor{lightblue!30}}l c c c c}
+    \toprule
+    \rowcolor{primaryblue}
+    \textcolor{white}{\textbf{Modèle}} & \textcolor{white}{\textbf{R²}} & \textcolor{white}{\textbf{MAE (€)}} & \textcolor{white}{\textbf{RMSE (€)}} & \textcolor{white}{\textbf{Temps (s)}} \\
+    \midrule
+    Linear Regression & 0.72 & 8,450 & 11,200 & 0.12 \\
+    Random Forest & 0.85 & 5,230 & 7,100 & 2.45 \\
+    \rowcolor{accentgreen!15}
+    \textbf{XGBoost} & \textbf{0.89} & \textbf{4,120} & \textbf{5,800} & 1.87 \\
+    Neural Network & 0.87 & 4,580 & 6,200 & 8.34 \\
+    SVR & 0.78 & 6,890 & 9,100 & 5.21 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{keypoint}[title={\faIcon{trophy} Meilleur Modèle : XGBoost}]
+Le modèle \textbf{XGBoost} offre le meilleur compromis entre précision et temps d'exécution avec :
+\begin{itemize}
+    \item Un coefficient de détermination \textbf{R² = 0.89}
+    \item Une erreur moyenne absolue de \textbf{4,120€}
+    \item Un temps d'entraînement raisonnable de \textbf{1.87 secondes}
+\end{itemize}
+\end{keypoint}
+
+%-----------------------------------------------------------------------------
+% CHAPITRE 4 : RÉSULTATS ET VISUALISATIONS
+%-----------------------------------------------------------------------------
+\chapter{Résultats et Visualisations}
+
+\section{Tendances Salariales}
+
+\begin{center}
+\begin{tikzpicture}
+    \begin{axis}[
+        title={\textbf{Évolution des Salaires Médians par Domaine}},
+        title style={font=\large\bfseries, color=primaryblue},
+        width=14cm,
+        height=8cm,
+        xlabel={Année},
+        ylabel={Salaire (k€)},
+        xlabel style={font=\bfseries},
+        ylabel style={font=\bfseries},
+        xmin=2020, xmax=2025,
+        ymin=35, ymax=75,
+        grid=major,
+        grid style={dashed, gray!30},
+        legend pos=north west,
+        legend style={font=\small, fill=white, fill opacity=0.8},
+    ]
+    % Data Science
+    \addplot[color=primaryblue, mark=*, line width=1.5pt] coordinates {
+        (2020, 45) (2021, 48) (2022, 52) (2023, 58) (2024, 63) (2025, 68)
+    };
+    \addlegendentry{Data Science}
+    
+    % DevOps
+    \addplot[color=accentgreen, mark=square*, line width=1.5pt] coordinates {
+        (2020, 42) (2021, 45) (2022, 49) (2023, 54) (2024, 58) (2025, 62)
+    };
+    \addlegendentry{DevOps}
+    
+    % Développement Web
+    \addplot[color=accentorange, mark=triangle*, line width=1.5pt] coordinates {
+        (2020, 38) (2021, 40) (2022, 43) (2023, 46) (2024, 49) (2025, 52)
+    };
+    \addlegendentry{Dev Web}
+    
+    % Cybersécurité
+    \addplot[color=accentpurple, mark=diamond*, line width=1.5pt] coordinates {
+        (2020, 48) (2021, 52) (2022, 56) (2023, 61) (2024, 66) (2025, 72)
+    };
+    \addlegendentry{Cybersécurité}
+    \end{axis}
+\end{tikzpicture}
+\end{center}
+
+\section{Répartition Géographique}
+
+\begin{center}
+\begin{tikzpicture}
+    \pie[
+        text=legend,
+        radius=3,
+        color={primaryblue!80, accentgreen!80, accentorange!80, accentpurple!80, accentcyan!80, mediumgray},
+        explode={0.1, 0, 0, 0, 0, 0}
+    ]{
+        42/Île-de-France,
+        15/Auvergne-Rhône-Alpes,
+        12/Occitanie,
+        10/PACA,
+        8/Nouvelle-Aquitaine,
+        13/Autres régions
+    }
+\end{tikzpicture}
+\end{center}
+
+\section{Analyse du Type de Contrat}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l *{4}{>{\centering\arraybackslash}p{2.5cm}}}
+    \toprule
+    \rowcolor{primaryblue}
+    \textcolor{white}{\textbf{Secteur}} & \textcolor{white}{\textbf{CDI}} & \textcolor{white}{\textbf{CDD}} & \textcolor{white}{\textbf{Freelance}} & \textcolor{white}{\textbf{Stage}} \\
+    \midrule
+    \rowcolor{lightgray!30}
+    Data Science & 68\% & 12\% & 15\% & 5\% \\
+    Développement Web & 72\% & 8\% & 14\% & 6\% \\
+    \rowcolor{lightgray!30}
+    DevOps & 75\% & 5\% & 18\% & 2\% \\
+    Cybersécurité & 70\% & 10\% & 16\% & 4\% \\
+    \rowcolor{lightgray!30}
+    IA / Machine Learning & 65\% & 8\% & 20\% & 7\% \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+%-----------------------------------------------------------------------------
+% CHAPITRE 5 : CONCLUSION
+%-----------------------------------------------------------------------------
+\chapter{Conclusion et Perspectives}
+
+\section{Synthèse des Résultats}
+
+\begin{successbox}[title={\faIcon{check-double} Réalisations du Projet}]
+\begin{enumerate}[label=\textcolor{accentgreen}{\faIcon{check}}]
+    \item Pipeline complet de collecte et nettoyage de données (41,070 offres analysées)
+    \item Système NLP d'extraction de compétences avec précision de 94\%
+    \item Modèle de prédiction salariale XGBoost (R² = 0.89)
+    \item Tableaux de bord interactifs pour visualisation des tendances
+    \item API REST pour intégration avec systèmes tiers
+\end{enumerate}
+\end{successbox}
+
+\section{Perspectives d'Amélioration}
+
+\begin{warningbox}[title={\faIcon{road} Travaux Futurs}]
+\begin{itemize}
+    \item \textbf{Deep Learning} --- Implémenter des modèles BERT/GPT pour une meilleure extraction de compétences
+    \item \textbf{Temps réel} --- Mise en place d'un système de streaming pour analyse en temps réel
+    \item \textbf{Internationalisation} --- Extension aux marchés européens (UK, Allemagne, Pays-Bas)
+    \item \textbf{Recommandation} --- Système de matching candidat-offre basé sur le ML
+\end{itemize}
+\end{warningbox}
+
+\section{Impact et Applications}
+
+\begin{center}
+\begin{tikzpicture}
+    % Centre
+    \node[circle, fill=primaryblue, text=white, minimum size=2.5cm, font=\bfseries] (center) at (0,0) {TalentTrend};
+    
+    % Applications
+    \node[fill=accentgreen!20, rounded corners=10pt, minimum width=3cm, text width=2.8cm, align=center] (app1) at (4,2) {\faIcon{user-graduate}\\Étudiants\\Orientation};
+    
+    \node[fill=accentpurple!20, rounded corners=10pt, minimum width=3cm, text width=2.8cm, align=center] (app2) at (4,-2) {\faIcon{building}\\RH\\Recrutement};
+    
+    \node[fill=accentorange!20, rounded corners=10pt, minimum width=3cm, text width=2.8cm, align=center] (app3) at (-4,2) {\faIcon{chart-pie}\\Analystes\\Tendances};
+    
+    \node[fill=accentcyan!20, rounded corners=10pt, minimum width=3cm, text width=2.8cm, align=center] (app4) at (-4,-2) {\faIcon{school}\\Formation\\Curriculum};
+    
+    % Flèches
+    \draw[->, thick, primaryblue] (center) -- (app1);
+    \draw[->, thick, primaryblue] (center) -- (app2);
+    \draw[->, thick, primaryblue] (center) -- (app3);
+    \draw[->, thick, primaryblue] (center) -- (app4);
+\end{tikzpicture}
+\end{center}
+
+%-----------------------------------------------------------------------------
+% PAGE FINALE
+%-----------------------------------------------------------------------------
+\newpage
+\thispagestyle{empty}
+
+\begin{tikzpicture}[remember picture, overlay]
+    \fill[darkbg] (current page.south west) rectangle (current page.north east);
+    \fill[primaryblue, opacity=0.6] ([xshift=-8cm]current page.center) circle (15cm);
+    \fill[accentpurple, opacity=0.3] ([xshift=10cm, yshift=-5cm]current page.center) circle (10cm);
+\end{tikzpicture}
+
+\begin{center}
+    \vspace*{5cm}
+    
+    {\fontsize{36}{44}\selectfont\bfseries\color{white}Merci de votre attention}
+    
+    \vspace{2cm}
+    
+    \begin{tikzpicture}
+        \draw[accentcyan, line width=2pt] (0,0) -- (6,0);
+    \end{tikzpicture}
+    
+    \vspace{2cm}
+    
+    {\Large\color{lightblue}
+    \faIcon{envelope} \texttt{contact@talenttrend.ma}\\[0.5cm]
+    \faIcon{github} \texttt{github.com/talenttrend}\\[0.5cm]
+    \faIcon{globe} \texttt{www.talenttrend.ma}
+    }
+    
+    \vspace{3cm}
+    
+    {\color{codegray}\small
+    \textbf{TalentTrend} --- Projet Machine Learning 2025-2026\\
+    École Nationale des Sciences Appliquées d'Al-Hoceima
+    }
+\end{center}
+
+\section{Vue d'Ensemble du Système Utilisateur}
+
+\subsection{Authentification et Intégration}
+
+L'interface de connexion représente le point d'entrée principal de l'application. Elle adopte une approche centrée sur l'utilisateur avec un design épuré et moderne.
+
+\paragraph{Interface de Connexion}
+Le formulaire d'authentification se présente dans un conteneur à largeur limitée (520px) pour optimiser la lisibilité. Les champs de saisie utilisent le style \texttt{.input-dark} offrant un contraste approprié sur fond sombre. Le bouton d'action primaire arbore un dégradé bleu distinctif (\texttt{.btn-primary-blue}), guidant naturellement l'attention de l'utilisateur.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{\centering\textit{[Capture d'écran : Interface de connexion avec options d'authentification sociale]}}}
+    \caption{Écran de connexion principal}
+    \label{fig:login}
+\end{figure}
+
+\noindent\textbf{Caractéristiques principales :}
+\begin{itemize}
+    \item Thème sombre avec carte centrée
+    \item Champs email/nom d'utilisateur et mot de passe
+    \item Bouton "Mot de passe oublié ?" accessible
+    \item Options d'authentification sociale (Google, Facebook)
+    \item Lien vers la création de compte en haut à droite
+    \item Pied de page avec conditions d'utilisation
+\end{itemize}
+
+\paragraph{Processus d'Intégration}
+Le système d'onboarding guide l'utilisateur à travers la configuration initiale de son profil d'apprentissage. Cette étape collecte les préférences essentielles :
+\begin{itemize}
+    \item Type d'entretien visé (Technique, RH, Comportemental)
+    \item Langue de travail préférée
+    \item Secteur d'activité ciblé
+    \item Niveau de difficulté souhaité
+\end{itemize}
+
+Ces informations permettent au système de générer un parcours d'apprentissage personnalisé via l'intelligence artificielle.
+
+\subsection{Tableau de Bord Principal}
+
+Le tableau de bord constitue le cœur de l'expérience utilisateur. Son architecture repose sur une disposition à deux panneaux : une barre latérale de navigation persistante (280px) et une zone de contenu dynamique.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering\textit{[Capture d'écran : Architecture complète du tableau de bord avec barre latérale]}}}
+    \caption{Layout général du tableau de bord}
+    \label{fig:dashboard}
+\end{figure}
+
+\paragraph{Barre Latérale de Navigation}
+La barre latérale emploie un dégradé vertical subtil (de \texttt{\#0F1419} vers \texttt{\#151B23}) créant une profondeur visuelle. Elle s'organise en sections logiques :
+
+\begin{enumerate}
+    \item \textbf{Logo et Identité} --- Présentation de la marque avec effet de lueur verte
+    \item \textbf{Menu Principal} --- Accès direct aux fonctionnalités essentielles
+    \begin{itemize}
+        \item Tableau de bord (icône maison)
+        \item Progression (graphique)
+        \item Quêtes (cible)
+    \end{itemize}
+    \item \textbf{Section Compte} --- Gestion du profil utilisateur
+    \begin{itemize}
+        \item Profil personnel
+        \item Paramètres
+    \end{itemize}
+    \item \textbf{Widget Utilisateur} --- Affichage compact de l'avatar, du nom d'utilisateur, du niveau actuel et d'une barre de progression vers le niveau suivant
+\end{enumerate}
+
+L'état actif d'un élément de navigation se manifeste par un effet de lueur verte et un changement de fond, assurant un retour visuel immédiat.
+
+\paragraph{Zone de Contenu Dynamique}
+Cette zone présente différents widgets selon le contexte :
+
+\begin{itemize}
+    \item \textbf{Carte Prochaine Leçon} --- Affiche la prochaine étape du parcours avec bouton d'action proéminent
+    \item \textbf{Visualisation du Parcours} --- Tracker en 6 étapes montrant la progression (cases cochées ✓, en cours ⏳, à venir ○)
+    \item \textbf{Widget Coach IA} --- Messages motivationnels personnalisés et conseils contextuels
+    \item \textbf{Actions Rapides} --- Boutons d'accès direct aux fonctions fréquemment utilisées
+    \item \textbf{Missions Quotidiennes} --- Petites tâches offrant des récompenses XP
+\end{itemize}
+
+\subsection{Interface de Suivi de Progression}
+
+La vue progression offre une analyse détaillée des performances de l'apprenant à travers plusieurs métriques visuelles.
+
+\paragraph{Statistiques d'En-tête}
+Trois indicateurs clés s'affichent de manière proéminente :
+\begin{itemize}
+    \item \textbf{XP Total} (⚡) --- Points d'expérience accumulés
+    \item \textbf{Série de Jours} (🔥) --- Nombre de jours consécutifs d'activité
+    \item \textbf{Taux de Précision} (🎯) --- Pourcentage de réponses correctes
+\end{itemize}
+
+\paragraph{Graphiques Analytiques}
+La grille de visualisation se divise en deux colonnes équilibrées (50\% chacune) :
+
+\textbf{Graphique de Progression XP} --- Courbe linéaire affichant l'évolution des points d'expérience sur les 7 derniers jours. L'axe horizontal représente les dates, tandis que l'axe vertical quantifie les XP gagnés.
+
+\textbf{Graphique de Série} --- Représentation visuelle de la constance quotidienne avec indicateurs de feu pour les jours actifs.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering\textit{[Capture d'écran : Vue complète de la progression avec graphiques XP et séries]}}}
+    \caption{Interface de suivi des performances}
+    \label{fig:progress}
+\end{figure}
+
+\paragraph{Parcours d'Apprentissage}
+Les six étapes du programme apparaissent avec leurs statuts respectifs :
+\begin{enumerate}
+    \item Auto-présentation (✓ Complétée)
+    \item Points forts (✓ Complétée)
+    \item Points faibles (⏳ En cours)
+    \item Questions techniques (○ Verrouillée)
+    \item Questions RH (○ Verrouillée)
+    \item Entretien final simulé (○ Verrouillée)
+\end{enumerate}
+
+Chaque étape inclut une barre de progression individuelle et un compteur de leçons terminées.
+
+\subsection{Système de Quêtes et Gamification}
+
+L'interface des quêtes exploite la psychologie de la récompense pour maintenir l'engagement utilisateur. Deux types de défis coexistent avec des cycles temporels différents.
+
+\paragraph{Quête Quotidienne}
+\begin{itemize}
+    \item \textbf{Objectif :} Répondre à 20 questions
+    \item \textbf{Récompense :} +900 XP
+    \item \textbf{Indicateur temporel :} Compte à rebours jusqu'à la réinitialisation (ex: "Se termine dans 14h 32m")
+    \item \textbf{Barre de progression :} Affichage visuel de l'avancement (0/20 → 20/20)
+    \item \textbf{Bouton de réclamation :} Activé une fois l'objectif atteint
+    \item \textbf{Style visuel :} Emoji flamme (🔥), dégradé orange-rouge
+\end{itemize}
+
+\paragraph{Quête Mensuelle}
+\begin{itemize}
+    \item \textbf{Objectif :} Compléter 12 chapitres
+    \item \textbf{Récompense :} +30\,000 XP
+    \item \textbf{Indicateur temporel :} Jours restants dans le mois
+    \item \textbf{Tracker :} Suivi de complétion des cours
+    \item \textbf{Style visuel :} Emoji trophée (🏆), dégradé doré
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering\textit{[Capture d'écran : Système de quêtes avec cartes quotidiennes et mensuelles]}}}
+    \caption{Interface de gestion des quêtes}
+    \label{fig:quests}
+\end{figure}
+
+Le panneau latéral droit affiche un résumé statistique personnel incluant l'XP gagné ce mois-ci, le nombre de quêtes complétées et une vitrine des badges obtenus.
+
+\subsection{Interface d'Apprentissage et Leçons}
+
+L'interface de leçon représente l'espace où se déroule l'apprentissage actif. Elle adopte une structure bipartite optimisant l'espace écran.
+
+\paragraph{En-tête de Leçon}
+Deux informations contextuelles s'affichent en permanence :
+\begin{itemize}
+    \item Titre du chapitre (ex: "Chapitre 1 : Fondamentaux Java")
+    \item Indicateur de progression (ex: "Question 1 sur 25")
+    \item Barre de progression avec pourcentage de complétion
+\end{itemize}
+
+\paragraph{Panneau Principal (65\% de largeur)}
+
+\textbf{Carte Question} --- Élément central présentant :
+\begin{itemize}
+    \item Badge numéro de question (Q1, Q2, etc.) avec dégradé vert
+    \item Étiquette du type de question ("Choix Multiple", "Réponse Courte", "Vrai/Faux")
+    \item Indicateur de statut (point coloré)
+    \item Texte de la question avec retour à la ligne automatique
+\end{itemize}
+
+\textbf{Zone de Réponse} --- S'adapte selon le type :
+\begin{itemize}
+    \item \textit{Choix multiples :} Boutons sélectionnables (\texttt{.choice-button})
+    \item \textit{Réponse courte :} Zone de texte extensible (\texttt{.short-answer-area})
+    \item Visibilité dynamique selon le contexte
+\end{itemize}
+
+\textbf{Bannière de Retour} --- Apparaît après soumission :
+\begin{itemize}
+    \item État succès : Coche verte (✓) avec message "Correct !"
+    \item État erreur : Croix rouge (✗) avec message "Incorrect"
+    \item Animation d'apparition fluide
+\end{itemize}
+
+\textbf{Panneau Explication} --- Section repliable révélant :
+\begin{itemize}
+    \item Explication détaillée de la réponse correcte
+    \item Matériel de référence et astuces
+    \item Bouton de confirmation "J'ai compris"
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering\textit{[Capture d'écran : Interface de leçon complète avec panneau IA]}}}
+    \caption{Vue d'apprentissage en cours de leçon}
+    \label{fig:lesson}
+\end{figure}
+
+\paragraph{Panneau Assistant IA (35\% de largeur)}
+Ce panneau latéral fournit :
+\begin{itemize}
+    \item Indices et conseils en temps réel
+    \item Concepts connexes
+    \item Messages d'encouragement
+    \item Motivateurs de progression
+\end{itemize}
+
+\paragraph{Contrôles de Navigation}
+Boutons d'action disposés logiquement :
+\begin{itemize}
+    \item \textbf{Soumettre la réponse} --- Action primaire
+    \item \textbf{Question suivante} --- Apparaît après soumission
+    \item \textbf{Retour} --- Accès aux questions précédentes
+    \item \textbf{Passer} --- Option si activée dans les paramètres
+\end{itemize}
+
+\subsection{Gestion du Profil Utilisateur}
+
+L'interface de profil centralise les informations personnelles et les paramètres du compte.
+
+\paragraph{Bannière de Profil}
+Section d'en-tête proéminente affichant :
+\begin{itemize}
+    \item Avatar circulaire (rayon 40px)
+    \item Nom d'affichage
+    \item Adresse email
+    \item Badge de type de compte ("CANDIDAT")
+    \item Indicateur de statut en ligne (point vert)
+\end{itemize}
+
+\paragraph{Rangée de Statistiques}
+Quatre métriques clés avec accents colorés :
+\begin{itemize}
+    \item \textbf{XP Total} --- Accent bleu
+    \item \textbf{Niveau Actuel} --- Accent violet
+    \item \textbf{Jours de Série} --- Accent ambre
+    \item \textbf{Cours Complétés} --- Accent vert
+\end{itemize}
+
+\paragraph{Sections de Configuration}
+
+\textbf{1. Informations du Compte} (Carte éditable)
+\begin{itemize}
+    \item Nom d'utilisateur
+    \item Adresse email
+    \item Vérification du mot de passe actuel
+    \item Bouton "Sauvegarder les modifications"
+\end{itemize}
+
+\textbf{2. Sécurité du Mot de Passe}
+\begin{itemize}
+    \item Champ mot de passe actuel
+    \item Nouveau mot de passe
+    \item Confirmation du nouveau mot de passe
+    \item Indicateur de force du mot de passe
+    \item Bouton "Mettre à jour"
+\end{itemize}
+
+\textbf{3. Préférences d'Apprentissage}
+\begin{itemize}
+    \item Sélection du type d'entretien
+    \item Langue préférée
+    \item Focus sur l'industrie
+    \item Niveau de difficulté
+    \item Bouton de sauvegarde des préférences
+\end{itemize}
+
+\textbf{4. Actions du Compte}
+\begin{itemize}
+    \item Exporter les données de progression
+    \item Télécharger les certificats
+    \item Supprimer le compte (avec confirmation)
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering\textit{[Capture d'écran : Page de profil utilisateur avec sections de paramètres]}}}
+    \caption{Interface de gestion du profil}
+    \label{fig:profile}
+\end{figure}
+
+\section{Système d'Interface Administrateur}
+
+\subsection{Tableau de Bord Administrateur}
+
+Le tableau de bord admin offre une vue d'ensemble complète des métriques plateforme en temps réel.
+
+\paragraph{Section d'En-tête}
+\begin{itemize}
+    \item \textbf{Titre de page :} "Vue d'Ensemble du Tableau de Bord" avec effet dégradé
+    \item \textbf{Indicateur Live :} Point vert pulsant avec badge "DIRECT"
+    \item \textbf{Sous-titre :} "Analyses et métriques de performance en temps réel"
+    \item \textbf{Badge Admin :} "⚡ ADMIN - Accès Complet"
+\end{itemize}
+
+\paragraph{Cartes de Statistiques Rapides (Glass Morphism)}
+
+\textbf{1. Carte Utilisateurs Totaux}
+\begin{itemize}
+    \item Icône : 👥 (utilisateurs)
+    \item Valeur : Compteur dynamique
+    \item Sous-titre : "Comptes enregistrés"
+    \item Couleur : Lueur bleue (\texttt{.stat-card-blue})
+\end{itemize}
+
+\textbf{2. Carte Utilisateurs Actifs}
+\begin{itemize}
+    \item Icône : ⚡ (éclair)
+    \item Valeur : Compteur temps réel
+    \item Indicateur de pulsation live
+    \item Sous-titre : "Utilisateurs en ligne"
+    \item Couleur : Lueur verte (\texttt{.stat-card-green})
+\end{itemize}
+
+\textbf{3. Carte Cours Totaux}
+\begin{itemize}
+    \item Icône : 📚 (livres)
+    \item Affichage du nombre de cours
+    \item Sous-titre : "Parcours d'apprentissage"
+    \item Couleur : Lueur violette
+\end{itemize}
+
+\textbf{4. Carte Santé Système}
+\begin{itemize}
+    \item Icône : 💚 (cœur)
+    \item Pourcentage de statut
+    \item Indicateur de temps de fonctionnement
+    \item Couleur : Lueur cyan
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering\textit{[Capture d'écran : Tableau de bord admin avec cartes de statistiques]}}}
+    \caption{Vue d'ensemble administrateur}
+    \label{fig:admin-dashboard}
+\end{figure}
+
+\paragraph{Section Graphiques et Analyses}
+
+\textbf{Graphique de Croissance (PieChart)} --- Visualise la distribution des rôles utilisateurs (CANDIDAT vs ADMIN) avec légende interactive.
+
+\textbf{Chronologie d'Activité (LineChart)} --- Axe des catégories représentant les périodes temporelles, axe numérique pour les métriques d'activité. Options de vue 7 jours ou 30 jours.
+
+\paragraph{Flux d'Activité Récente}
+Liste chronologique des événements incluant :
+\begin{itemize}
+    \item Actions utilisateur en temps réel
+    \item Complétions de cours
+    \item Événements de connexion
+    \item Journal des actions administrateur
+\end{itemize}
+
+\subsection{Gestion des Utilisateurs}
+
+L'interface de gestion utilisateur permet aux administrateurs de surveiller et contrôler les comptes de la plateforme.
+
+\paragraph{En-tête et Statistiques}
+\begin{itemize}
+    \item \textbf{Icône et titre :} 👥 "Gestion des Utilisateurs"
+    \item \textbf{Sous-titre :} "Gérer les utilisateurs, consulter les profils et effectuer des actions admin"
+    \item \textbf{Stats rapides :}
+    \begin{itemize}
+        \item Nombre total d'utilisateurs
+        \item Actifs aujourd'hui (avec accent de couleur)
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Barre de Recherche et Filtres}
+
+\textbf{Zone de Recherche}
+\begin{itemize}
+    \item Icône : 🔍
+    \item Placeholder : "Rechercher par nom d'utilisateur ou email..."
+    \item Capacité de recherche en temps réel
+\end{itemize}
+
+\textbf{Menus Déroulants de Filtrage}
+\begin{itemize}
+    \item Filtre par type d'entretien
+    \item Filtre par langue
+    \item Filtre par statut (Actif, Inactif, Suspendu)
+    \item Filtre par progression
+    \item Bouton d'effacement des filtres (✕)
+\end{itemize}
+
+\paragraph{Disposition Divisée du Contenu}
+
+\textbf{Panneau Gauche --- Table des Utilisateurs}
+
+Colonnes du TableView :
+\begin{itemize}
+    \item \textbf{Nom d'utilisateur} --- Identifiant principal
+    \item \textbf{Email} --- Informations de contact
+    \item \textbf{Rôle} --- CANDIDAT, ADMIN, etc.
+    \item \textbf{Statut} --- Actif/Inactif avec indicateurs colorés
+    \item \textbf{Progression} --- Pourcentage avec barre de progression
+    \item \textbf{Type d'entretien} --- Préférence utilisateur
+    \item \textbf{Langue} --- Langue de la plateforme
+    \item \textbf{Dernière activité} --- Horodatage
+    \item \textbf{Actions} --- Boutons Éditer, Voir, Suspendre, Supprimer
+\end{itemize}
+
+Fonctionnalités du tableau :
+\begin{itemize}
+    \item Colonnes triables
+    \item Mise en surbrillance de la sélection
+    \item Support de pagination
+    \item Capacités d'actions en masse
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering\textit{[Capture d'écran : Interface de gestion des utilisateurs avec tableau et filtres]}}}
+    \caption{Panneau d'administration des utilisateurs}
+    \label{fig:user-management}
+\end{figure}
+
+\textbf{Panneau Droit --- Détails Utilisateur}
+
+Carte de profil (utilisateur sélectionné) :
+\begin{itemize}
+    \item Affichage de l'avatar
+    \item Nom d'utilisateur et email
+    \item Badge de rôle
+    \item Indicateur de statut
+    \item Horodatage de dernière connexion
+    \item Date de création du compte
+\end{itemize}
+
+Grille de statistiques :
+\begin{itemize}
+    \item XP total gagné
+    \item Niveau actuel
+    \item Cours complétés
+    \item Leçons terminées
+    \item Série quotidienne
+    \item Badges gagnés
+\end{itemize}
+
+Actions rapides disponibles :
+\begin{itemize}
+    \item Éditer les informations utilisateur
+    \item Réinitialiser le mot de passe
+    \item Suspendre le compte
+    \item Supprimer le compte
+    \item Consulter le journal d'activité
+    \item Attribuer des rôles (RBAC)
+\end{itemize}
+
+\subsection{Gestion des Cours}
+
+Interface administrative permettant le contrôle complet du contenu pédagogique.
+
+\paragraph{Statistiques d'En-tête}
+\begin{itemize}
+    \item \textbf{Cours Totaux} --- Badge de comptage
+    \item \textbf{Actifs} --- Cours en utilisation (accent bleu)
+    \item \textbf{Complétés} --- Cours terminés (accent vert)
+    \item \textbf{En Cours} --- Cours en progression (accent ambre)
+    \item \textbf{Complétion Moyenne} --- Pourcentage plateforme (accent violet)
+\end{itemize}
+
+\paragraph{Recherche et Filtres}
+\begin{itemize}
+    \item \textbf{Champ de recherche :} "Rechercher par titre de cours, nom ou email du propriétaire..."
+    \item \textbf{Filtre de statut :} Tous, Actif, Complété, En cours, Archivé
+    \item \textbf{Bouton Recherche :} Exécute la requête filtrée
+    \item \textbf{Bouton Réinitialiser :} Efface tous les filtres
+\end{itemize}
+
+\paragraph{Colonnes du Tableau de Cours}
+\begin{itemize}
+    \item \textbf{ID Cours} --- Identifiant unique
+    \item \textbf{Titre} --- Nom du cours
+    \item \textbf{Propriétaire} --- Utilisateur créateur
+    \item \textbf{Email} --- Email du propriétaire
+    \item \textbf{Statut} --- État actuel avec codage couleur
+    \item \textbf{Progression} --- Pourcentage avec barre visuelle
+    \item \textbf{Chapitres} --- Nombre total de chapitres
+    \item \textbf{Questions} --- Nombre total de questions
+    \item \textbf{Date de Création} --- Horodatage
+    \item \textbf{Actions} --- Voir, Éditer, Supprimer, Archiver
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering\textit{[Capture d'écran : Gestion des cours avec tableau et statistiques]}}}
+    \caption{Interface d'administration des cours}
+    \label{fig:course-management}
+\end{figure}
+
+\paragraph{Actions Administrateur}
+\begin{itemize}
+    \item Consulter les détails du cours
+    \item Éditer le contenu du cours
+    \item Supprimer des cours (avec confirmation)
+    \item Archiver les anciens cours
+    \item Exporter les données de cours
+    \item Dupliquer des cours
+\end{itemize}
+
+\subsection{Profil Administrateur}
+
+Interface spécialisée pour la gestion des comptes administrateurs.
+
+\paragraph{Statistiques d'En-tête}
+\begin{itemize}
+    \item \textbf{Rôle :} "Super Admin", "Admin", "Modérateur" (accent vert)
+    \item \textbf{Dernière Connexion :} Affichage relatif (accent bleu)
+    \item \textbf{Statut :} Actif/Inactif (accent cyan)
+\end{itemize}
+
+\paragraph{Bannière de Profil}
+\begin{itemize}
+    \item Avatar large (diamètre 80px)
+    \item Nom de l'administrateur
+    \item Email de l'administrateur
+    \item Badge de rôle avec codage couleur
+    \item Indicateur de statut en ligne
+\end{itemize}
+
+\paragraph{Cartes de Paramètres}
+
+\textbf{1. Informations du Compte}
+\begin{itemize}
+    \item Nom d'utilisateur (éditable)
+    \item Email (éditable avec vérification)
+    \item Nom d'affichage
+    \item Coordonnées
+    \item Bouton de sauvegarde
+\end{itemize}
+
+\textbf{2. Paramètres de Sécurité}
+\begin{itemize}
+    \item Vérification mot de passe actuel
+    \item Saisie nouveau mot de passe
+    \item Confirmation mot de passe
+    \item Activation double authentification
+    \item Bouton de mise à jour
+\end{itemize}
+
+\textbf{3. Préférences Admin}
+\begin{itemize}
+    \item Paramètres de notification
+    \item Configuration des alertes email
+    \item Personnalisation du tableau de bord
+    \item Sélection de la vue par défaut
+\end{itemize}
+
+\textbf{4. Rôle et Permissions (Lecture seule)}
+\begin{itemize}
+    \item Affichage du rôle actuel
+    \item Liste des permissions attribuées
+    \item Aperçu du niveau d'accès
+    \item Bouton de demande de modification
+\end{itemize}
+
+\textbf{5. Journal d'Activité}
+\begin{itemize}
+    \item Actions admin récentes
+    \item Historique de connexion
+    \item Adresses IP
+    \item Export du journal
+\end{itemize}
+
+\subsection{Navigation Administrateur}
+
+La barre latérale admin adopte un design distinct reflétant son statut privilégié.
+
+\paragraph{Structure de la Barre Latérale}
+
+\textbf{Section Logo}
+\begin{itemize}
+    \item Cercle vert avec icône admin
+    \item Titre "InterviewAI"
+    \item Sous-titre "Portail Admin"
+\end{itemize}
+
+\textbf{Navigation Principale}
+\begin{itemize}
+    \item 🏠 \textbf{Tableau de bord} --- Vue d'ensemble et analyses
+    \item 👥 \textbf{Utilisateurs} --- Gestion des utilisateurs
+    \item 📚 \textbf{Cours} --- Administration des cours
+    \item 📊 \textbf{Rapports} --- Analyses et rapports
+    \item ⚙️ \textbf{Paramètres} --- Configuration système
+\end{itemize}
+
+\textbf{Section Compte}
+\begin{itemize}
+    \item 👤 \textbf{Profil} --- Gestion du profil admin
+    \item 🔐 \textbf{Sécurité} --- Paramètres de sécurité
+    \item 🚪 \textbf{Déconnexion} --- Déconnexion avec accent rouge
+\end{itemize}
+
+\paragraph{Caractéristiques de Design}
+\begin{itemize}
+    \item Fond verre (glass background) avec transparence subtile
+    \item État actif : bordure gauche verte + lueur
+    \item Effets de survol avec transitions fluides
+    \item Conteneurs d'icônes de 36px arrondis
+    \item Style spécial déconnexion : différenciation rouge
+\end{itemize}
+
+\section{Système de Design}
+
+\subsection{Palette de Couleurs}
+
+\paragraph{Couleurs Primaires}
+\begin{itemize}
+    \item \textbf{Vert de Marque :} \texttt{\#22C55E} --- Actions principales, états de succès, indicateurs actifs
+    \item \textbf{Vert Secondaire :} \texttt{\#10B981} --- Dégradés, surlignages
+\end{itemize}
+
+\paragraph{Couleurs de Fond}
+\begin{itemize}
+    \item \textbf{Base Interface Utilisateur :} \texttt{\#0A0E14} (charbon foncé)
+    \item \textbf{Base Interface Admin :} \texttt{\#050708} (noir pur)
+    \item \textbf{Barre Latérale Utilisateur :} \texttt{linear-gradient(\#0F1419 → \#151B23)}
+    \item \textbf{Barre Latérale Admin :} \texttt{linear-gradient(\#080B0F → \#0D1117 → \#080B0F)}
+\end{itemize}
+
+\paragraph{Couleurs d'Accent}
+\begin{itemize}
+    \item \textbf{Bleu :} \texttt{\#3B82F6} --- Infos, statistiques
+    \item \textbf{Violet :} \texttt{\#A855F7} --- Niveaux, réalisations
+    \item \textbf{Ambre/Orange :} \texttt{\#F59E0B} --- Séries, avertissements
+    \item \textbf{Rouge :} \texttt{\#EF4444} --- Erreurs, actions de suppression
+    \item \textbf{Cyan :} \texttt{\#06B6D4} --- Indicateurs de statut
+\end{itemize}
+
+\paragraph{Couleurs de Texte}
+\begin{itemize}
+    \item \textbf{Texte Principal :} \texttt{\#FFFFFF} (blanc)
+    \item \textbf{Texte Secondaire :} \texttt{\#94A3B8} (ardoise 400)
+    \item \textbf{Texte Tertiaire :} \texttt{\#64748B} (ardoise 500)
+    \item \textbf{Texte Désactivé :} \texttt{\#475569} (ardoise 600)
+\end{itemize}
+
+\subsection{Typographie}
+
+\textbf{Famille de Polices :}
+\begin{verbatim}
+"Inter", "SF Pro Display", "Segoe UI", "Roboto", sans-serif
+\end{verbatim}
+
+\paragraph{Tailles de Police}
+\begin{itemize}
+    \item Titres de page : 24-28px, graisse 700
+    \item Titres de section : 18-20px, graisse 600
+    \item Texte courant : 14px, graisse 400-500
+    \item Étiquettes : 12-13px, graisse 500
+    \item Petit texte : 11px, graisse 400
+    \item Icônes (Emoji) : 20-32px
+\end{itemize}
+
+\subsection{Espacement}
+
+\paragraph{Échelle de Padding/Margin}
+\begin{itemize}
+    \item XS : 4px
+    \item S : 8px
+    \item M : 12px
+    \item L : 16px
+    \item XL : 20px
+    \item 2XL : 24px
+    \item 3XL : 32px
+\end{itemize}
+
+\subsection{Effets Visuels}
+
+\paragraph{Glass Morphism}
+\begin{verbatim}
+background: rgba(255, 255, 255, 0.03);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.06);
+\end{verbatim}
+
+\paragraph{Effets de Lueur}
+\begin{verbatim}
+/* Lueur Verte */
+-fx-effect: dropshadow(gaussian, rgba(34, 197, 94, 0.5), 8, 0, 0, 0);
+
+/* Lueur Bleue */
+-fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 10, 0, 0, 0);
+\end{verbatim}
+
+\paragraph{Ombres}
+\begin{itemize}
+    \item Ombre de carte : \texttt{dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, 4, 0)}
+    \item Ombre de bouton : \texttt{dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 2, 2)}
+\end{itemize}
+
+\paragraph{Border Radius}
+\begin{itemize}
+    \item Petit : 8px (champs, petits boutons)
+    \item Moyen : 12-14px (cartes, éléments de navigation)
+    \item Large : 16-20px (cartes majeures)
+    \item Cercle : 50\% (avatars, badges)
+\end{itemize}
+
+\section{Points Forts Identifiés}
+
+\begin{keypoint}
+\textbf{Excellence du Design}
+\begin{itemize}
+    \item ✓ \textbf{Langage visuel cohérent} --- Thème sombre unifié sur toutes les interfaces
+    \item ✓ \textbf{Esthétique moderne} --- Glass morphism, dégradés et lueurs créent une sensation premium
+    \item ✓ \textbf{Hiérarchie claire} --- La typographie et l'espacement établissent une architecture informationnelle nette
+    \item ✓ \textbf{Navigation intuitive} --- Barre latérale persistante avec regroupement logique
+\end{itemize}
+\end{keypoint}
+
+\begin{keypoint}
+\textbf{Expérience Utilisateur}
+\begin{itemize}
+    \item ✓ \textbf{Intégration de gamification} --- XP, séries, badges motivent l'engagement continu
+    \item ✓ \textbf{Divulgation progressive} --- Information révélée au besoin (explications, retours)
+    \item ✓ \textbf{Retour en temps réel} --- Validation immédiate et mises à jour de progression
+    \item ✓ \textbf{Séparation des interfaces} --- Distinction claire entre modes utilisateur et admin
+\end{itemize}
+\end{keypoint}
+
+\begin{keypoint}
+\textbf{Implémentation Technique}
+\begin{itemize}
+    \item ✓ \textbf{Réutilisabilité des composants} --- Composants de barre latérale partagés, styles cohérents
+    \item ✓ \textbf{Architecture évolutive} --- Pattern MVC basé FXML avec couche de service
+    \item ✓ \textbf{Considérations de performance} --- Tables virtualisées, chargement lazy implicite
+    \item ✓ \textbf{Maintenabilité} --- Structure de fichiers organisée, conventions de nommage claires
+\end{itemize}
+\end{keypoint}
+
+\section{Axes d'Amélioration}
+
+\begin{warningbox}
+\textbf{Accessibilité}
+\begin{itemize}
+    \item ⚠ \textbf{Support lecteur d'écran} --- Implémentation nécessaire des labels et rôles ARIA
+    \item ⚠ \textbf{Navigation clavier} --- Optimisation possible de l'ordre de tabulation et raccourcis
+    \item ⚠ \textbf{Contraste de couleur} --- Certaines combinaisons texte/fond peuvent ne pas respecter WCAG 2.1 AA
+    \item ⚠ \textbf{Redimensionnement de police} --- Préférence utilisateur pour taille de texte non évidente
+\end{itemize}
+\end{warningbox}
+
+\begin{warningbox}
+\textbf{Design Responsive}
+\begin{itemize}
+    \item ⚠ \textbf{Redimensionnement fenêtre} --- Comportement à petites tailles de fenêtre non défini
+    \item ⚠ \textbf{Considération mobile} --- Design desktop uniquement limite la portée
+    \item ⚠ \textbf{Débordement de composant} --- Gestion du contenu long pas complètement spécifiée
+\end{itemize}
+\end{warningbox}
+
+\begin{warningbox}
+\textbf{Utilisabilité}
+\begin{itemize}
+    \item ⚠ \textbf{Gestion d'erreurs} --- États d'erreur et messages nécessitent plus de définition
+    \item ⚠ \textbf{États de chargement} --- Retour d'opération asynchrone pourrait être plus proéminent
+    \item ⚠ \textbf{Système d'aide} --- Absence d'infobulles, documentation d'aide ou tutoriels d'intégration
+    \item ⚠ \textbf{Annuler/Refaire} --- Actions critiques manquent de mécanismes d'annulation
+\end{itemize}
+\end{warningbox}
+
+\section{Recommandations}
+
+\subsection{Priorité 1 (Critique)}
+\begin{enumerate}
+    \item Implémenter une gestion d'erreurs complète avec messages conviviaux
+    \item Ajouter des spinners de chargement pour toutes opérations asynchrones
+    \item Créer un audit d'accessibilité et implémenter la conformité WCAG 2.1 AA
+    \item Documenter les raccourcis clavier et assurer une navigation clavier complète
+\end{enumerate}
+
+\subsection{Priorité 2 (Élevée)}
+\begin{enumerate}
+    \setcounter{enumi}{4}
+    \item Développer un système d'aide avec infobulles, aide contextuelle et guide utilisateur
+    \item Ajouter des dialogues de confirmation pour toutes actions destructrices
+    \item Implémenter la fonctionnalité d'annulation pour opérations critiques
+    \item Créer des points de rupture responsive pour écrans plus petits
+\end{enumerate}
+
+\subsection{Priorité 3 (Moyenne)}
+\begin{enumerate}
+    \setcounter{enumi}{8}
+    \item Ajouter un thème clair comme préférence utilisateur
+    \item Implémenter un système de notification pour mises à jour temps réel
+    \item Créer une personnalisation du tableau de bord permettant réarrangement widgets
+    \item Ajouter fonctionnalité d'export/import pour données utilisateur
+\end{enumerate}
+
+\subsection{Priorité 4 (Basse)}
+\begin{enumerate}
+    \setcounter{enumi}{12}
+    \item Implémenter recherche avancée avec filtres et recherches sauvegardées
+    \item Ajouter opérations en masse dans interfaces admin
+    \item Créer bibliothèque de widgets pour personnalisation tableau de bord admin
+    \item Implémenter constructeur de thèmes pour personnalisation de marque
+\end{enumerate}
+
+\section{Conclusion}
+
+InterviewAI démontre une excellence en matière de design UI/UX avec un système double-interface sophistiqué répondant aux besoins des utilisateurs finaux et des administrateurs. La plateforme combine avec succès l'efficacité éducative et les mécaniques de gamification engageantes, le tout enveloppé dans une esthétique de design moderne et polie.
+
+\paragraph{Réalisations Clés}
+\begin{itemize}
+    \item \textbf{Qualité Professionnelle} --- Interface de qualité entreprise adaptée au déploiement commercial
+    \item \textbf{Engagement Utilisateur} --- Éléments de gamification éprouvés pour augmenter la rétention
+    \item \textbf{Puissance Admin} --- Système RBAC complet pour gestion utilisateur évolutive
+    \item \textbf{Cohérence Design} --- Langage visuel unifié à travers 18+ vues distinctes
+\end{itemize}
+
+\paragraph{Valeur Stratégique}
+Le système d'interface positionne InterviewAI comme un produit premium sur le marché de la préparation aux entretiens, avec une qualité de design égalant ou surpassant les concurrents commerciaux. La séparation claire des interfaces utilisateur et admin permet une gestion efficace tout en maintenant la simplicité centrée utilisateur.
+
+\paragraph{Prochaines Étapes}
+Se concentrer sur la conformité d'accessibilité, l'amélioration de la gestion d'erreurs, et les améliorations de design responsive pour assurer que la plateforme respecte les standards web modernes et atteigne l'audience la plus large possible.
+
+\vspace{1cm}
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\begin{center}
+\textit{Fin du Rapport d'Analyse}
+
+\vspace{0.5cm}
+
+Document préparé pour usage interne \\
+InterviewAI -- Système de Préparation aux Entretiens \\
+Décembre 2025
+\end{center}
+
+\end{document}

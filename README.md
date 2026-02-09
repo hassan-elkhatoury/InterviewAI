@@ -63,39 +63,7 @@ mvn javafx:run
 
 ## 🎨 Dashboard Layout
 
-```
-┌──────────────────────────────────────────────────────────┐
-│ 🏠 Home  📈 Progress  🎯 Quests  🏅 Leaderboard  👤 ⚙️    │
-├──────────────────────┬─────────────────────────────────────┤
-│                      │                                     │
-│  SIDEBAR             │  ┌──────────────────────────┐       │
-│  🏠 Home/Learn       │  │ NEXT LESSON CARD         │ 🕒    │
-│  📈 Progress         │  ├──────────────────────────┤ DAI   │
-│  🎯 Quests           │  │ "Behavioral Q&A..."      │ LY    │
-│  🏅 Leaderboard      │  │ [Start/Continue]         │ MIS   │
-│  👤 Profile          │  └──────────────────────────┘ SION  │
-│  ⚙️ Settings          │                                     │
-│                      │  ┌──────────────────────────┐ S    │
-│                      │  │ LEARNING PATH            │ T    │
-│                      │  ├──────────────────────────┤ A    │
-│                      │  │ ✅ Self-Introduction     │ T    │
-│                      │  │ ✅ Strengths             │ S    │
-│                      │  │ ⏳ Weaknesses            │      │
-│                      │  │ ⭕ Technical             │      │
-│                      │  │ ⭕ HR Questions          │      │
-│                      │  │ ⭕ Final Mock            │      │
-│                      │  └──────────────────────────┘      │
-│                      │                                     │
-│                      │  ┌──────────────────────────┐       │
-│                      │  │ AI COACH WIDGET          │       │
-│                      │  ├──────────────────────────┤       │
-│                      │  │ "You're doing great!     │       │
-│                      │  │  Keep the streak! 💪"    │       │
-│                      │  └──────────────────────────┘       │
-│                      │                                     │
-│                      │ 🎤 📘 🎥 (Quick Actions)            │
-└──────────────────────┴─────────────────────────────────────┘
-```
+![Dashboard Layout](src/main/resources/images/dashboard.png)
 
 ## 🎨 Design System
 
@@ -263,12 +231,6 @@ Follow a proven sequence to master interviews:
 - 🧠 **Technical Expert** - Excel in technical section
 - 🎤 **Confidence Builder** - Complete 5 mock interviews
 - ⚡ **Speed Demon** - Answer 20 questions in 10 minutes
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/hassan-elkhatoury/InterviewAI/issues)
-- **Email**: hassan.elkhatoury@example.com
-- **Full Docs**: See PROJECT_DOCUMENTATION.md
 
 ## 📄 License
 
